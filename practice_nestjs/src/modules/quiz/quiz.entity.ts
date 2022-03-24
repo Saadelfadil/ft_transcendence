@@ -17,7 +17,7 @@ export class Quiz extends BaseEntity {
     @Column({
         type: 'text',
     })
-    desription: string;
+    description: string;
 
     @Column({
         type: 'boolean',

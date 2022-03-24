@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreateQuizDto } from './dto/createQuiz.dto';
 import { QuizService } from './quiz.service';
 
@@ -14,8 +14,8 @@ export class QuizController {
 
 	@Post('/create')
 	@UsePipes(ValidationPipe)
-	createQuiz(@Body() quizData: CreateQuizDto)
+	async createQuiz(@Body() quizData: CreateQuizDto)
 	{
-		return quizData;
+		return await this.quizService.createQuiz(quizData);
 	}
 }
