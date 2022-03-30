@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { QuestionController } from './question.controller';
-import { QuestionRepository } from './question.repository';
+import { QuestionController } from './controllers/question.controller';
+import { QuestionRepository } from './repositories/question.repository';
 import { QuestionService } from './question.service';
 import { QuizController } from './quiz.controller';
 import { QuizRepository } from './quiz.repository';
-import { QuizService } from './quiz.service';
+import { QuizService } from './services/quiz.service';
 
 @Module({
     controllers: [QuizController, QuestionController],
