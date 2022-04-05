@@ -5,15 +5,17 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt'
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 @Module({
 	imports: [
+		ConfigModule,
 		UsersModule,
 		PassportModule.register({ session: true }),
 		JwtModule.register({secret: 'SECRET', signOptions: { expiresIn: '60s'}})
 	],
 	providers: [AuthService, LocalStrategy, JwtStrategy],
-	exports: [AuthService]
+	exports: [AuthService],
 })
 export class AuthModule {}
