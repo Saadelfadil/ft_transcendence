@@ -1,14 +1,19 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty, Length } from "class-validator";
 
 export class UserDto
 {
-    @IsNotEmpty()
+    @IsNotEmpty({ message: "Should have an ID"})
     id: number;
 
+    @IsNotEmpty()
     @IsEmail()
-    email?: string;
+    email: string;
 
-    login?: string;
-
-    image_url?: string;
+    @IsNotEmpty()
+    @Length(8, 8)
+    login: string;
+    
+    @IsNotEmpty()
+    @Length(50)
+    image_url: string;
 }
