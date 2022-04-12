@@ -4,8 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from 'config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { JwtAuthGuard } from './jwt-auth-guard';
-import { JwtStrategy } from './jwt-strategy';
 import { UserEntity } from './user.entity';
 
 @Module({
@@ -24,10 +22,11 @@ import { UserEntity } from './user.entity';
   TypeOrmModule.forFeature([UserEntity]),
   JwtModule.register({
     secret: 'secret',
-    signOptions: {expiresIn: '1d'}
+    signOptions: {expiresIn: '60s'}
   })
 ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  exports: [AppService],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AppService } from './app.service';
 import { Response, Request } from 'express';
 import Authenticator from './42-authentication';
-import { JwtAuthGuard } from './jwt-auth-guard';
+import { AuthenticatedGuard } from './auth.guard';
 
 @Controller('api')
 export class AppController {
@@ -15,11 +15,19 @@ export class AppController {
 		res.redirect("https://api.intra.42.fr/oauth/authorize?client_id=3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2F&response_type=code");
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(AuthenticatedGuard)
 	@Get('profile')
-	profile()
+	profile(@Req() request: Request)
 	{
-		return "Hello to my profile";
+		return this.appService.getUserDataFromJwt(request);
+	}
+
+
+	@UseGuards(AuthenticatedGuard)
+	@Get('game')
+	game()
+	{
+		return "Hello to game route";
 	}
 
 	@Get()
