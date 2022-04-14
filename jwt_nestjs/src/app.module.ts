@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from 'config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserEntity } from './user.entity';
@@ -22,7 +21,7 @@ import { UserEntity } from './user.entity';
   TypeOrmModule.forFeature([UserEntity]),
   JwtModule.register({
     secret: 'secret',
-    signOptions: {expiresIn: '60s'}
+    signOptions: {expiresIn: '3600s'}
   })
 ],
   controllers: [AppController],

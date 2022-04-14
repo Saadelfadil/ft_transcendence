@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Post, Query, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppService } from './app.service';
 import { Response, Request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
+import { NotFoundError } from 'rxjs';
 
 @Controller('api')
 export class AppController {
@@ -28,6 +29,15 @@ export class AppController {
 	game()
 	{
 		return "Hello to game route";
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Post('update')
+	updateU(@Req() request: Request, @Body() body)
+	{
+		return this.appService.updateUser(request, body);
+		console.log(body);
+		return 'test update';
 	}
 
 	@Get()
@@ -57,12 +67,13 @@ export class AppController {
 					id,
 					email,
 					login,
-					image_url
+					image_url,
 				}
 			);
 		}
 		const jwt = await this.jwtService.signAsync({id: id});
 		response.cookie('jwt', jwt,  {httpOnly: true});
+		// response.redirect('profile');
 	}
 
 	@Get('user')

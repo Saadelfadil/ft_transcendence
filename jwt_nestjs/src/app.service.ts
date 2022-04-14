@@ -1,4 +1,4 @@
-import { Get, Injectable, Req, UnauthorizedException } from '@nestjs/common';
+import { Get, Injectable, NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +14,12 @@ export class AppService {
 		async create(data: any) : Promise<UserEntity>
 		{
 			return this.userRepository.save(data);
+		}
+
+		async getUserByLogin(login: string) : Promise<UserEntity>
+		{
+			const user = await this.userRepository.findOne({login});
+			return user;
 		}
 
 		async getUserById(id: number) : Promise<UserEntity>
@@ -37,5 +43,30 @@ export class AppService {
 			} catch (error) {
 				throw new UnauthorizedException();
 			}
+		}
+
+		async updateUser(request: Request, body: any) : Promise<any>
+		{
+			const user = await this.getUserDataFromJwt(request);
+			console.log(body.image_url);
+			const userDb = await this.getUserByLogin(body.login);
+			if (userDb)
+				throw new UnauthorizedException();
+			if ((body.login) != null){
+				const userUpdated = await this.userRepository.update(user.id, {login: body.login});
+			}
+			if (body.image_url != null)
+			{
+				const userUpdated = await this.userRepository.update(user.id, {image_url: body.image_url});
+			}
+			if (body.twof != null)
+			{
+				const userUpdated = await this.userRepository.update(user.id, {twof: body.twof});
+			}
+			// if (userDb == undefined)
+			// 	throw new NotFoundException();
+			// user.image_url = "https://cdn.intra.42.fr/users/ael-fadi.jpg"
+			// const userUpdate = await this.userRepository.update(user.id, user.image_url);
+			// return userUpdate;
 		}
 }
