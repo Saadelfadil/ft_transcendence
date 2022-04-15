@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { Response, Request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
-import { NotFoundError } from 'rxjs';
 
 @Controller('api')
 export class AppController {

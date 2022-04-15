@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { Response, Request } from 'express';
-
+import cloudinary from './utils/cloudinary';
 
 @Injectable()
 export class AppService {
@@ -48,7 +48,6 @@ export class AppService {
 		async updateUser(request: Request, body: any) : Promise<any>
 		{
 			const user = await this.getUserDataFromJwt(request);
-			console.log(body);
 			const userDb = await this.getUserByLogin(body.login);
 			if (userDb)
 				throw new UnauthorizedException();
@@ -59,11 +58,14 @@ export class AppService {
 			{
 				try {
 					const fileStr = body.image_url;
-					console.log(fileStr);
+					const uploadedResponse = await cloudinary.uploader.upload(fileStr, {
+						upload_preset: 'ft_transcendence'
+					})
+					const userUpdated = await this.userRepository.update(user.id, {image_url: uploadedResponse.secure_url});
+					
 				} catch (error) {
 					console.error(error);
 				}
-				const userUpdated = await this.userRepository.update(user.id, {image_url: body.image_url});
 			}
 			if (body.twof != null)
 			{
