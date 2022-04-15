@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserEntity } from './user.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [TypeOrmModule.forRoot(
@@ -22,7 +23,8 @@ import { UserEntity } from './user.entity';
   JwtModule.register({
     secret: 'secret',
     signOptions: {expiresIn: '3600s'}
-  })
+  }),
+  ConfigModule.forRoot()
 ],
   controllers: [AppController],
   exports: [AppService],

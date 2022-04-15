@@ -48,7 +48,7 @@ export class AppService {
 		async updateUser(request: Request, body: any) : Promise<any>
 		{
 			const user = await this.getUserDataFromJwt(request);
-			console.log(body.image_url);
+			console.log(body);
 			const userDb = await this.getUserByLogin(body.login);
 			if (userDb)
 				throw new UnauthorizedException();
@@ -57,16 +57,17 @@ export class AppService {
 			}
 			if (body.image_url != null)
 			{
+				try {
+					const fileStr = body.image_url;
+					console.log(fileStr);
+				} catch (error) {
+					console.error(error);
+				}
 				const userUpdated = await this.userRepository.update(user.id, {image_url: body.image_url});
 			}
 			if (body.twof != null)
 			{
 				const userUpdated = await this.userRepository.update(user.id, {twof: body.twof});
 			}
-			// if (userDb == undefined)
-			// 	throw new NotFoundException();
-			// user.image_url = "https://cdn.intra.42.fr/users/ael-fadi.jpg"
-			// const userUpdate = await this.userRepository.update(user.id, user.image_url);
-			// return userUpdate;
 		}
 }

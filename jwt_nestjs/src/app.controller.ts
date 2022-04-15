@@ -36,8 +36,6 @@ export class AppController {
 	updateU(@Req() request: Request, @Body() body)
 	{
 		return this.appService.updateUser(request, body);
-		console.log(body);
-		return 'test update';
 	}
 
 	@Get()
