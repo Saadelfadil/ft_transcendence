@@ -17,14 +17,17 @@ import { ConfigModule } from '@nestjs/config';
       database: 'ft_transcendence',
       entities: [UserEntity],
       synchronize: true,
-    }
+    },
+    
   ),
   TypeOrmModule.forFeature([UserEntity]),
   JwtModule.register({
     secret: 'secret',
     signOptions: {expiresIn: '3600s'}
   }),
-  ConfigModule.forRoot()
+  ConfigModule.forRoot({
+    isGlobal: true,
+  })
 ],
   controllers: [AppController],
   exports: [AppService],
