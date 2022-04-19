@@ -11,6 +11,14 @@ export class AppService {
 		constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
 		private readonly jwtService: JwtService) {}
 
+
+		googleLogin(req)
+		{
+			if (!req.user)
+				throw new NotFoundException();
+			return {user: req.user};
+		}
+
 		async create(data: any) : Promise<UserEntity>
 		{
 			return this.userRepository.save(data);

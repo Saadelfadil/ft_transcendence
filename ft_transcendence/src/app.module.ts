@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserEntity } from './user.entity';
 import { ConfigModule } from '@nestjs/config';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [TypeOrmModule.forRoot(
@@ -31,6 +32,6 @@ import { ConfigModule } from '@nestjs/config';
 ],
   controllers: [AppController],
   exports: [AppService],
-  providers: [AppService],
+  providers: [AppService, GoogleStrategy],
 })
 export class AppModule {}

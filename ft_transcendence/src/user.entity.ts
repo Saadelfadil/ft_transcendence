@@ -18,4 +18,7 @@ export class UserEntity extends BaseEntity
 
     @Column({ type: 'boolean', nullable: true})
     twof: boolean = false;
+
+    @Column({ type: 'varchar', nullable: true})
+    twof_secret: string;
 }

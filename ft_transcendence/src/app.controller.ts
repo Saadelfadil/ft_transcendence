@@ -4,16 +4,27 @@ import { AppService } from './app.service';
 import { Response, Request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import speakeasy from 'speakeasy';
 
 @Controller('api')
 export class AppController {
 	constructor(private readonly appService: AppService, private readonly jwtService: JwtService) { }
 
-	// @Get('login')
-	// redirect(@Res() res) {
-	// 	res.set({ "Access-Control-Allow-Origin": "*" })
-	// 	res.redirect("https://api.intra.42.fr/oauth/authorize?client_id=3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2F&response_type=code")
-	// }
+
+	@Get('google')
+	@UseGuards(AuthGuard('google'))
+	async googleAuth(@Req() req)
+	{
+
+	}
+
+	@Get('auth/google/callback')
+	@UseGuards(AuthGuard('google'))
+	googleAuthRedirect(@Req() req)
+	{
+		return this.appService.googleLogin(req);
+	}
 
 	@UseGuards(AuthenticatedGuard)
 	@Get('profile')
@@ -21,11 +32,19 @@ export class AppController {
 		return this.appService.getUserDataFromJwt(request);
 	}
 
-
 	@UseGuards(AuthenticatedGuard)
 	@Get('game')
 	game() {
 		return "Hello to game route";
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Get('islogin')
+	loginOrNot(@Req() request: Request) {
+		const user = this.appService.getUserDataFromJwt(request);
+		if (user)
+			return true;
+		return false;
 	}
 
 	@UseGuards(AuthenticatedGuard)
@@ -39,7 +58,7 @@ export class AppController {
 		console.log("Code: ", code);
 		const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
 		const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
-		const REDIRECT_URI = "http://localhost:8080/profile";
+		const REDIRECT_URI = "http://localhost:8080/login";
 
 		// 42 authenticator instance
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
@@ -64,7 +83,6 @@ export class AppController {
 				}
 			);
 		}
-		console.log(userData.error);
 		if (userData.error === undefined)
 		{
 			const jwt = await this.jwtService.signAsync({ id: id });
@@ -73,6 +91,7 @@ export class AppController {
 		}
 	}
 
+	@UseGuards(AuthenticatedGuard)
 	@Get('user')
 	async user(@Req() request: Request) {
 		try {
