@@ -57,7 +57,8 @@ export class AppService {
 		async generateQR(text: string)
 		{
 			try {
-				console.log(await QRCode.toDataURL(text));
+				// console.log(await QRCode.toDataURL([{account: "saad", key: text}]));
+				// return QRCode.toDataURL([  {data : "Account: saad\n", mode: "byte"},
 				return QRCode.toDataURL(text);
 			} catch (error) {
 				console.error(error);

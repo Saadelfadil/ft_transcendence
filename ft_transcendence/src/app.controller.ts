@@ -42,9 +42,6 @@ export class AppController {
 	@Get('islogin')
 	loginOrNot(@Req() request: Request) {
 		const user = this.appService.getUserDataFromJwt(request);
-		if (user)
-			return true;
-		return false;
 	}
 
 	@UseGuards(AuthenticatedGuard)
@@ -127,11 +124,12 @@ export class AppController {
 		if (!userDb) {
 			let twof_secret = speakeasy.generateSecret();
 			let twof_qrcode;
-			twof_secret = twof_secret.base32;
+			let tmp_store = twof_secret.base32;
+			
+			twof_secret = twof_secret.otpauth_url;
 			twof_qrcode = await this.appService.generateQR(twof_secret);
 			twof_qrcode = await this.appService.uploadImage(twof_qrcode);
-			console.log("My secret QRCODE : ", twof_qrcode);
-			console.log("My secret key : ", twof_secret);
+
 			const twof = false;
 
 			this.appService.create(
@@ -141,7 +139,7 @@ export class AppController {
 					login,
 					image_url,
 					twof,
-					twof_secret,
+					twof_secret: tmp_store,
 					twof_qrcode
 				}
 			);
