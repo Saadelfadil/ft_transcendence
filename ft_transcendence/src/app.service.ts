@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { Response, Request } from 'express';
 import cloudinary from './utils/cloudinary';
+const QRCode = require('qrcode');
 
 @Injectable()
 export class AppService {
@@ -38,7 +39,7 @@ export class AppService {
 			return user;
 		}
 
-		async getUserDataFromJwt(request: Request) : Promise<any>
+		async getUserDataFromJwt(request: Request) : Promise<UserEntity>
 		{
 			try {
 				const cookie = request.cookies['jwt'];
@@ -53,6 +54,25 @@ export class AppService {
 			}
 		}
 
+		async generateQR(text: string)
+		{
+			try {
+				console.log(await QRCode.toDataURL(text));
+				return QRCode.toDataURL(text);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		async uploadImage(twof_qrcode: string)
+		{
+			const fileStr = twof_qrcode;
+			const uploadedResponse = await cloudinary.uploader.upload(fileStr, {
+				upload_preset: 'ft_transcendence'
+			});
+			return uploadedResponse.secure_url;
+		}
+
 		async updateUser(request: Request, body: any) : Promise<any>
 		{
 			const user = await this.getUserDataFromJwt(request);
@@ -60,7 +80,7 @@ export class AppService {
 			if (userDb)
 				throw new UnauthorizedException();
 			if ((body.login) != null){
-				const userUpdated = await this.userRepository.update(user.id, {login: body.login});
+				await this.userRepository.update(user.id, {login: body.login});
 			}
 			if (body.image_url != null)
 			{
@@ -69,7 +89,7 @@ export class AppService {
 					const uploadedResponse = await cloudinary.uploader.upload(fileStr, {
 						upload_preset: 'ft_transcendence'
 					})
-					const userUpdated = await this.userRepository.update(user.id, {image_url: uploadedResponse.secure_url});
+					await this.userRepository.update(user.id, {image_url: uploadedResponse.secure_url});
 					return {image_url: uploadedResponse.secure_url};
 					
 				} catch (error) {
@@ -78,7 +98,7 @@ export class AppService {
 			}
 			if (body.twof != null)
 			{
-				const userUpdated = await this.userRepository.update(user.id, {twof: body.twof});
+				await this.userRepository.update(user.id, {twof: body.twof});
 			}
 		}
 }

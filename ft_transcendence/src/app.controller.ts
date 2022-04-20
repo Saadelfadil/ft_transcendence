@@ -5,7 +5,7 @@ import { Response, Request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
-import speakeasy from 'speakeasy';
+const speakeasy = require('speakeasy');
 
 @Controller('api')
 export class AppController {
@@ -53,6 +53,57 @@ export class AppController {
 		return this.appService.updateUser(request, body);
 	}
 
+	@UseGuards(AuthenticatedGuard)
+	@Post('verify')
+	async verify(@Req() request: Request, @Body() body) {
+		try {
+			const {token} = request.body; 
+			const cookie = request.cookies['jwt'];
+			const data = await this.jwtService.verifyAsync(cookie);
+
+			if (!data)
+				throw new UnauthorizedException();
+			const user = this.appService.getUserById(data['id']);
+			
+			const verified = speakeasy.totp.verify({
+				secret: (await user).twof_secret,
+				encoding: 'base32',
+				token
+			  });
+			
+		} catch (error) {
+			throw new UnauthorizedException();
+		}
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Post('validate')
+	async validate(@Req() request: Request)
+	{
+		try {
+			const {twof_qrcode} = request.body;
+			const cookie = request.cookies['jwt'];
+			const data = await this.jwtService.verifyAsync(cookie);
+
+			if (!data)
+				throw new UnauthorizedException();
+			const user = this.appService.getUserById(data['id']);
+			
+			const tokenValidate = speakeasy.totp.verify({
+				secret: (await user).twof_secret,
+				encoding: 'base32',
+				token: twof_qrcode,
+				window:1 // time window
+			  });
+
+			if (tokenValidate)
+				return true;
+			return false;
+		} catch (error) {
+			throw new UnauthorizedException();
+		}
+	}
+
 	@Post('login')
 	async getData(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
 		console.log("Code: ", code);
@@ -69,17 +120,29 @@ export class AppController {
 
 		const { id, email, login, image_url } = userData;
 		const userDb = await this.appService.getUserById(id)
-
+		
 		console.log(`Heyy Iam Saad ID : ${id}, EMAIL : ${email}, LOGIN : ${login}, IMAGE_URL : ${image_url}`);
 		console.log("=============================================================");
-
+		
 		if (!userDb) {
+			let twof_secret = speakeasy.generateSecret();
+			let twof_qrcode;
+			twof_secret = twof_secret.base32;
+			twof_qrcode = await this.appService.generateQR(twof_secret);
+			twof_qrcode = await this.appService.uploadImage(twof_qrcode);
+			console.log("My secret QRCODE : ", twof_qrcode);
+			console.log("My secret key : ", twof_secret);
+			const twof = false;
+
 			this.appService.create(
 				{
 					id,
 					email,
 					login,
 					image_url,
+					twof,
+					twof_secret,
+					twof_qrcode
 				}
 			);
 		}

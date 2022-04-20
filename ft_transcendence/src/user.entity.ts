@@ -21,4 +21,7 @@ export class UserEntity extends BaseEntity
 
     @Column({ type: 'varchar', nullable: true})
     twof_secret: string;
+
+    @Column({ type: 'varchar', nullable: true})
+    twof_qrcode: string;
 }
