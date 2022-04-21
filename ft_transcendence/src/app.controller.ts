@@ -1,15 +1,18 @@
 import { Body, Controller, Get, NotFoundException, Post, Query, Redirect, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppService } from './app.service';
-import { Response, Request } from 'express';
+import { Response, Request, request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './user.entity';
 const speakeasy = require('speakeasy');
 
 @Controller('api')
 export class AppController {
-	constructor(private readonly appService: AppService, private readonly jwtService: JwtService) { }
+	constructor(private readonly appService: AppService, private readonly jwtService: JwtService, @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>) { }
 
 
 	@Get('google')
@@ -40,14 +43,19 @@ export class AppController {
 
 	@UseGuards(AuthenticatedGuard)
 	@Get('islogin')
-	loginOrNot(@Req() request: Request) {
-		const user = this.appService.getUserDataFromJwt(request);
+	async loginOrNot(@Req() request: Request, @Query() query) {
+		const user = await this.appService.getUserDataFromJwt(request);
+		const is_login_db = user.is_login;
+		// if (query.change === undefined)
+		// 	await this.userRepository.update(user.id, {is_login: false});
+		// console.log("IS : ", is_login_db);
+		return is_login_db;
 	}
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('update')
-	updateU(@Req() request: Request, @Body() body) {
-		return this.appService.updateUser(request, body);
+	async updateU(@Req() request: Request, @Body() body) {
+		this.appService.updateUser(request, body);
 	}
 
 	@UseGuards(AuthenticatedGuard)
@@ -78,23 +86,29 @@ export class AppController {
 	async validate(@Req() request: Request)
 	{
 		try {
-			const {twof_qrcode} = request.body;
+			const { twof_qrcode, change, twof } = request.body;
 			const cookie = request.cookies['jwt'];
 			const data = await this.jwtService.verifyAsync(cookie);
 
 			if (!data)
 				throw new UnauthorizedException();
-			const user = this.appService.getUserById(data['id']);
+			const user = await this.appService.getUserById(data['id']);
 			
 			const tokenValidate = speakeasy.totp.verify({
 				secret: (await user).twof_secret,
 				encoding: 'base32',
 				token: twof_qrcode,
-				window:1 // time window
+				window: 1 // time window
 			  });
 
 			if (tokenValidate)
+			{
+				await this.userRepository.update(user.id, {is_login: false});
+				console.log("CHANGE : ", change);
+				if (!change)
+					await this.userRepository.update(user.id, {twof: twof});
 				return true;
+			}
 			return false;
 		} catch (error) {
 			throw new UnauthorizedException();
@@ -129,9 +143,7 @@ export class AppController {
 			twof_secret = twof_secret.otpauth_url;
 			twof_qrcode = await this.appService.generateQR(twof_secret);
 			twof_qrcode = await this.appService.uploadImage(twof_qrcode);
-
 			const twof = false;
-
 			this.appService.create(
 				{
 					id,
@@ -144,6 +156,7 @@ export class AppController {
 				}
 			);
 		}
+		await this.userRepository.update(id, {is_login: true});
 		if (userData.error === undefined)
 		{
 			const jwt = await this.jwtService.signAsync({ id: id });
@@ -161,7 +174,7 @@ export class AppController {
 
 			if (!data)
 				throw new UnauthorizedException();
-			const user = this.appService.getUserById(data['id']);
+			const user = this.appService.getUserById(data['id']); 
 			return user;
 		} catch (error) {
 			throw new UnauthorizedException();

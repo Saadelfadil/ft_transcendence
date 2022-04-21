@@ -24,4 +24,7 @@ export class UserEntity extends BaseEntity
 
     @Column({ type: 'varchar', nullable: true})
     twof_qrcode: string;
+
+    @Column({ type: 'boolean', nullable: true})
+    is_login: boolean = false;
 }

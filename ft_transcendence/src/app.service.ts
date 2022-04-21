@@ -97,9 +97,9 @@ export class AppService {
 					console.error(error);
 				}
 			}
-			if (body.twof != null)
-			{
-				await this.userRepository.update(user.id, {twof: body.twof});
-			}
+			// if (body.twof != null)
+			// {
+			// 	await this.userRepository.update(user.id, {twof: body.twof});
+			// }
 		}
 }
