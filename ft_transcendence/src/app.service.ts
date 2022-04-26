@@ -61,13 +61,13 @@ export class AppService {
 			return user;
 		}
 
-		// async getUserByIdHistory(id: number) : Promise<UserHistoryEntity>
-		// {
-		// 	const user = await this.userHistoryEntity.findOne(id).then((user) => {
-		// 		return user;
-		// 	});
-		// 	return user;
-		// }
+		async getUserByIdHistory(id: number) : Promise<UserHistoryEntity>
+		{
+			const user = await this.userHistoryEntity.findOne(id).then((user) => {
+				return user;
+			});
+			return user;
+		}
 
 		async getUserDataFromJwt(request: Request) : Promise<UserEntity>
 		{

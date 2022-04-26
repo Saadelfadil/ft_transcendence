@@ -1,11 +1,11 @@
-import { Body, Controller, Get, NotFoundException, Post, Query, Redirect, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Post, Query, Redirect, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppService } from './app.service';
 import { Response, Request, request } from 'express';
 import Authenticator from './42-authentication';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { Repository } from 'typeorm';
+import { Index, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
@@ -47,8 +47,8 @@ export class AppController {
 	{
 		let reqs : Array<any> = [];
 		const { id } = body;
-		const { user_friends } = await  this.appService.getUserByIdFriend(id);
-		await Promise.all(user_friends.map(async (index) => {
+		const user = await  this.appService.getUserByIdFriend(id);
+		await Promise.all(user.user_friends.map(async (index) => {
 			const { login } = await this.appService.getUserById(index);
 			reqs.push({ id: index, login: login });
 		}));
@@ -92,7 +92,57 @@ export class AppController {
 			return false;
 		}
 	}
+	@Post('removefriend')
+	async removeFriend(@Body() body)
+	{
+		const { user_id, friend_id } = body;
+		try {
+			const userFriend = await this.appService.getUserByIdFriend(user_id);
+			const { user_friends } = await this.appService.getUserByIdFriend(friend_id);
+			userFriend.user_friends.map((curId: number, index) => {
+				if (curId === friend_id)
+				{
+					userFriend.user_friends.splice(index, 1);
+					return;
+				}
+			});
+			user_friends.map((curId: number, index) => {
+				if (curId === user_id)
+				{
+					user_friends.splice(index, 1);
+					return;
+				}
+			});
+			await this.userFriendsEntity.update(user_id, {user_friends: userFriend.user_friends});
+			await this.userFriendsEntity.update(friend_id, {user_friends: user_friends});
+		} catch (error) {
+		}
+	}
 	
+
+	// @Post('getfrienddata')
+	// async getFriendData(@Body() body)
+	// {
+	// 	const { id, user_id} = body;
+	// 	let profileData : any;
+	// 	let isFriend = false;
+	// 	let frontId = 0;
+	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
+	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
+	// 	const { login, image_url} = await this.appService.getUserById(user_id);
+	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
+	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
+
+	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
+	// 		const userOpponent = await this.appService.getUserById(oppenentId);
+	// 		histObj.id = frontId;
+	// 		frontId++;
+			
+	// 	}));
+	// 	isFriend = user_friends.includes(id);
+
+	// 	return profileData;
+	// }
 	
 	@Post('requesttofriend')
 	async RequestToFriend(@Body() body)
@@ -116,13 +166,12 @@ export class AppController {
 			userFriendRequest.user_requested.map((id: number, index) => {
 				if (id === user_id)
 				{
-					console.log("sghfkjsgfkjsbgfs");
 					userFriendRequest.user_requested.splice(index, 1);
 					return;
 				}
 			});
 			await this.userFriendsEntity.update(user_id, {user_friends: user_friends, user_requested: user_requested});		
-			await this.userFriendsEntity.update(request_user_id, {user_friends: userFriendRequest.user_friends});		
+			await this.userFriendsEntity.update(request_user_id, {user_friends: userFriendRequest.user_friends, user_requested: userFriendRequest.user_requested});		
 		}
 		else
 		{
@@ -179,6 +228,9 @@ export class AppController {
 	// async updateGame(@Body() body)
 	// {
 	// 	let {winOrlost, score, id} = body;
+	// 	console.log(winOrlost);
+	// 	console.log(score);
+	// 	console.log(id);
 	// 	const user = await  this.appService.getUserByIdGame(id);
 	// 	score += +user.score;
 	// 	if (winOrlost)
@@ -221,8 +273,12 @@ export class AppController {
 	@UseGuards(AuthenticatedGuard)
 	@Get('islogin')
 	async loginOrNot(@Req() request: Request, @Query() query) {
-		const user = await this.appService.getUserDataFromJwt(request);
-		return {is_login_db: user.is_login, id: user.id};
+		try {
+			const user = await this.appService.getUserDataFromJwt(request);
+			return {is_login_db: user.is_login, id: user.id};
+		} catch (error) {
+			throw new ForbiddenException();
+		}
 	}
 
 	@UseGuards(AuthenticatedGuard)
@@ -351,14 +407,12 @@ export class AppController {
 		try {
 			const cookie = request.cookies['jwt'];
 			const data = await this.jwtService.verifyAsync(cookie);
-
 			if (!data)
 				throw new UnauthorizedException();
-			const user :any = await this.appService.getUserById(data['id']); 
+			const user :any = await this.appService.getUserById(data['id']);
 			const { wins, loses } = await this.appService.getUserByIdGame(data['id']);
 			user.wins = wins;
 			user.loses = loses;
-			// return {"user": user, "wins": wins, "loses": loses};
 			return user;
 		} catch (error) {
 			throw new UnauthorizedException();

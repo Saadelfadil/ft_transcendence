@@ -7,11 +7,11 @@ export class UserHistoryEntity extends BaseEntity
     id: number;
     
     @Column({ type: 'bigint', nullable: false})
-    opponent: number = 0;
+    opponent: number[];
 
     @Column({ type: 'bigint', nullable: false})
-    user_score: number = 0;
+    user_score: number[];
 
     @Column({ type: 'bigint', nullable: false})
-    opponent_score: number = 0;
+    opponent_score: number[];
 }
