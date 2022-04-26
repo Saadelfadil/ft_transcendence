@@ -8,6 +8,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     username: 'admin',
     password: 'admin',
     database: 'ft_transcendence',
-    entities: [UserEntity],
+    entities: [UserEntity, ],
     synchronize: true,
 };

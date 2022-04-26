@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { UserEntity } from './user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleStrategy } from './google.strategy';
+import { UserFriendsEntity } from './userFriends.entity';
+import { UserGameEntity } from './userGame.entity';
+import { UserHistoryEntity } from './userHistory.entity';
 
 @Module({
   imports: [TypeOrmModule.forRoot(
@@ -16,12 +19,12 @@ import { GoogleStrategy } from './google.strategy';
       username: 'admin',
       password: 'admin',
       database: 'ft_transcendence',
-      entities: [UserEntity],
+      entities: [UserEntity, UserFriendsEntity, UserGameEntity, UserHistoryEntity],
       synchronize: true,
     },
     
   ),
-  TypeOrmModule.forFeature([UserEntity]),
+  TypeOrmModule.forFeature([UserEntity, UserFriendsEntity, UserGameEntity, UserHistoryEntity]),
   JwtModule.register({
     secret: 'secret',
     signOptions: {expiresIn: '3600s'}
