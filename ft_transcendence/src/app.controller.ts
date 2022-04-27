@@ -283,8 +283,13 @@ export class AppController {
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('update')
-	async updateU(@Req() request: Request, @Body() body) {
-		this.appService.updateUser(request, body);
+	async updateU(@Req() request: Request, @Body() body)
+	{
+		try {
+			return this.appService.updateUser(request, body);
+		} catch (error) {
+			throw new NotFoundException();
+		}
 	}
 
 	@UseGuards(AuthenticatedGuard)
