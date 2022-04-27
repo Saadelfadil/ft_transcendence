@@ -334,10 +334,28 @@ export class AppController {
 			{
 				await this.userRepository.update(user.id, {is_login: false});
 				if (!change)
+				{
+					let tmp_store : any;
+					let img_url: any;
+					if (!twof)
+					{
+						let twof_secret = speakeasy.generateSecret();
+						let twof_qrcode;
+						tmp_store = twof_secret.base32;
+						
+						twof_secret = twof_secret.otpauth_url;
+						twof_qrcode = await this.appService.generateQR(twof_secret);
+						twof_qrcode = await this.appService.uploadImage(twof_qrcode);
+						img_url = twof_qrcode;
+						await this.userRepository.update(user.id, {twof: twof, twof_secret: tmp_store, twof_qrcode: twof_qrcode});
+					}
 					await this.userRepository.update(user.id, {twof: twof});
-				return true;
+					if (!twof)
+						return {success: true, twof_qrcode: img_url, twof_secret: tmp_store};
+				}
+				return {success: true};
 			}
-			return false;
+			return {sucess:false};
 		} catch (error) {
 			throw new UnauthorizedException();
 		}
