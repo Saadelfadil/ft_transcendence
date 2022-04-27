@@ -376,7 +376,6 @@ export class AppController {
 
 		const { id, email, login, image_url } = userData;
 		const userDb = await this.appService.getUserById(id);
-
 		if (!userDb) {
 			let twof_secret = speakeasy.generateSecret();
 			let twof_qrcode;
