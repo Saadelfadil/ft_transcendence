@@ -188,17 +188,17 @@ export class AppController {
 	}
 
 	// Two Routes for User Friends
-	@Post('array')
-	async insertArray()
-	{
-		const userFriend = {
-			"id": 62603,
-			"user_friends": [],
-			"user_blocked": [],
-			"user_requested": [],
-		}
-		await this.userFriendsEntity.save(userFriend);
-	}
+	// @Post('array')
+	// async insertArray()
+	// {
+	// 	const userFriend = {
+	// 		"id": 62603,
+	// 		"user_friends": [],
+	// 		"user_blocked": [],
+	// 		"user_requested": [],
+	// 	}
+	// 	await this.userFriendsEntity.save(userFriend);
+	// }
 	
 	// Two Routes for User Friends
 	// @Post('array1')
@@ -439,6 +439,20 @@ export class AppController {
 		} catch (error) {
 			throw new UnauthorizedException();
 		}
+	}
+
+	// @UseGuards(AuthenticatedGuard)
+	@Post('getusers')
+	async allUser(@Body() body) {
+		let users : Array<{id:number, login:string, image_url: string}> = [];
+
+		const { usersId } = body;
+
+		await Promise.all(usersId.map(async (index) => {
+			const { id, login, image_url} = await this.appService.getUserById(index);
+			users.push({id, login, image_url});
+		}));
+		return users;
 	}
 
 	@Post('logout')
