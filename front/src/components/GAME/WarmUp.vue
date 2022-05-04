@@ -24,6 +24,9 @@
 
 <script lang="ts">
 import { io } from "socket.io-client";
+import axios from 'axios';
+import store from '@/store';
+import router from '@/router';
 import { defineComponent } from 'vue';
 
 interface Player {
@@ -49,8 +52,10 @@ export default  defineComponent({
     
     data() {
         return {
-            socket : io("http://localhost:3000/warmup") as any,
+            socket : null as any,
             canvas: 0 as any,
+            logged: false as boolean,
+            user_id: 0 as number,
             // canvasHtml: any;
             canvasGrd: 0 as any,
             context: 0 as any,
@@ -85,7 +90,6 @@ export default  defineComponent({
             plName: '' as string,
             timeMsg: 'Start In : ',
         }
-    
     },
     methods: {
         renderGame(): void{
@@ -110,7 +114,7 @@ export default  defineComponent({
             const timerInterval = setInterval(() => {
                 this.timer = counter;
                 if (counter <= 0){
-                    this.timeMsg = 'Countdown : ';
+                    this.timeMsg = 'Go';
                     clearInterval(timerInterval);
                     popup.classList.add('fade');
                     this.startGame();
@@ -122,72 +126,112 @@ export default  defineComponent({
         },
 
         startGame(){
-            this.socket.emit("startTime");
+            //this.socket.emit("startTime");
             this.socket.emit("startGame");
             this.canvas.addEventListener("mousemove", (e: any) => {
                 this.playerLeft.y = e.clientY - this.canvas.getBoundingClientRect().top - this.playerLeft.h/2;
                 this.socket.emit("updatePos", this.playerLeft);
             });
+        },
+
+        async checkLogin()
+        {
+            try{
+                const resp = await axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/api/islogin',
+                    withCredentials: true
+                });
+                this.logged = true;
+                this.user_id = resp.data.id;
+            }
+            catch(e)
+            {
+                this.logged = false;
+                router.push({name : 'login'});
+                return;
+            }
+        },
+        warmup()
+        {
+            let popup : any = document.getElementById("popup");
+            popup.classList.remove('fade');
+            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.canvas.height = this.canvas.width / 1.5;
+            //console.log(this.canvas.height, this.canvas.width);
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
+                this.canvas.width/2,
+                    this.canvas.height/2, 
+                    5,
+                    this.canvas.width/2,
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+            
+            this.socket = io("http://localhost:3000/warmup");
+            this.socket.on("connect", () => {
+                this.plName = this.user_id.toString();
+                this.socket.emit("initGame", {
+                    userId: this.user_id,
+                    canvasW: this.canvas.width, 
+                    canvasH: this.canvas.height
+                });
+
+                this.timerBeforStart(this.countdown);
+
+                this.socket.on("updateClient", (clientData: any) => {
+                    this.playerLeft = clientData.pl;
+                    this.playerRight = clientData.pr;
+                    this.ball = clientData.b;
+                    //console.log(this.ball.x);
+                    this.renderGame();
+                });
+
+                this.socket.on("disconnect", () => {
+                    console.log(`${this.socket.id} disconnected`); // world
+                });
+
+                this.socket.on("updateTime", (time: number) => {
+                    this.timer = time;
+                    //console.log(time);
+                });
+
+                this.socket.on("leaveRoom", () => {
+                    this.$router.push('/profile');
+                });
+            });
+        },
+        async isUserPlaying(){
+            const resp = await axios({
+                method: 'POST',
+                url: 'http://localhost:8080/api/getgamestatus',
+                data: {
+                    user_id: this.user_id,
+                }
+            });
+
+            if (resp.data.in_game)
+            {
+                router.push({name: 'profile'});
+                return ;
+            }
         }
     },
-
-    mounted(){
+    async mounted(){
         console.log('warmup mounted');
-        let popup : any = document.getElementById("popup");
-        popup.classList.remove('fade');
-        this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        this.canvas.width = this.canvas.offsetWidth ;
-        this.canvas.height = this.canvas.width / 1.5;
-        console.log(this.canvas.height, this.canvas.width);
-        this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-        this.canvasGrd = this.context.createRadialGradient(
-            this.canvas.width/2,
-                this.canvas.height/2, 
-                5,
-                this.canvas.width/2,
-                this.canvas.height/2,
-                this.canvas.height
-            );
-        this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-        this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
-        
-        this.socket.on("connect", () => {
-            this.plName = this.socket.id;
-            console.log(this.canvas.height, this.canvas.width);
-            this.socket.emit("initGame", { 
-                canvasW: this.canvas.width, 
-                canvasH: this.canvas.height
-            });
-        });
-        this.timerBeforStart(this.countdown);
-
-        this.socket.on("updateClient", (clientData: any) => {
-            this.playerLeft = clientData.pl;
-            this.playerRight = clientData.pr;
-            this.ball = clientData.b;
-            //console.log(this.ball.x);
-            this.renderGame();
-        });
-
-        this.socket.on("disconnect", () => {
-            console.log(`${this.socket.id} disconnected`); // world
-        });
-
-        this.socket.on("updateTime", (time: number) => {
-            this.timer = time;
-            //console.log(time);
-        });
-
-        this.socket.on("leaveRoom", () => {
-            this.$router.push('/profile');
-        });
+        await this.checkLogin();
+        await this.isUserPlaying();
+        this.warmup();
     },
-
     unmounted(){
         console.log('warmup unmounted');
         //this.socket.emit("stopTime");
         this.socket.disconnect();
-    }
+    },
 });
 </script>
 

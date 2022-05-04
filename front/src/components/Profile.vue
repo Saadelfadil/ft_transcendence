@@ -43,23 +43,22 @@
             </label>
         </div>
       </div>
+        <div class="w-full p-8 mx-2 flex justify-around">
+        <div class="bg-green-500 rounded-lg font-bold text-white text-center px-4 py-3">
+            wins: {{user_info.wins}}
+        </div>
+        <div  class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3  ">
+            loses : {{user_info.loses}}
+        </div>
+        <div @click="onUpload" class="bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
+            <router-link :to="{name: 'matchhistory', query: {history_id: user_info.user_id}}">
+                history
+            </router-link>
+        </div>
+        </div>
     </div>
 
   </div>
-
-    <div>
-        <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md uppercase">
-            <div class="flex items-center">
-                wins : {{user_info.wins}}
-            </div>   
-        </div>
-
-        <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md uppercase">
-            <div class="flex items-center">
-                loses : {{user_info.loses}}
-            </div>   
-        </div>
-    </div>
 
 </div>
 
@@ -70,7 +69,7 @@
 
 
 <script lang="ts">
-declare var require: any; // important for require with typescript
+
 import { defineComponent } from 'vue'
 import axios from 'axios';
 import store from '@/store';
@@ -86,7 +85,6 @@ export default defineComponent({
     data()
     {
         return {
-            tmp_data: 'hh' as string,
             user_info: {
                 user_name: '' as string,
                 user_id: 0 as number,
@@ -106,14 +104,14 @@ export default defineComponent({
             logged: false as boolean,
             state: 0 as number, // change this to 0
             auth_switch: false as boolean,
+            history_category: 0 as number,
         }
     },
     async created(){
         await this.checkLogin();
         if (!this.logged)
-        {
             router.push({name: 'login'});
-        }
+
         await this.getUserInfo();
 
         store.commit('set_verify', this.auth_switch && this.auth2_enabled);
@@ -124,14 +122,12 @@ export default defineComponent({
     computed: {
         avatar_img()
         {
-            console.log('image updated');
             const img : string = this.user_info.avatar_file_name;
             return img;
         },
-        is_done()
+        is_done() : number
         {
-            const res : any = this.user_info.user_name.length !== 0;
-            return res;
+            return this.user_info.avatar_file_name.length;
         },
         qr_image() : string
         {
@@ -330,7 +326,6 @@ export default defineComponent({
         }
     }
 })
-
 
 const toBase64 =(file:any) => new Promise((resolve, reject) => {
     const reader = new FileReader();

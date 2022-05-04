@@ -59,8 +59,12 @@ export default createStore({
 	  currentRoomId: 0 as number,
     beforeAuth2 : false as boolean,
     is_verify: false as boolean,
+    user: 45 as number,
   },
   getters: {
+    get_user(state:any){
+      return state.user;
+    },
     get_verify(state:any)
     {
       return state.is_verify;
@@ -107,6 +111,9 @@ export default createStore({
     }
   },
   mutations: {
+    setUser(state:any, val:number){
+      state.user = val;
+    },
     set_verify(state:any, val:boolean){
       state.is_verify = val;
     },

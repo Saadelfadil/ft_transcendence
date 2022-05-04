@@ -1,82 +1,43 @@
 <template>
     <div>
         <Navbar />
+
 <div class="h-full mt-5">
  
   <div class="border-b-2 block md:flex">
 
-    <div class="w-full md:w-2/5 p-4 sm:p-6 lg:p-8 bg-white shadow-md">
+    <div class="w-full p-4 sm:p-6 lg:p-8 bg-white shadow-md">
         <div class="flex justify-between">
-            <span class="text-xl font-semibold block"> {{ user.name }} </span>
+            <span class="text-xl font-semibold block"> {{ user_name }} </span>
         </div>
 
         <div class="w-full p-8  mx-2 flex justify-center">
-            <img id="showImage" class="rounded-full max-w-xs w-32 items-center border" :src="user_avatar">
+            <img class="rounded-full max-w-xs w-32 items-center border" :src="user_avatar">
         </div>
         <div class="w-full p-8 mx-2 flex justify-center">
-        <div  class="w-28 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6"
-        :class="addStyle"
-        >
+        <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6">
             {{msg_status}}
         </div>
-        <button  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer"
-        >
+        <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
            Play
-        </button>
-        <div  class="w-28  bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6" v-if="user.is_friend">
+        </div>
+
+        <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
+           block
+        </div>
+        <div @click="addFriend" class="w-28  cursor-pointer bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6" v-if="!user_info.is_friend">
             Add
         </div>
+
+        <router-link :to="{name: 'matchhistory', query: {history_id: $route.query.friend_id}}"  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
+           history
+        </router-link>
+        
         </div>
-        <p> Wins : {{user.wins}}</p>
-        <p> Loses : {{user.loses}}</p>
+        <p> Wins : {{user_info.wins}}</p>
+        <p> Loses : {{user_info.loses}}</p>
     </div>
     
-    <div class="w-full md:w-3/5 p-8 bg-white lg:ml-4 shadow-md">
-    <div class="grid grid-cols-1 min-w-full rounded">
-                <ul class="overflow-auto hideScrollBar" style="height: 40vh;">
-                    <li>
-                        <div class="px-6"
-                        v-for="players in user_history" :key="players.id"
-                        >
-                            <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
-                            <div class="flex items-center">
-                                <div class="ml-2">
-                                        <img id="showImage" class="rounded-full max-w-xs w-32 items-center border" :src="user_avatar">
-                                        <p class=' py-2 px-10 border-gray-900 text-gray-900 hover:shadow-md rounded-md cursor-pointer'>
-                                            {{user.name}}
-                                        </p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center">
-                                <div class="ml-2">
-                                    {{players.score1}} - {{players.score2}}
-                                </div>
-                            </div>
-
-                            <div class="flex items-center">
-                                <div class="ml-5">
-                                    <img id="showImage" class="rounded-full max-w-xs w-32 items-center border" :src="players.user2_avatar">
-                                    <p class=' py-2 px-10 border-gray-900 text-gray-900 hover:shadow-md rounded-md cursor-pointer'>
-                                        {{ players.login }}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <div>
-
-                            </div>
-                        </div>
-
-                        </div>
-
-
-
-                    </li>
-                </ul>
-    </div>
-
-    </div>
 
   </div>
  
@@ -92,6 +53,14 @@ import Navbar from './Navbar.vue';
 import router from '@/router';
 import axios from 'axios';
 
+interface FriendProfile{
+    login:string;
+    image_url:string;
+    is_friend:boolean;
+    wins:number;
+    loses:number;
+};
+
 
 export default defineComponent({
   components: { Navbar },
@@ -102,67 +71,16 @@ export default defineComponent({
             msg_status : "offline",
             user_id: 0 as number,
             logged: false as boolean,
-            msg : "friendProfile component Helloooo",
-            user : {
-                wins: 5 as number,
-                loses: 2 as number,
-                avatar_url: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8aHVtYW58ZW58MHx8MHx8&w=1000&q=80' as string,
-                name: 'user name' as string,
-                status: 0 as number, // 0  offling 1 online 2 in game,
-                is_friend: false as boolean,
-            },
-            // user_history: [
-            //     {
-            //         id: 0 as number,
-            //         user1_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user2_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user1_score: 1000 as number,
-            //         user2_score: 10 as number,
-            //     },
-            //                   {
-            //         id: 0 as number,
-            //         user1_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user2_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user1_score: 1000 as number,
-            //         user2_score: 10 as number,
-            //     },
-            //                   {
-            //         id: 0 as number,
-            //         user1_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user2_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user1_score: 1000 as number,
-            //         user2_score: 10 as number,
-            //     },
-            //                   {
-            //         id: 0 as number,
-            //         user1_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user2_avatar: 'https://media.istockphoto.com/photos/rear-view-of-man-looking-at-city-in-sunlight-picture-id876576796?k=20&m=876576796&s=612x612&w=0&h=0IObpcqCk-i6atRIX8D0odOIVr7wIZfM6XgVosy67CI=' as string,
-            //         user1_score: 1000 as number,
-            //         user2_score: 10 as number,
-            //     },
-            // ]  as Array<any>,
-
-
-            user_history : [] as Array<
-                {id:number, score1:number, avatar:string, score2: number, login:string}
-            >
-
-
-
+            user_info: {login:'', image_url:'', is_friend:false, wins:0, loses:0} as FriendProfile
         }
     },
     computed: {
         user_avatar () : string {
-            return this.user.avatar_url;
+            return this.user_info.image_url;
         },
-        addStyle() : string
-        {
-            if (this.user.status === 0)
-                return 'bg-blue-500';
-            else if (this.user.status === 1)
-                return 'bg-green-500';          
-            return 'bg-yellow-500';
-        },
+        user_name() : string{
+            return this.user_info.login;
+        }
     },
     component : { // s
         Navbar,
@@ -185,16 +103,38 @@ export default defineComponent({
             }
         },
 
-        async getFriendData(_id:number) {
-            const resp = await axios({
-                method: 'post',
-                data: {
-                    id: _id,
-                    user_id: this.user_id
-                },
-                url: 'http://localhost:8080/api/getfrienddata',
-                withCredentials: true
-            });
+        async getExactUserData(_id:number) {
+            try{
+                const resp = await axios({
+                    method: 'post',
+                    data: {
+                        friend_id:_id,
+                        user_id:this.user_id    
+                    },
+                    url: 'http://localhost:8080/api/exactuser',
+                    withCredentials: true
+                });
+                this.user_info = resp.data;
+            }catch(e){
+                console.log(e);
+            }
+        },
+        async addFriend()
+        {
+            try{
+                const resp = await axios({
+                    method: 'post',
+                    data: {
+                        login: this.user_info.login,
+                        user_id: this.user_id, 
+                    },
+                    url: 'http://localhost:8080/api/addfriend',
+                    withCredentials: true
+                });
+                this.user_info.is_friend = true;
+            }catch(e){
+                console.log(e);
+            }
         }
     },
     async created() {
@@ -202,21 +142,10 @@ export default defineComponent({
         if (!this.logged)
         {
             router.push({name: 'login'});
+            return ;
         }
-        await this.getFriendData(Number(this.$route.query.friend_id));
+        await this.getExactUserData(Number(this.$route.query.friend_id));
     },
 
 })
 </script>
-
-<style scoped>
-.hideScrollBar::-webkit-scrollbar {
-    display: none;
-}
-
-.hideScrollBar
-{
-    -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>

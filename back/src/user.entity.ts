@@ -27,4 +27,7 @@ export class UserEntity extends BaseEntity
 
     @Column({ type: 'boolean', nullable: true})
     is_login: boolean = false;
+
+    @Column({ type: 'boolean', nullable: true})
+    in_game: boolean = false;
 }

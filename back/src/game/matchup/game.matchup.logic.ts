@@ -105,7 +105,7 @@ export class MatchUpLogic {
             let newNode = this.rooms.insert(node.key, node.data);
             this.wRooms.remove(node.key);
             client.join(newNode.data.id);
-            newNode.data.players.push(client.id);
+            newNode.data.players.push(client.data.userId);
             newNode.data.size++;
             client.data.pos = 'right';
             client.data.room = newNode.data.id;
@@ -117,7 +117,7 @@ export class MatchUpLogic {
                 node = this.wRooms.insert(Date.now(), roomnode);
             node.data.id = node.key.toString();
             client.join(node.data.id);
-            node.data.players.push(client.id);
+            node.data.players.push(client.data.userId);
             node.data.size = 1;
             client.data.pos = 'left'; 
             client.data.room = node.data.id;

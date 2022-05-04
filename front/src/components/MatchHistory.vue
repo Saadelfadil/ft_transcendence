@@ -106,21 +106,21 @@ export default defineComponent({
         async InitMatchHistory()
         {
             try{
-                // const resp = await axios({
-                //     method: 'get',
-                //     url: 'http://localhost:3000/game/matchs/' + (this.$route.query.history_id ? this.$route.query.history_id : '')
-                // });
-                // this.matchs_info = resp.data;
+                const resp = await axios({
+                    method: 'get',
+                    url: 'http://localhost:3000/game/matchs/' + (this.$route.query.history_id ? this.$route.query.history_id : '')
+                });
+                this.matchs_info = resp.data;
 
                 // start tests
-                this.matchs_info  = [];
-                this.matchs_info.push({id:0, data: [{id:58640, score:100}, {id:1200, score:50}], type:'matchup'});
-                this.matchs_info.push({id:0, data: [{id:1300, score:600}, {id:1500, score:56}], type:'1v1'});
+                // this.matchs_info  = [];
+                // this.matchs_info.push({id:0, data: [{id:58640, score:100}, {id:1200, score:50}], type:'matchup'});
+                // this.matchs_info.push({id:0, data: [{id:1300, score:600}, {id:1500, score:56}], type:'1v1'});
                 //end tests
                 this.users_ids = [];
                 this.matchs_info.map((inp:Match) => {
-                    this.users_ids.push(inp.data[0].id);
-                    this.users_ids.push(inp.data[1].id);
+                    this.users_ids.push(+inp.data[0].id);
+                    this.users_ids.push(+inp.data[1].id);
                 });
             }
             catch(e)
@@ -130,6 +130,7 @@ export default defineComponent({
         },
         async getUsers()
         {
+            console.log(this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',
@@ -137,7 +138,7 @@ export default defineComponent({
                     data : {usersId: this.users_ids}
                 });
                 this.match_display = resp.data;
-            }catch(e){
+            } catch(e){
                 console.log(e);
             }
         },
@@ -180,7 +181,7 @@ export default defineComponent({
         },
         historyDisplay() : Array<OneHistory>
         {
-            return this.match_display;
+            return this.match_display.reverse();
         }
     }
 })

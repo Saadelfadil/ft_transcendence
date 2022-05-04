@@ -11,6 +11,7 @@ import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
 import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
+import { match } from 'assert';
 const speakeasy = require('speakeasy');
 
 @Controller('api')
@@ -116,7 +117,7 @@ export class AppController {
 			await this.userFriendsEntity.update(user_id, {user_friends: userFriend.user_friends});
 			await this.userFriendsEntity.update(friend_id, {user_friends: user_friends});
 		} catch (error) {
-		}
+		} 
 	}
 	
 
@@ -188,17 +189,17 @@ export class AppController {
 	}
 
 	// Two Routes for User Friends
-	@Post('array')
-	async insertArray()
-	{
-		const userFriend = {
-			"id": 62603,
-			"user_friends": [],
-			"user_blocked": [],
-			"user_requested": [],
-		}
-		await this.userFriendsEntity.save(userFriend);
-	}
+	// @Post('array')
+	// async insertArray()
+	// {
+	// 	const userFriend = {
+	// 		"id": 62603,
+	// 		"user_friends": [],
+	// 		"user_blocked": [],
+	// 		"user_requested": [],
+	// 	}
+	// 	await this.userFriendsEntity.save(userFriend);
+	// }
 	
 	// Two Routes for User Friends
 	// @Post('array1')
@@ -366,6 +367,15 @@ export class AppController {
 		}
 	}
 
+	@Post('getgamestatus')
+	async getgamestate(@Body() body){
+		const {user_id} = body;
+		const {in_game} = await this.appService.getUserById(user_id);
+		return {in_game : in_game};
+		// await this.userRepository.update(user_id, {in_game: state});
+	}
+
+
 	@Post('login')
 	async getData(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
 		const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
@@ -439,6 +449,92 @@ export class AppController {
 		} catch (error) {
 			throw new UnauthorizedException();
 		}
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Post('getusers')
+	async allUser(@Body() body) {
+		let match : {
+			left_player: {
+				id:number;
+				login:string;
+				image_url:string;
+			},
+			right_player: {
+				id:number;
+				login:string;
+				image_url:string;
+			}
+		};
+
+		let users : Array<typeof match> = [];
+
+		const { usersId } = body;
+
+		let tmp:any;
+		const length = usersId.length;
+
+
+		for (let i = 0; i < length; i +=  2)
+		{
+			const { id, login, image_url} = await this.appService.getUserById(usersId[i]);
+			tmp =  await this.appService.getUserById(usersId[i + 1]);
+			users.push({left_player: {id, login, image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
+		}
+
+		return users;
+	}
+
+
+		// @Post('getfrienddata')
+	// async getFriendData(@Body() body)
+	// {
+	// 	const { id, user_id} = body;
+	// 	let profileData : any;
+	// 	let isFriend = false;
+	// 	let frontId = 0;
+	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
+	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
+	// 	const { login, image_url} = await this.appService.getUserById(user_id);
+	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
+	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
+
+	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
+	// 		const userOpponent = await this.appService.getUserById(oppenentId);
+	// 		histObj.id = frontId;
+	// 		frontId++;
+			
+	// 	}));
+	// 	isFriend = user_friends.includes(id);
+
+	// 	return profileData;
+	// }
+
+
+	@UseGuards(AuthenticatedGuard)
+	@Post('exactuser')
+	async getExactUser(@Body() body){
+
+		let tmp = false;
+		const {friend_id, user_id} = body;
+
+		const {login, image_url} = await this.appService.getUserById(friend_id);
+		
+		// const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
+		const wins = 78;
+		const loses = 45;
+
+		// const { user_friends } = await this.appService.getUserByIdFriend(user_id);
+		const user_friends = [1200];
+
+		user_friends.map((fr_id) => {
+			if (fr_id === friend_id)
+			{
+				tmp = true;
+				return ;
+			}
+		});
+		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loses};
 	}
 
 	@Post('logout')

@@ -7,6 +7,8 @@ import { OnGatewayConnection,
           WebSocketGateway,
           WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { UserEntity } from 'src/user.entity';
+import { Repository } from 'typeorm';
 import { Match, matchPlayerData } from '../game.entities';
 import { roomDb, roomNode } from '../game.interface';
 import { GameRepository, MatchRepository } from '../game.repository';
@@ -22,9 +24,9 @@ import { MatchUpLogic } from './game.matchup.logic';
 export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
-    @InjectRepository(GameRepository)
-    private gameRepository: GameRepository,
-    private matchRepository: MatchRepository,
+    @InjectRepository(GameRepository) private gameRepository: GameRepository,
+    @InjectRepository(MatchRepository) private matchRepository: MatchRepository,
+    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
     private matchUpLogic: MatchUpLogic,
   ){}
 
@@ -95,7 +97,6 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     //console.log('here');
   }
 
-
   @SubscribeMessage('updatePos')
   updatePos(client: any, curspos: number): void {
     if (client.data.pos === 'left'){
@@ -104,7 +105,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       client.data.node.playerRight.y = curspos - client.data.node.playerRight.h/2;
     }
   }
-  
+
   @SubscribeMessage('setRoom')
   setRoom(client: any, room: string): void {
     client.data.room = room;
@@ -117,8 +118,11 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   @SubscribeMessage('clientType')
   clientType(client: any, data: any): void {
+    client.data.userId = data.userId;
+    console.log(client.data.userId);
     client.data.type = data.type;
     if (data.type === 'play'){
+      this.userRepository.update(client.data.userId, {in_game: true});
       client.data.node = new roomNode();
       client.data.room = '';
       client.data.roomStatus = 'waiting';
@@ -147,6 +151,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     } else {
       if (client.data.roomStatus === 'waiting'){
         client.leave(client.data.room);
+        this.userRepository.update(client.data.userId, {in_game: false});
         this.matchUpLogic.wRooms.remove(Number(client.data.room));
       } else if (client.data.roomStatus === 'play'){
         client.leave(client.data.room);
@@ -155,6 +160,9 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         if (client.data.pos === 'left'){
           this.matchRepository.addMatchData(client.data.node, 'matchup');
         }
+        console.log(client.data.node);
+        this.userRepository.update(Number(client.data.node.players[0]), {in_game: false});
+        this.userRepository.update(Number(client.data.node.players[1]), {in_game: false});
         this.matchUpLogic.rooms.remove(Number(client.data.room));
         this.gameRepository.deleteRoom(client.data.room);
       }
@@ -178,11 +186,11 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   // }
 
   startGame(client: any){
-    let users = ['1', '2', '3', '4', '5', '6', '7'];
-    let result = users.sort(() => .5 - Math.random()).slice(0,2);
-    console.log(result);
-    client.data.node.players[0] = result[0];
-    client.data.node.players[1] = result[1];
+    // let users = ['1', '2', '3', '4', '5', '6', '7'];
+    // let result = users.sort(() => .5 - Math.random()).slice(0,2);
+    // console.log(result);
+    // client.data.node.players[0] = result[0];
+    // client.data.node.players[1] = result[1];
     client.data.node.gameLoop = setInterval(() => {
         this.matchUpLogic.update(client.data);
         this.server.to(client.data.room).emit("updateClient", {

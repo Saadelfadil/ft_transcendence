@@ -9,10 +9,12 @@ import { WarmUpLogic } from './warmup/game.warmup.logic';
 import { WarmUpGateway } from './warmup/game.warmup.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameRepository, MatchRepository } from './game.repository';
+import { UserEntity } from 'src/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GameRepository,
-                                      MatchRepository])],
+                                      MatchRepository,
+                                      UserEntity])],
   controllers: [GameController],
   providers: [GameService,
               GameGateway,

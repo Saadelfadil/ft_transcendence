@@ -55,7 +55,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/game',
     name: 'game',
-    redirect: {path: '/game/warmup'},
+    redirect: {path: '/game/stream'},
     component: GameBlock,
     children: [
       {

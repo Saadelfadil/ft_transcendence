@@ -26,6 +26,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import axios from 'axios';
+import router from '@/router';
 import { io } from "socket.io-client";
 interface Player {
     x: number;
@@ -50,10 +52,12 @@ export default defineComponent({
     name: 'MatchUpBlock',
     data(){
         return{
-            socket : io("http://localhost:3000/matchup") as any,
+            socket : null as any,
             canvas: 0 as any,
             canvasGrd: 0 as any,
             context: 0 as any,
+            logged: false as boolean,
+            user_id: 0 as number,
             playerRight: {
                 x: 0 as number, 
                 y: 0 as number,
@@ -108,69 +112,109 @@ export default defineComponent({
                 //console.log(cursPos);
                 this.socket.emit("updatePos", cursPos);
             });
+        },
+        async checkLogin()
+        {
+            try{
+                const resp = await axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/api/islogin',
+                    withCredentials: true
+                });
+                this.logged = true;
+                this.user_id = resp.data.id;
+            }
+            catch(e)
+            {
+                this.logged = false;
+                router.push({name : 'login'});
+                return;
+            }
+        },
+        matchup(){
+            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
+                this.canvas.width/2,
+                    this.canvas.height/2, 
+                    5,
+                    this.canvas.width/2,
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+
+
+            let msgHtml = document.getElementById('msg') as any;
+            this.socket = io("http://localhost:3000/matchup");
+            this.socket.on('connect', () => {
+
+                this.socket.emit('clientType', {userId: this.user_id ,type: 'play', room: ''});
+                this.socket.on('waitingForRoom', (pos: string) => {
+                    this.playerPos = pos;
+                    console.log(pos);
+                    msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
+                });
+
+                this.socket.on('connectedToRoom', (room: string, pos: string) => {
+                    this.playerPos = pos;
+                    console.log(pos);
+                    msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
+                });
+                
+                this.socket.on('roomCreated', (room: string, players: string[]) => {
+                    msgHtml.innerHTML = `hello ${this.playerPos}`;
+                    this.socket.emit('setRoom', room);
+                    this.socket.emit("initGame", { 
+                        canvasW: this.canvas.width, 
+                        canvasH: this.canvas.height
+                    });
+                    this.plName = players[0];
+                    this.prName = players[1];
+                    // lPnHtml.innerHTML = `${this.playerLeft.name}`;
+                    // rPnHtml.innerHTML = `${this.playerRight.name}`;
+                    //console.log(players);
+                    this.startGame();
+                });
+
+                this.socket.on("updateClient", (clientData: any) => {
+                    this.playerLeft = clientData.pl;
+                    this.playerRight = clientData.pr;
+                    this.ball = clientData.b;
+                    //console.log(clientData.pl);
+                    this.renderGame();
+                });
+
+                this.socket.on("leaveRoom", () => {
+                    //this.socket.emit('clear');
+                    this.$router.push('/profile');
+                });
+                console.log(this.socket.id);
+
+            });
+        },
+        async isUserPlaying(){
+            const resp = await axios({
+                method: 'POST',
+                url: 'http://localhost:8080/api/getgamestatus',
+                data: {
+                    user_id: this.user_id,
+                }
+            });
+
+            if (resp.data.in_game)
+            {
+                router.push({name: 'profile'});
+                return ;
+            }
         }
     },
-    mounted(){
+    async mounted(){
         console.log('matchup mounted');
-        this.socket.on('connect', () => {
-            this.socket.emit('clientType', {type: 'play', room: ''});
-            console.log(this.socket.id);
-        });
-        this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-        this.canvasGrd = this.context.createRadialGradient(
-            this.canvas.width/2,
-                this.canvas.height/2, 
-                5,
-                this.canvas.width/2,
-                this.canvas.height/2,
-                this.canvas.height
-            );
-        this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-        this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
-
-
-        let msgHtml = document.getElementById('msg') as any;
-
-        this.socket.on('waitingForRoom', (pos: string) => {
-            this.playerPos = pos;
-            console.log(pos);
-            msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
-        });
-
-        this.socket.on('connectedToRoom', (room: string, pos: string) => {
-            this.playerPos = pos;
-            console.log(pos);
-            msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
-        });
-        
-        this.socket.on('roomCreated', (room: string, players: string[]) => {
-            msgHtml.innerHTML = `hello ${this.playerPos}`;
-            this.socket.emit('setRoom', room);
-            this.socket.emit("initGame", { 
-                canvasW: this.canvas.width, 
-                canvasH: this.canvas.height
-            });
-            this.plName = players[0];
-            this.prName = players[1];
-            // lPnHtml.innerHTML = `${this.playerLeft.name}`;
-            // rPnHtml.innerHTML = `${this.playerRight.name}`;
-            //console.log(players);
-            this.startGame();
-        });
-
-        this.socket.on("updateClient", (clientData: any) => {
-            this.playerLeft = clientData.pl;
-            this.playerRight = clientData.pr;
-            this.ball = clientData.b;
-            //console.log(clientData.pl);
-            this.renderGame();
-        });
-
-        this.socket.on("leaveRoom", () => {
-            //this.socket.emit('clear');
-            this.$router.push('/profile');
-        });
+        await this.checkLogin();
+        await this.isUserPlaying();
+        this.matchup();
     },
     unmounted(){
         console.log('matchup unmounted');

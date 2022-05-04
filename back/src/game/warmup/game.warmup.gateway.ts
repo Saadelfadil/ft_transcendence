@@ -7,8 +7,10 @@ import { OnGatewayConnection,
           WebSocketGateway,
           WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { roomDb } from '../game.interface';
-import { GameRepository } from '../game.repository';
+import { UserEntity } from 'src/user.entity';
+import { Repository } from 'typeorm';
+import { roomDb, roomNode } from '../game.interface';
+import { GameRepository, MatchRepository } from '../game.repository';
 import { WarmUpLogic } from './game.warmup.logic';
 
 @WebSocketGateway({
@@ -20,8 +22,9 @@ import { WarmUpLogic } from './game.warmup.logic';
 export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
-    @InjectRepository(GameRepository)
-    private gameRepository: GameRepository,
+    @InjectRepository(GameRepository) private gameRepository: GameRepository,
+    @InjectRepository(MatchRepository) private matchRepository: MatchRepository,
+    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
     private warmUp: WarmUpLogic
   ){}
 
@@ -41,6 +44,13 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.stopTime(client);
       this.stopGame(client);
       this.gameRepository.deleteRoom(client.id);
+      let matchData = new roomNode();
+      matchData.id = client.data.id;
+      matchData.playerLeft = client.data.playerLeft;
+      matchData.playerRight = client.data.playerRight;
+      matchData.players = [client.data.userId, '0'];
+      this.userRepository.update(client.data.userId, {in_game: false});
+      this.matchRepository.addMatchData(matchData, 'warmup');
     }
     console.log('-----end of disconnect socket ------\n');
     //this.warmUp.wclients.find(client.id)
@@ -67,11 +77,13 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('initGame')
-  initGame(client: any, canvas: any): void {
+  initGame(client: any, clientData: any): void {
     //let initData : {};
-    console.log(`init: ${canvas.canvasW}, ${canvas.canvasH}`);
+    client.data.userId = clientData.userId;
+    this.userRepository.update(client.data.userId, {in_game: true});
+    console.log(`init: ${clientData.canvasW}, ${clientData.canvasH}`);
     //client.data.playerLeft = this.warmUp.
-    let {...data} = this.warmUp.initGmae(canvas.canvasH, canvas.canvasW);
+    let {...data} = this.warmUp.initGmae(clientData.canvasH, clientData.canvasW);
     client.data.playerLeft = data.playerLeft;
     client.data.playerRight = data.playerRight;
     client.data.ball = data.ball;
@@ -81,6 +93,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       pr: data.playerRight,
       b: data.ball
     });
+    console.log('done init gme')
   }
 
   @SubscribeMessage('startTime')
