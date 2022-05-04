@@ -160,7 +160,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         if (client.data.pos === 'left'){
           this.matchRepository.addMatchData(client.data.node, 'matchup');
         }
-        console.log(client.data.node);
+        //console.log(client.data.node);
         this.userRepository.update(Number(client.data.node.players[0]), {in_game: false});
         this.userRepository.update(Number(client.data.node.players[1]), {in_game: false});
         this.matchUpLogic.rooms.remove(Number(client.data.room));

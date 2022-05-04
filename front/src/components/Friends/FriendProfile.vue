@@ -135,6 +135,13 @@ export default defineComponent({
             }catch(e){
                 console.log(e);
             }
+        },
+        validFriend(friend_id:number){
+            if (this.user_id === friend_id)
+            {
+                router.replace({name: 'profile'});
+                return ;
+            }
         }
     },
     async created() {
@@ -144,8 +151,9 @@ export default defineComponent({
             router.push({name: 'login'});
             return ;
         }
+        this.validFriend(Number(this.$route.query.friend_id));
         await this.getExactUserData(Number(this.$route.query.friend_id));
-    },
+    }
 
 })
 </script>

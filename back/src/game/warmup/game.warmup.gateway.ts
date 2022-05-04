@@ -111,7 +111,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   startGame(client: any){
     let newDbRoom = {} as roomDb;
     newDbRoom.name = client.id;
-    newDbRoom.players = [client.id, 'AI'];
+    newDbRoom.players = [client.data.userId, '0'];
     newDbRoom.namespace = 'warmup';
     this.gameRepository.addRoom(newDbRoom);
     client.data.gameLoop = setInterval(() => {

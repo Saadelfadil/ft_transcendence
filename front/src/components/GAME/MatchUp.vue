@@ -133,6 +133,9 @@ export default defineComponent({
         },
         matchup(){
             this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.canvas.height = this.canvas.width / 1.5;
+            
             this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
             this.canvasGrd = this.context.createRadialGradient(
                 this.canvas.width/2,
@@ -223,3 +226,25 @@ export default defineComponent({
     },
 })
 </script>
+
+
+<style scoped>
+
+
+#canvas {
+    /* margin-top: 10px; */
+    border: solid 1px rgb(240, 46, 170);
+    background: rgb(177,255,185);
+    background: radial-gradient(circle, rgba(177,255,185,1) 0%, rgba(36,252,82,1) 100%);
+    width: 100%;
+    object-fit: contain;
+    /* height: 800; */
+    max-width: 800px;
+    box-shadow: rgba(240, 46, 170, 0.4) 0px 5px, rgba(240, 46, 170, 0.3) 0px 10px, rgba(240, 46, 170, 0.2) 0px 15px, rgba(240, 46, 170, 0.1) 0px 20px, rgba(240, 46, 170, 0.05) 0px 25px;
+    /* max-height: 800px; */
+    /* position: absolute; */
+    /* overflow: hidden; */
+    
+}
+
+</style>
