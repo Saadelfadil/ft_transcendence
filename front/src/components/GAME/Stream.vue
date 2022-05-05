@@ -31,7 +31,7 @@
 
 
                 <div id = "pong-table" class="pong-table">
-                    <canvas id="canvas" width="800" height="500" ></canvas>
+                    <canvas id="canvas"></canvas>
                 </div>
             </div>
         
@@ -149,6 +149,9 @@ export default defineComponent({
             canvas: 0 as any,
             canvasGrd: 0 as any,
             context: 0 as any,
+            factor: 0 as number,
+            scw: 0 as number,
+            sch: 0 as number,
             playerRight: {
                 x: 0 as number, 
                 y: 0 as number,
@@ -255,17 +258,46 @@ export default defineComponent({
         {
             console.log(`stream id ${stream_id}`);
         },
+        initGame(scw: number, sch: number){
+            this.scw = scw;
+            this.sch = sch;
+            //this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.factor = this.canvas.width / scw;
+
+            window.addEventListener('resize', () => {
+                this.canvas.width = this.canvas.offsetWidth ;
+                this.factor = this.canvas.width / this.scw;
+                this.canvas.height = this.sch * this.factor;
+            });
+
+            this.canvas.height = sch * this.factor;
+            
+            // this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            // this.canvasGrd = this.context.createRadialGradient(
+            //     this.canvas.width/2,
+            //         this.canvas.height/2, 
+            //         5,
+            //         this.canvas.width/2,
+            //         this.canvas.height/2,
+            //         this.canvas.height
+            //     );
+            // this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            // this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+
+            this.renderGame();
+        },
         renderGame(): void{
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
             this.context.fillStyle = this.playerLeft.color;
-            this.context.fillRect(this.playerRight.x, this.playerRight.y, this.playerRight.w, this.playerRight.h);
-            this.context.fillRect(this.playerLeft.x, this.playerLeft.y, this.playerLeft.w, this.playerLeft.h);
-
+            this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
+            this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
+            //console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
-            this.context.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI*2,false);
+            this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
             this.context.closePath();
             this.context.fill();
         },
@@ -278,13 +310,20 @@ export default defineComponent({
         roomClicked(namespace:string, name:string)
         {
             console.log(typeof name);
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.factor = this.canvas.width / this.scw;
+            this.canvas.height = this.sch * this.factor;
             if (this.socket){
                 this.socket.disconnect();
             }
             this.socket = io(`http://localhost:3000/${namespace}`);
+            
             this.socket.on('connect', () => {
                 this.socket.emit('clientType', {type: 'stream',room: name});
-                console.log(this.socket.id);
+                this.socket.on('canvasWH', (canvas: any) => {
+                    this.initGame(canvas.scw, canvas.sch);
+                });
+                //console.log(this.socket.id);
             });
             this.socket.on("updateClient", (clientData: any) => {
                 this.playerLeft = clientData.pl;
@@ -299,9 +338,13 @@ export default defineComponent({
         }
     },
     mounted(){
-        console.log('stream mounted');
-
+        this.factor = 1;
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        this.canvas.width = this.canvas.offsetWidth ;
+        //this.factor = this.canvas.width / this.canvas.width;
+
+        this.canvas.height = this.canvas.width * 0.7;
+        
         this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
         this.canvasGrd = this.context.createRadialGradient(
             this.canvas.width/2,
@@ -314,7 +357,6 @@ export default defineComponent({
         this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
         this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
         this.renderGame();
-
     },
     unmounted(){
         console.log('stream unmounted');
@@ -325,3 +367,24 @@ export default defineComponent({
 })
 
 </script>
+
+<style scoped>
+
+
+#canvas {
+    /* margin-top: 10px; */
+    border: solid 1px rgb(240, 46, 170);
+    background: rgb(177,255,185);
+    background: radial-gradient(circle, rgba(177,255,185,1) 0%, rgba(36,252,82,1) 100%);
+    width: 100%;
+    object-fit: contain;
+    /* height: 800; */
+    max-width: 800px;
+    box-shadow: rgba(240, 46, 170, 0.4) 0px 5px, rgba(240, 46, 170, 0.3) 0px 10px, rgba(240, 46, 170, 0.2) 0px 15px, rgba(240, 46, 170, 0.1) 0px 20px, rgba(240, 46, 170, 0.05) 0px 25px;
+    /* max-height: 800px; */
+    /* position: absolute; */
+    /* overflow: hidden; */
+    
+}
+
+</style>
