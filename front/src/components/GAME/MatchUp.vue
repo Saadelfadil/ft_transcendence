@@ -18,7 +18,7 @@
         </div>
     
         <div id = "pong-table" class="pong-table flex justify-center">
-            <canvas id="canvas" width="800" height="500" ></canvas>
+            <canvas id="canvas"></canvas>
         </div>
 
     </div>
@@ -58,6 +58,7 @@ export default defineComponent({
             context: 0 as any,
             logged: false as boolean,
             user_id: 0 as number,
+            factor: 0 as number,
             playerRight: {
                 x: 0 as number, 
                 y: 0 as number,
@@ -89,28 +90,61 @@ export default defineComponent({
         }
     },
     methods: {
+        initGame(status: string, scw: number, sch: number){
+            //if (status === 'init'){
+                this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+                this.canvas.width = this.canvas.offsetWidth ;
+                this.factor = this.canvas.width / scw;
+                this.canvas.height = sch * this.factor;
+                
+                this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+                this.canvasGrd = this.context.createRadialGradient(
+                    this.canvas.width/2,
+                        this.canvas.height/2, 
+                        5,
+                        this.canvas.width/2,
+                        this.canvas.height/2,
+                        this.canvas.height
+                    );
+                this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+                this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+
+            //}
+            this.context.fillStyle = this.canvasGrd;
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            this.context.fillStyle = this.playerLeft.color;
+            this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
+            this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
+
+            this.context.fillStyle = this.ball.color;
+            this.context.beginPath();
+            this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
+            this.context.closePath();
+            this.context.fill();
+        },
         renderGame(): void{
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
             this.context.fillStyle = this.playerLeft.color;
-            this.context.fillRect(this.playerRight.x, this.playerRight.y, this.playerRight.w, this.playerRight.h);
-            this.context.fillRect(this.playerLeft.x, this.playerLeft.y, this.playerLeft.w, this.playerLeft.h);
-
+            this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
+            this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
+            //console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
-            this.context.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI*2,false);
+            this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
             this.context.closePath();
             this.context.fill();
         },
-        startGame(){
+        startMouseEvent(){
             // this.socket.emit("startTime");
             //this.socket.emit("startGame");
             this.canvas.addEventListener("mousemove", (e: any) => {
                 //console.log(`her${this.canvasHtml.getBoundingClientRect().top}`);
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
                 //console.log(cursPos);
-                this.socket.emit("updatePos", cursPos);
+                this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
         async checkLogin()
@@ -132,28 +166,18 @@ export default defineComponent({
             }
         },
         matchup(){
-            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-            this.canvas.width = this.canvas.offsetWidth ;
-            this.canvas.height = this.canvas.width / 1.5;
             
-            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-            this.canvasGrd = this.context.createRadialGradient(
-                this.canvas.width/2,
-                    this.canvas.height/2, 
-                    5,
-                    this.canvas.width/2,
-                    this.canvas.height/2,
-                    this.canvas.height
-                );
-            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
-
-
             let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/matchup");
             this.socket.on('connect', () => {
-
+                
                 this.socket.emit('clientType', {userId: this.user_id ,type: 'play', room: ''});
+                
+                // this.socket.emit("initGame", {
+                //     canvasW: this.canvas.width, 
+                //     canvasH: this.canvas.height
+                // });
+                
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
                     console.log(pos);
@@ -169,24 +193,34 @@ export default defineComponent({
                 this.socket.on('roomCreated', (room: string, players: string[]) => {
                     msgHtml.innerHTML = `hello ${this.playerPos}`;
                     this.socket.emit('setRoom', room);
-                    this.socket.emit("initGame", { 
-                        canvasW: this.canvas.width, 
-                        canvasH: this.canvas.height
-                    });
                     this.plName = players[0];
                     this.prName = players[1];
-                    // lPnHtml.innerHTML = `${this.playerLeft.name}`;
-                    // rPnHtml.innerHTML = `${this.playerRight.name}`;
-                    //console.log(players);
-                    this.startGame();
+                    
+                    this.socket.on("startMouseEvent", () => {
+                        this.startMouseEvent();
+                        
+                        this.socket.on("updateClient", (clientData: any) => {
+                            this.playerLeft = clientData.pl;
+                            this.playerRight = clientData.pr;
+                            this.ball = clientData.b;
+                            // console.log(clientData.pl);
+                            // console.log(clientData.pr);
+                            //console.log(clientData.b);
+                            if (clientData.b && clientData.pr && clientData.pl){
+                                //console.log('render')
+                                this.renderGame();
+                            }
+                        });
+                    });
+
                 });
 
-                this.socket.on("updateClient", (clientData: any) => {
+                this.socket.on("initData", (clientData: any) => {
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
                     //console.log(clientData.pl);
-                    this.renderGame();
+                    this.initGame('init', clientData.scw, clientData.sch);
                 });
 
                 this.socket.on("leaveRoom", () => {
@@ -216,7 +250,7 @@ export default defineComponent({
     async mounted(){
         console.log('matchup mounted');
         await this.checkLogin();
-        await this.isUserPlaying();
+        //await this.isUserPlaying();
         this.matchup();
     },
     unmounted(){

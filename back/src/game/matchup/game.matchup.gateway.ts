@@ -78,22 +78,28 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   @SubscribeMessage('initGame')
-  initGame(client: any, canvas: any): void {
+  initGame(client: any): void {
     //let initData : {};
     //console.log(`init: ${canvas.canvasW}, ${canvas.canvasH}`);
     //client.data.playerLeft = this.gameLogic.
-    let {...data} = this.matchUpLogic.initGmae(canvas.canvasH, canvas.canvasW);
-    client.data.node.playerLeft = data.playerLeft;
-    client.data.node.playerRight = data.playerRight;
-    client.data.node.ball = data.ball;
-    //console.log(client.data);
-    client.emit("updateClient", {
-      pl: data.playerLeft,
-      pr: data.playerRight,
-      b: data.ball
+    this.matchUpLogic.initGmae();
+    client.data.node.playerLeft = this.matchUpLogic.playerLeft;
+    client.data.node.playerRight = this.matchUpLogic.playerRight;
+    client.data.node.ball = this.matchUpLogic.ball;
+    // client.data.node.playerLeft = data.playerLeft;
+    // client.data.node.playerRight = data.playerRight;
+    // client.data.node.ball = data.ball;
+    //client.data.node.canvasW = data.canvasW;
+    console.log(client.data.node);
+    client.emit("initData", {
+      pl: client.data.node.playerLeft,
+      pr: client.data.node.playerRight,
+      b: client.data.node.ball,
+      scw: this.matchUpLogic.canvasW,
+      sch: this.matchUpLogic.canvasH,
     });
-    if (client.data.pos === 'left')
-      this.startGame(client);
+    //if (client.data.pos === 'left')
+      //this.startGame(client);
     //console.log('here');
   }
 
@@ -113,19 +119,25 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (node){
       client.data.roomStatus = 'play';
       client.data.node = node.data;
+      console.log(client.data.node);
+      client.emit('startMouseEvent');
+      console.log('mouse event sended');
+      if (client.data.pos === 'left')
+        this.startGame(client);
     }
   }
 
   @SubscribeMessage('clientType')
   clientType(client: any, data: any): void {
     client.data.userId = data.userId;
-    console.log(client.data.userId);
+    //console.log(client.data.userId);
     client.data.type = data.type;
     if (data.type === 'play'){
       this.userRepository.update(client.data.userId, {in_game: true});
       client.data.node = new roomNode();
       client.data.room = '';
       client.data.roomStatus = 'waiting';
+      this.initGame(client);
       this.checkRoomconnection(client);
 
       // console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);

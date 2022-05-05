@@ -29,7 +29,7 @@ export class roomNode{
     players: string[] = [];
     playerLeft: Player = new Player();
     playerRight: Player = new Player();
-    ball: Ball;
+    ball: Ball = new Ball();
     gameLoop: any;
 }
 

@@ -8,21 +8,20 @@ export class MatchUpLogic {
 
     rooms: AVLTree<number, roomNode> = new AVLTree((a, b) => a - b, true);
     wRooms: AVLTree<number, roomNode> = new AVLTree((a, b) => a - b, true);
-    canvasH: number;
-    canvasW: number;
+    canvasW: number = 800;
+    canvasH: number = this.canvasW * 0.7;
+    playerLeft = new Player();
+    playerRight = new Player();
+    ball = new Ball();
 
-    initGmae(CanvasH: number, CanvasW: number): any{
+    initGmae(): any{
         let playerLeft = new Player();
         let playerRight = new Player();
-        let ball: Ball;
+        let ball = new Ball();
 
-        this.canvasH = CanvasH;
-        this.canvasW = CanvasW;
-        // console.log(`canvash: ${CanvasH}`);
-        // console.log(`canvasw: ${CanvasW}`);
         playerLeft = {
             x: 0,
-            y: CanvasH/2 - 100/2,
+            y: this.canvasH/2 - 100/2,
             w: 10,
             h: 100,
             color: "WHITE",
@@ -30,8 +29,8 @@ export class MatchUpLogic {
             name: '',
         };
         playerRight = {
-            x: CanvasW - 10,
-            y: CanvasH/2 - 100/2,
+            x: this.canvasW - 10,
+            y: this.canvasH/2 - 100/2,
             w: 10,
             h: 100,
             color: "WHITE",
@@ -39,15 +38,18 @@ export class MatchUpLogic {
             name: '',
         };
         ball = {
-            x: CanvasW/2,
-            y: CanvasH/2,
+            x: this.canvasW/2,
+            y: this.canvasH/2,
             r: 10,
             speed: 5,
             velocityX: 1,
             velocityY: 1,
             color: "RED",
         };
-        return {playerLeft, playerRight, ball}
+        this.playerLeft = playerLeft;
+        this.playerRight = playerRight;
+        this.ball = ball;
+        return {playerLeft, playerRight, ball, canvasW: this.canvasW, canvasH: this.canvasH}
     }
 
     collision(ball: any, player: any): boolean{
@@ -72,34 +74,41 @@ export class MatchUpLogic {
 
     update(clientData: any){
         
-        clientData.node.ball.x += clientData.node.ball.velocityX * clientData.node.ball.speed;
-        clientData.node.ball.y += clientData.node.ball.velocityY * clientData.node.ball.speed;
+        //if (clientData.node.ball){
+            clientData.node.ball.x += clientData.node.ball.velocityX * clientData.node.ball.speed;
+            clientData.node.ball.y += clientData.node.ball.velocityY * clientData.node.ball.speed;
+            //console.log(clientData.node.ball.x);
+    
+            // if (clientData.ball.x > this.canvasW/2)
+            //     clientData.node.playerRight.y = clientData.ball.y - clientData.node.playerRight.h/2; 
+    
+            if(clientData.node.ball.y + clientData.node.ball.r > this.canvasH || clientData.node.ball.y - clientData.node.ball.r < 0){
+                clientData.node.ball.velocityY *= -1;
+            }
+    
+            let player = (clientData.node.ball.x < this.canvasW/2) ? clientData.node.playerLeft : clientData.node.playerRight;
+            //console.log(player.y);
+            if (this.collision(clientData.node.ball, player)){
+                clientData.node.ball.velocityX *= -1;
+            }
+    
+            if (clientData.node.ball.x - clientData.node.ball.r < 0){
+                clientData.node.playerRight.score++;
+                this.resetBall(clientData);
+            } else if (clientData.node.ball.x + clientData.node.ball.r > this.canvasW){
+                clientData.node.playerLeft.score++;
+                this.resetBall(clientData);
+            }
+        //}
 
-        // if (clientData.ball.x > this.canvasW/2)
-        //     clientData.node.playerRight.y = clientData.ball.y - clientData.node.playerRight.h/2; 
-
-        if(clientData.node.ball.y + clientData.node.ball.r > this.canvasH || clientData.node.ball.y - clientData.node.ball.r < 0){
-            clientData.node.ball.velocityY *= -1;
-        }
-
-        let player = (clientData.node.ball.x < this.canvasW/2) ? clientData.node.playerLeft : clientData.node.playerRight;
-        //console.log(player.y);
-        if (this.collision(clientData.node.ball, player)){
-            clientData.node.ball.velocityX *= -1;
-        }
-
-        if (clientData.node.ball.x - clientData.node.ball.r < 0){
-            clientData.node.playerRight.score++;
-            this.resetBall(clientData);
-        } else if (clientData.node.ball.x + clientData.node.ball.r > this.canvasW){
-            clientData.node.playerLeft.score++;
-            this.resetBall(clientData);
-        }
 
     }
 
     joinRoom(client: Socket) :roomNode{
         let roomnode = new roomNode();
+        roomnode.playerLeft = this.playerLeft;
+        roomnode.playerRight = this.playerRight;
+        roomnode.ball = this.ball;
         if (this.wRooms.size > 0){
             let node = this.wRooms.minNode();
             let newNode = this.rooms.insert(node.key, node.data);
