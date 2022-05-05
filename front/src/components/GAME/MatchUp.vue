@@ -59,6 +59,8 @@ export default defineComponent({
             logged: false as boolean,
             user_id: 0 as number,
             factor: 0 as number,
+            scw: 0 as number,
+            sch: 0 as number,
             playerRight: {
                 x: 0 as number, 
                 y: 0 as number,
@@ -92,9 +94,18 @@ export default defineComponent({
     methods: {
         initGame(status: string, scw: number, sch: number){
             //if (status === 'init'){
+                this.scw = scw;
+                this.sch = sch;
                 this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
                 this.canvas.width = this.canvas.offsetWidth ;
                 this.factor = this.canvas.width / scw;
+
+                window.addEventListener('resize', () => {
+                    this.canvas.width = this.canvas.offsetWidth ;
+                    this.factor = this.canvas.width / this.scw;
+                    this.canvas.height = this.sch * this.factor;
+                });
+
                 this.canvas.height = sch * this.factor;
                 
                 this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
