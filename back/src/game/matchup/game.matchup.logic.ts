@@ -14,7 +14,7 @@ export class MatchUpLogic {
     playerRight = new Player();
     ball = new Ball();
 
-    initGmae(): any{
+    initGmae(){
         let playerLeft = new Player();
         let playerRight = new Player();
         let ball = new Ball();
@@ -49,7 +49,6 @@ export class MatchUpLogic {
         this.playerLeft = playerLeft;
         this.playerRight = playerRight;
         this.ball = ball;
-        return {playerLeft, playerRight, ball, canvasW: this.canvasW, canvasH: this.canvasH}
     }
 
     collision(ball: any, player: any): boolean{

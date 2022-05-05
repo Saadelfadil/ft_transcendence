@@ -92,47 +92,34 @@ export default defineComponent({
         }
     },
     methods: {
-        initGame(status: string, scw: number, sch: number){
-            //if (status === 'init'){
-                this.scw = scw;
-                this.sch = sch;
-                this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        initGame(scw: number, sch: number){
+            this.scw = scw;
+            this.sch = sch;
+            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.factor = this.canvas.width / scw;
+
+            window.addEventListener('resize', () => {
                 this.canvas.width = this.canvas.offsetWidth ;
-                this.factor = this.canvas.width / scw;
+                this.factor = this.canvas.width / this.scw;
+                this.canvas.height = this.sch * this.factor;
+            });
 
-                window.addEventListener('resize', () => {
-                    this.canvas.width = this.canvas.offsetWidth ;
-                    this.factor = this.canvas.width / this.scw;
-                    this.canvas.height = this.sch * this.factor;
-                });
-
-                this.canvas.height = sch * this.factor;
-                
-                this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-                this.canvasGrd = this.context.createRadialGradient(
+            this.canvas.height = sch * this.factor;
+            
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
+                this.canvas.width/2,
+                    this.canvas.height/2, 
+                    5,
                     this.canvas.width/2,
-                        this.canvas.height/2, 
-                        5,
-                        this.canvas.width/2,
-                        this.canvas.height/2,
-                        this.canvas.height
-                    );
-                this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-                this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
 
-            //}
-            this.context.fillStyle = this.canvasGrd;
-            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-            this.context.fillStyle = this.playerLeft.color;
-            this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
-            this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
-
-            this.context.fillStyle = this.ball.color;
-            this.context.beginPath();
-            this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
-            this.context.closePath();
-            this.context.fill();
+            this.renderGame();
         },
         renderGame(): void{
             this.context.fillStyle = this.canvasGrd;
@@ -184,11 +171,6 @@ export default defineComponent({
                 
                 this.socket.emit('clientType', {userId: this.user_id ,type: 'play', room: ''});
                 
-                // this.socket.emit("initGame", {
-                //     canvasW: this.canvas.width, 
-                //     canvasH: this.canvas.height
-                // });
-                
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
                     console.log(pos);
@@ -231,7 +213,7 @@ export default defineComponent({
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
                     //console.log(clientData.pl);
-                    this.initGame('init', clientData.scw, clientData.sch);
+                    this.initGame(clientData.scw, clientData.sch);
                 });
 
                 this.socket.on("leaveRoom", () => {

@@ -81,17 +81,19 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     //let initData : {};
     client.data.userId = clientData.userId;
     this.userRepository.update(client.data.userId, {in_game: true});
-    console.log(`init: ${clientData.canvasW}, ${clientData.canvasH}`);
+    //console.log(`init: ${clientData.canvasW}, ${clientData.canvasH}`);
     //client.data.playerLeft = this.warmUp.
-    let {...data} = this.warmUp.initGmae(clientData.canvasH, clientData.canvasW);
-    client.data.playerLeft = data.playerLeft;
-    client.data.playerRight = data.playerRight;
-    client.data.ball = data.ball;
+    this.warmUp.initGmae();
+    client.data.playerLeft = this.warmUp.playerLeft;
+    client.data.playerRight = this.warmUp.playerRight;
+    client.data.ball = this.warmUp.ball;
     //console.log(client.data);
-    client.emit("updateClient", {
-      pl: data.playerLeft,
-      pr: data.playerRight,
-      b: data.ball
+    client.emit("initData", {
+      pl: client.data.playerLeft,
+      pr: client.data.playerRight,
+      b: client.data.ball,
+      scw: this.warmUp.canvasW,
+      sch: this.warmUp.canvasH,
     });
     console.log('done init gme')
   }
@@ -135,9 +137,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('updatePos')
-  updatePos(client: any, playerLeft: any): void {
-    if (playerLeft){
-      client.data.playerLeft = playerLeft;
-    }
+  updatePos(client: any, curspos: number): void {
+    client.data.playerLeft.y = curspos - client.data.playerLeft.h/2;
   }
 }

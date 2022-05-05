@@ -56,7 +56,9 @@ export default  defineComponent({
             canvas: 0 as any,
             logged: false as boolean,
             user_id: 0 as number,
-            // canvasHtml: any;
+            factor: 0 as number,
+            scw: 0 as number,
+            sch: 0 as number,
             canvasGrd: 0 as any,
             context: 0 as any,
             playerRight: {
@@ -92,17 +94,48 @@ export default  defineComponent({
         }
     },
     methods: {
+        initGame(scw: number, sch: number){
+            this.scw = scw;
+            this.sch = sch;
+            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            this.factor = this.canvas.width / scw;
+
+            window.addEventListener('resize', () => {
+                this.canvas.width = this.canvas.offsetWidth ;
+                this.factor = this.canvas.width / this.scw;
+                this.canvas.height = this.sch * this.factor;
+            });
+
+            this.canvas.height = sch * this.factor;
+            
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
+                this.canvas.width/2,
+                    this.canvas.height/2, 
+                    5,
+                    this.canvas.width/2,
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+
+            this.renderGame();
+        },
+
         renderGame(): void{
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
             this.context.fillStyle = this.playerLeft.color;
-            this.context.fillRect(this.playerRight.x, this.playerRight.y, this.playerRight.w, this.playerRight.h);
-            this.context.fillRect(this.playerLeft.x, this.playerLeft.y, this.playerLeft.w, this.playerLeft.h);
-
+            
+            this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
+            this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
+            
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
-            this.context.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI*2,false);
+            this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
             this.context.closePath();
             this.context.fill();
         },
@@ -126,11 +159,10 @@ export default  defineComponent({
         },
 
         startGame(){
-            //this.socket.emit("startTime");
             this.socket.emit("startGame");
             this.canvas.addEventListener("mousemove", (e: any) => {
-                this.playerLeft.y = e.clientY - this.canvas.getBoundingClientRect().top - this.playerLeft.h/2;
-                this.socket.emit("updatePos", this.playerLeft);
+                let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
+                this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
 
@@ -156,29 +188,18 @@ export default  defineComponent({
         {
             let popup : any = document.getElementById("popup");
             popup.classList.remove('fade');
-            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-            this.canvas.width = this.canvas.offsetWidth ;
-            this.canvas.height = this.canvas.width / 1.5;
-            //console.log(this.canvas.height, this.canvas.width);
-            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-            this.canvasGrd = this.context.createRadialGradient(
-                this.canvas.width/2,
-                    this.canvas.height/2, 
-                    5,
-                    this.canvas.width/2,
-                    this.canvas.height/2,
-                    this.canvas.height
-                );
-            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
             
             this.socket = io("http://localhost:3000/warmup");
             this.socket.on("connect", () => {
                 this.plName = this.user_id.toString();
-                this.socket.emit("initGame", {
-                    userId: this.user_id,
-                    canvasW: this.canvas.width, 
-                    canvasH: this.canvas.height
+                this.socket.emit("initGame", {userId: this.user_id});
+
+                this.socket.on("initData", (clientData: any) => {
+                    this.playerLeft = clientData.pl;
+                    this.playerRight = clientData.pr;
+                    this.ball = clientData.b;
+                    //console.log(clientData.pl);
+                    this.initGame(clientData.scw, clientData.sch);
                 });
 
                 this.timerBeforStart(this.countdown);
@@ -224,7 +245,7 @@ export default  defineComponent({
     async mounted(){
         console.log('warmup mounted');
         await this.checkLogin();
-        await this.isUserPlaying();
+        //await this.isUserPlaying();
         this.warmup();
     },
     unmounted(){

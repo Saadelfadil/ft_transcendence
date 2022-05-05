@@ -16,46 +16,47 @@ export class ClientNode {
 @Injectable()
 export class WarmUpLogic {
 
-    canvasH: number;
-    canvasW: number;
+    canvasW: number = 800;
+    canvasH: number = this.canvasW * 0.7;
+    playerLeft = new Player();
+    playerRight = new Player();
+    ball = new Ball();
 
-    initGmae(CanvasH: number, CanvasW: number): any{
+    initGmae(){
         let playerLeft = new Player();
         let playerRight = new Player();
         let ball = new Ball();
 
-        this.canvasH = CanvasH;
-        this.canvasW = CanvasW;
-        console.log(`canvash: ${CanvasH}`);
-        console.log(`canvasw: ${CanvasW}`);
         playerLeft = {
             x: 0,
-            y: CanvasH/2 - 100/2,
+            y: this.canvasH/2 - 100/2,
             w: 10,
             h: 100,
             color: "WHITE",
             score: 0,
-            name: ''
+            name: '',
         };
         playerRight = {
-            x: CanvasW - 10,
-            y: CanvasH/2 - 100/2,
+            x: this.canvasW - 10,
+            y: this.canvasH/2 - 100/2,
             w: 10,
             h: 100,
             color: "WHITE",
             score: 0,
-            name: ''
+            name: '',
         };
         ball = {
-            x: CanvasW/2,
-            y: CanvasH/2,
+            x: this.canvasW/2,
+            y: this.canvasH/2,
             r: 10,
             speed: 5,
             velocityX: 5,
             velocityY: 5,
             color: "RED",
         };
-        return {playerLeft, playerRight, ball}
+        this.playerLeft = playerLeft;
+        this.playerRight = playerRight;
+        this.ball = ball;
     }
 
     collision(ball: any, player: any): boolean{
