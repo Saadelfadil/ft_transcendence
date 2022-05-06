@@ -54,7 +54,8 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (room){
       //client.data.room = room;
       //console.log(client.data.node);
-      client.emit('connectedToRoom', room, client.data.pos);
+      let timer: number = 5;
+      this.server.to(room.id).emit('connectedToRoom', room.id, client.data.pos, timer);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
         let newDbRoom = {} as roomDb;
@@ -63,7 +64,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         newDbRoom.namespace = 'matchup';
         this.gameRepository.addRoom(newDbRoom);
         //this.gameRepository.getAllRooms();
-      }, 5000);
+      }, timer * 1000);
     } else {
       client.emit('waitingForRoom', client.data.pos);
     }

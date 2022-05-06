@@ -3,7 +3,7 @@
         <p id="msg"></p>
         <div id="popup" class="popup">
             <span class="msg fadeIn">Start In:</span>
-            <span id="countdown" class="countdown fadeIn">0</span>
+            <span id="countdown" class="countdown fadeIn">{{timer}}</span>
         </div>
         <div class="flex justify-between">
             <div class="player">
@@ -86,6 +86,7 @@ export default defineComponent({
                 velocityY: 0 as number,
                 color: '' as string,
             } as Ball,
+            timer: 0 as number,
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
@@ -177,10 +178,20 @@ export default defineComponent({
                     msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
                 });
 
-                this.socket.on('connectedToRoom', (room: string, pos: string) => {
+                this.socket.on('connectedToRoom', (room: string, pos: string, timer: number) => {
                     this.playerPos = pos;
-                    console.log(pos);
+                    console.log(room);
                     msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
+                    this.timer = timer;
+                    const timerInterval = setInterval(() => {
+                        if (this.timer <= 0){
+                            clearInterval(timerInterval);
+                        }
+                        else{
+                            this.timer--;
+                            console.log(this.timer);
+                        }
+                    }, 1000);
                 });
                 
                 this.socket.on('roomCreated', (room: string, players: string[]) => {
@@ -189,9 +200,12 @@ export default defineComponent({
                     this.plName = players[0];
                     this.prName = players[1];
                     
+                    
+
                     this.socket.on("startMouseEvent", () => {
-                        this.startMouseEvent();
-                        
+                        //setTimeout(() => {
+                            this.startMouseEvent();
+                        //}, timer * 1000);
                         this.socket.on("updateClient", (clientData: any) => {
                             this.playerLeft = clientData.pl;
                             this.playerRight = clientData.pr;
@@ -205,6 +219,7 @@ export default defineComponent({
                             }
                         });
                     });
+                    
 
                 });
 
