@@ -151,7 +151,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       // });
 
     } else if (data.type === 'stream'){
-      console.log(data.room);
+      console.log(data.room, 'stream');
       client.data.room = data.room;
       client.join(data.room);
       client.emit('canvasWH', {scw: this.matchUpLogic.canvasW, sch: this.matchUpLogic.canvasH});

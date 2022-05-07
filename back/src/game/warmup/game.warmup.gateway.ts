@@ -73,6 +73,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       console.log(data.room);
       client.data.room = data.room;
       client.join(data.room);
+      client.emit('canvasWH', {scw: this.warmUp.canvasW, sch: this.warmUp.canvasH});
     }
   }
 
@@ -122,6 +123,8 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           pl: client.data.playerLeft,
           pr: client.data.playerRight,
           b: client.data.ball,
+          scw: this.warmUp.canvasW,
+          sch: this.warmUp.canvasH,
         });
     }, 1000/65);
   }

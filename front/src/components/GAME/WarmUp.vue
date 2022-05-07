@@ -1,6 +1,6 @@
 <template>
     <div class="container mx-auto">
-        <p id="msg"></p>
+        <!-- <p id="msg"></p>
         <div id="popup" class="popup">
             <span class="msg fadeIn">{{timeMsg}}</span>
             <span id="countdown" class="countdown fadeIn">{{timer}}</span>
@@ -15,7 +15,44 @@
                 <span id="player-right-score"> {{playerRight.score}} : </span>
                 <span id="player-right-name" class=""> AI </span>
             </div>
-        </div>
+        </div> -->
+
+        
+	<!-- start of nav bar of streeam-->
+
+
+    <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="left_player_avatar" v-if="left_player_avatar != ''"  class="rounded-full max-w-xs w-16 items-center border" />
+		    <div class="text-center"> {{left_player_login}}</div>
+		</div>
+		<div class="mt-2.5"> {{playerLeft.score}} </div>
+	</div>
+	<div>
+
+	<div>
+
+		<div v-if="game_state == 0"> {{timer}} </div>
+		<div v-else>
+		    <div class="mt-2.5">VS</div>
+		</div>
+	</div>
+
+	</div>
+
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="right_player_avatar" v-if="right_player_avatar != ''" class="rounded-full max-w-xs w-16 items-center border" />
+		    <div>{{right_player_login}} </div>
+		</div>
+		<div class="mt-2.5"> {{playerRight.score}} </div>
+	</div>
+
+    </div>
+	<!-- end of nav bar of streeam-->
+
+
         <div id = "pong-table" class="pong-table flex justify-center">
             <canvas id="canvas" ></canvas>
         </div>
@@ -52,6 +89,11 @@ export default  defineComponent({
     
     data() {
         return {
+            game_state: 0 as number,
+            left_player_avatar: '' as string,
+            left_player_login: '' as string,
+            right_player_avatar: '' as string,
+            right_player_login: '' as string,
             socket : null as any,
             canvas: 0 as any,
             logged: false as boolean,
@@ -90,7 +132,7 @@ export default  defineComponent({
             countdown: 5 as number,
             timer: 0 as number,
             plName: '' as string,
-            timeMsg: 'Start In : ',
+            // timeMsg: 'Start In : ',
         }
     },
     methods: {
@@ -142,14 +184,14 @@ export default  defineComponent({
 
         timerBeforStart(countdown: number){
             let counter = countdown;
-            let counterHtml : any = document.getElementById("countdown");
-            let popup : any = document.getElementById("popup");
+            // let counterHtml : any = document.getElementById("countdown");
+            // let popup : any = document.getElementById("popup");
             const timerInterval = setInterval(() => {
                 this.timer = counter;
                 if (counter <= 0){
-                    this.timeMsg = 'Go';
+                    // this.timeMsg = 'Go';
                     clearInterval(timerInterval);
-                    popup.classList.add('fade');
+                    // popup.classList.add('fade');
                     this.startGame();
                 }
                 else{
@@ -160,6 +202,7 @@ export default  defineComponent({
 
         startGame(){
             this.socket.emit("startGame");
+            this.game_state = 1;
             this.canvas.addEventListener("mousemove", (e: any) => {
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
                 this.socket.emit("updatePos", cursPos / this.factor);
@@ -186,8 +229,8 @@ export default  defineComponent({
         },
         warmup()
         {
-            let popup : any = document.getElementById("popup");
-            popup.classList.remove('fade');
+            // let popup : any = document.getElementById("popup");
+            // popup.classList.remove('fade');
             
             this.socket = io("http://localhost:3000/warmup");
             this.socket.on("connect", () => {
@@ -240,11 +283,33 @@ export default  defineComponent({
                 router.push({name: 'profile'});
                 return ;
             }
+        },
+        async fillPlayersData(){
+            try {
+                let resp = await  axios({
+                    method: 'POST',
+                    url: 'http://localhost:8080/api/getloginbyid',
+                    data: {id: this.user_id}
+                });
+                this.left_player_avatar = resp.data.image_url;
+                this.left_player_login = resp.data.login;
+
+                resp = await  axios({
+                    method: 'POST',
+                    url: 'http://localhost:8080/api/getloginbyid',
+                    data: {id: 0}
+                });
+                this.right_player_avatar = resp.data.image_url;
+                this.right_player_login = resp.data.login;
+            }catch(e){
+                console.log(e);
+            }
         }
     },
     async mounted(){
         console.log('warmup mounted');
         await this.checkLogin();
+        await this.fillPlayersData();
         //await this.isUserPlaying();
         this.warmup();
     },

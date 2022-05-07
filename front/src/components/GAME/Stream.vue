@@ -18,7 +18,7 @@
 		    <img :src="left_player_avatar" v-if="left_player_avatar != ''"  class="rounded-full max-w-xs w-16 items-center border" />
 		    <div class="text-center"> {{left_player_login}}</div>
 		</div>
-	<!--	<div class="mt-2.5"> {{playerLeft.score}} </div> -->
+		<div class="mt-2.5"> {{playerLeft.score}} </div>
 	</div>
 	<div>
 		<div>
@@ -31,7 +31,7 @@
 		    <img :src="right_player_avatar" v-if="right_player_avatar != ''" class="rounded-full max-w-xs w-16 items-center border" />
 		    <div>{{right_player_login}} </div>
 		</div>
-	<!--	<div class="mt-2.5"> {{playerRight.score}} </div> -->
+		<div class="mt-2.5"> {{playerRight.score}} </div>
 	</div>
 
     </div>
@@ -223,12 +223,14 @@ export default defineComponent({
         },
         async getUsers()
         {
+            console.log("array: ", this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',
                     url: 'http://localhost:8080/api/getusers',
                     data : {usersId: this.users_ids}
                 });
+                
                 this.room_display = resp.data;
             }catch(e){
                 console.log(e);
@@ -281,17 +283,17 @@ export default defineComponent({
 
             this.canvas.height = sch * this.factor;
 
-            // this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-            // this.canvasGrd = this.context.createRadialGradient(
-            //     this.canvas.width/2,
-            //         this.canvas.height/2,
-            //         5,
-            //         this.canvas.width/2,
-            //         this.canvas.height/2,
-            //         this.canvas.height
-            //     );
-            // this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-            // this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
+                this.canvas.width/2,
+                    this.canvas.height/2,
+                    5,
+                    this.canvas.width/2,
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
 
             this.renderGame();
         },
@@ -317,10 +319,10 @@ export default defineComponent({
 
         roomClicked(namespace:string, name:string, oneroom: OneRoom)
         {
-		this.left_player_avatar = oneroom.left_player.image_url;
-		this.left_player_login = oneroom.left_player.login;
-		this.right_player_avatar = oneroom.right_player.image_url;
-		this.right_player_login = oneroom.right_player.login;
+            this.left_player_avatar = oneroom.left_player.image_url;
+            this.left_player_login = oneroom.left_player.login;
+            this.right_player_avatar = oneroom.right_player.image_url;
+            this.right_player_login = oneroom.right_player.login;
 
             this.canvas.width = this.canvas.offsetWidth ;
             this.factor = this.canvas.width / this.scw;
@@ -333,6 +335,7 @@ export default defineComponent({
             this.socket.on('connect', () => {
                 this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('canvasWH', (canvas: any) => {
+                    console.log(this.scw, this.sch);
                     this.initGame(canvas.scw, canvas.sch);
                 });
                 //console.log(this.socket.id);
@@ -341,7 +344,9 @@ export default defineComponent({
                 this.playerLeft = clientData.pl;
                 this.playerRight = clientData.pr;
                 this.ball = clientData.b;
-                //console.log(clientData.pl);
+                // this.scw = clientData.scw;
+                // this.sch = clientData.sch;
+                // console.log(this.scw);
                 this.renderGame();
             });
             this.socket.on("leaveRoom", () => {

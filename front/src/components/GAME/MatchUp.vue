@@ -10,6 +10,7 @@
 		</div>
 		<div class="mt-2.5"> {{playerLeft.score}} </div>
 	</div>
+
 	<div>
 		<div v-if="game_state == 0"> waiting... </div>
 		<div v-else-if="game_state == 1"> {{timer}} </div>
