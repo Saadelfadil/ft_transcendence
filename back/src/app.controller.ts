@@ -543,4 +543,12 @@ export class AppController {
 		return "Cookies Clean";
 	}
 
+	@UseGuards(AuthenticatedGuard)
+    @Post('getloginbyid')
+    async getloginbyid(@Body() body){
+        const {id} = body;
+        const {login, image_url} = await this.appService.getUserById(id);
+        return {login: login, image_url: image_url};
+    }
+
 }

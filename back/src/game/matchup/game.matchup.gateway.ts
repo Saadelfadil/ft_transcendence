@@ -55,7 +55,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       //client.data.room = room;
       //console.log(client.data.node);
       let timer: number = 5;
-      this.server.to(room.id).emit('connectedToRoom', room.id, client.data.pos, timer);
+      this.server.to(room.id).emit('connectedToRoom', timer, room.players);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
         let newDbRoom = {} as roomDb;

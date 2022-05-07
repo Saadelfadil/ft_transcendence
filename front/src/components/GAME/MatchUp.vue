@@ -1,4 +1,4 @@
-<template>
+<!--<template>
     <div class="container mx-auto">
         <p id="msg"></p>
         <div id="popup" class="popup">
@@ -22,7 +22,55 @@
         </div>
 
     </div>
+</template>-->
+
+<template>
+    <div class="container mx-auto">
+      <!-- <p id="msg"></p>
+        <div id="popup" class="popup">
+            <span class="msg fadeIn">Start In:</span>
+            <span id="countdown" class="countdown fadeIn">{{timer}}</span>
+        </div>
+        <div class="flex justify-between">
+            <div class="player">
+                <span id="player-left-name" class="mr-8">{{plName}}</span>
+                <span id="player-left-score"> {{playerLeft.score}} </span>
+            </div>
+            <div class="vs"> VS </div>
+            <div class="player">
+                <span id="player-right-score"> {{playerRight.score}} </span>
+                <span id="player-right-name" class="ml-8"> {{prName}} </span>
+            </div>
+        </div> -->
+
+    <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
+        <div class="flex flex-col">
+            <img :src="left_player_avatar" class="rounded-full max-w-xs w-24 items-center border" />
+            <div class="text-center"> {{left_player_login}} : {{playerLeft.score}}</div>
+        </div>
+        <div v-if="game_state == 0"> waiting... </div>
+	<div v-else-if="game_state == 1"> {{timer}} </div>
+	<div v-else>
+
+            <div class="mt-[3rem]">VS</div>
+    </div>
+
+        <div class="flex flex-col">
+            <img :src="right_player_avatar" class="rounded-full max-w-xs w-24 items-center border" />
+            <div>{{right_player_login}} : {{playerRight.score}}</div>
+        </div>
+        
+    </div>
+
+
+
+        <div id = "pong-table" class="pong-table flex justify-center">
+            <canvas id="canvas"></canvas>
+        </div>
+
+    </div>
 </template>
+
 
 <script lang="ts">
 import { defineComponent } from 'vue';
@@ -54,6 +102,11 @@ export default defineComponent({
         return{
             socket : null as any,
             canvas: 0 as any,
+            game_state: 0 as number,
+            left_player_login: '' as string,
+            right_player_login : '' as string,
+            left_player_avatar: '' as string,
+            right_player_avatar: '' as string,
             canvasGrd: 0 as any,
             context: 0 as any,
             logged: false as boolean,
@@ -92,7 +145,47 @@ export default defineComponent({
             prName: '' as string,
         }
     },
+    watch: {
+        plName() {
+            this.leftLogin();
+        },
+        prName() {
+            this.rightLogin();
+        }
+    },
     methods: {
+        async leftLogin(){
+            try{
+                const resp = await axios({
+                    method: 'post',
+                    data: {
+                        id:+this.plName,
+                    },
+                    url: 'http://localhost:8080/api/getloginbyid',
+                    withCredentials: true
+                });
+                this.left_player_login = resp.data.login;
+                this.left_player_avatar = resp.data.image_url;
+            }catch(e){
+                console.log(e);
+            }
+        },
+        async rightLogin(){
+            try{
+                const resp = await axios({
+                    method: 'post',
+                    data: {
+                        id:+this.prName,
+                    },
+                    url: 'http://localhost:8080/api/getloginbyid',
+                    withCredentials: true
+                });
+                this.right_player_login = resp.data.login;
+                this.right_player_avatar = resp.data.image_url;
+            }catch(e){
+                console.log(e);
+            }
+        },
         initGame(scw: number, sch: number){
             this.scw = scw;
             this.sch = sch;
@@ -166,7 +259,7 @@ export default defineComponent({
         },
         matchup(){
             
-            let msgHtml = document.getElementById('msg') as any;
+            //let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/matchup");
             this.socket.on('connect', () => {
                 
@@ -175,14 +268,17 @@ export default defineComponent({
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
                     console.log(pos);
-                    msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
+                    // msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
+                    this.game_state = 0;
                 });
 
-                this.socket.on('connectedToRoom', (room: string, pos: string, timer: number) => {
-                    this.playerPos = pos;
-                    console.log(room);
-                    msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
+                this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
+                    // this.playerPos = pos;
+                    // console.log(room);
+                    // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
+                    this.plName = players[0];
+                    this.prName = players[1];
                     const timerInterval = setInterval(() => {
                         if (this.timer <= 0){
                             clearInterval(timerInterval);
@@ -192,20 +288,16 @@ export default defineComponent({
                             console.log(this.timer);
                         }
                     }, 1000);
+                    this.game_state = 1;
                 });
                 
                 this.socket.on('roomCreated', (room: string, players: string[]) => {
-                    msgHtml.innerHTML = `hello ${this.playerPos}`;
+                    // msgHtml.innerHTML = `hello ${this.playerPos}`;
                     this.socket.emit('setRoom', room);
-                    this.plName = players[0];
-                    this.prName = players[1];
-                    
-                    
 
                     this.socket.on("startMouseEvent", () => {
-                        //setTimeout(() => {
-                            this.startMouseEvent();
-                        //}, timer * 1000);
+                        this.startMouseEvent();
+                        this.game_state = 2;
                         this.socket.on("updateClient", (clientData: any) => {
                             this.playerLeft = clientData.pl;
                             this.playerRight = clientData.pr;
