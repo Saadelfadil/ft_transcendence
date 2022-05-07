@@ -2,44 +2,49 @@
 
 <div>
 <div class="h-full mt-5">
- 
+
   <div class="border-b-2 block md:flex" style="height:80vh">
 
-    <div class="w-full md:w-3/6 p-4 sm:p-6 lg:p-8 bg-white shadow-md">
-       <div class="container mx-auto">
+    <div class="w-full md:w-3/6  bg-blue">
+
+        <div class="overflow-auto" style="height: 80vh;">
+
+	<!-- start of nav bar of streeam-->
 
 
-        <!-- <div class ="columns-2"> -->
+    <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="left_player_avatar" v-if="left_player_avatar != ''"  class="rounded-full max-w-xs w-16 items-center border" />
+		    <div class="text-center"> {{left_player_login}}</div>
+		</div>
+	<!--	<div class="mt-2.5"> {{playerLeft.score}} </div> -->
+	</div>
+	<div>
+		<div>
+		    <div class="mt-2.5">VS</div>
+		</div>
+	</div>
 
-            <div class="">
-                <!-- <p id="msg"></p>
-                <div id="popup" class="popup">
-                    <span class="msg fadeIn">Start In:</span>
-                    <span id="countdown" class="countdown fadeIn">0</span>
-                </div>
-                <div class="flex justify-between">
-                    <div class="player">
-                        <span id="player-left-name" class="mr-8">{{plName}}</span>
-                        <span id="player-left-score"> {{playerLeft.score}} </span>
-                    </div>
-                    <div class="vs"> VS </div>
-                    <div class="player">
-                        <span id="player-right-score"> {{playerRight.score}} </span>
-                        <span id="player-right-name" class="ml-8"> {{prName}} </span>
-                    </div>
-                </div> -->
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="right_player_avatar" v-if="right_player_avatar != ''" class="rounded-full max-w-xs w-16 items-center border" />
+		    <div>{{right_player_login}} </div>
+		</div>
+	<!--	<div class="mt-2.5"> {{playerRight.score}} </div> -->
+	</div>
 
-
-                <div id = "pong-table" class="pong-table">
-                    <canvas id="canvas"></canvas>
-                </div>
-            </div>
-        
-        <!-- </div> -->
-
-        </div>
     </div>
-    
+	<!-- end of nav bar of streeam-->
+
+
+		<div id ="pong-table" class="pong-table flex justify-center">
+		    <canvas id="canvas"></canvas>
+		</div>
+	</div>
+
+    </div>
+
     <div class="w-full md:w-3/6 p-8 bg-white lg:ml-4 shadow-md">
         <div class="grid grid-cols-1 min-w-full rounded">
                 <ul class="overflow-auto" style="height: 70vh;">
@@ -51,20 +56,20 @@
                             <div class="flex items-center">
                                 <div class="ml-2">
                                     <div class="cursor-pointer" @click="redirect_left_player(oneroom.left_player.id)">
-                                        <img id="showImage" class="w-24 h-24  rounded-full max-w-xs w-32 items-center border" :src="oneroom.left_player.image_url">
+                                        <img id="showImage" class="rounded-full max-w-xs w-16 items-center border" :src="oneroom.left_player.image_url">
                                         <div class="text-center">{{oneroom.left_player.login}}</div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="flex items-center cursor-pointer" @click="roomClicked(rooms_info[index].namespace, rooms_info[index].name)">
+
+                            <div class="flex items-center cursor-pointer" @click="roomClicked(rooms_info[index].namespace, rooms_info[index].name, oneroom)">
                                     {{ rooms_info[index].namespace }}
                             </div>
 
                             <div class="flex items-center">
                                 <div class="ml-5">
                                     <div class="cursor-pointer" @click="redirect_left_player(oneroom.right_player.id)">
-                                        <img id="showImage" class="w-24 h-24 rounded-full max-w-xs w-32 items-center border" :src="oneroom.right_player.image_url">
+                                        <img id="showImage" class="rounded-full max-w-xs w-16 items-center border" :src="oneroom.right_player.image_url">
                                         <div class="text-center">{{oneroom.right_player.login}}</div>
                                     </div>
                                 </div>
@@ -134,9 +139,15 @@ interface OneRoom{
 
 export default defineComponent({
     name: 'ProfileBlock',
+    components: {
+    },
     data()
     {
         return {
+	left_player_login: '' as string,
+	left_player_avatar: '' as string,
+	right_player_login: '' as string,
+	right_player_avatar: '' as string,
             user_id: 0 as number,
             users_ids: [] as Array<number>,
             logged: false as boolean,
@@ -150,7 +161,7 @@ export default defineComponent({
             scw: 0 as number,
             sch: 0 as number,
             playerRight: {
-                x: 0 as number, 
+                x: 0 as number,
                 y: 0 as number,
                 w: 0 as number,
                 h: 0 as number,
@@ -158,7 +169,7 @@ export default defineComponent({
                 color: ''  as string,
             } as Player,
             playerLeft: {
-                x: 0 as number, 
+                x: 0 as number,
                 y: 0 as number,
                 w: 0 as number,
                 h: 0 as number,
@@ -269,11 +280,11 @@ export default defineComponent({
             });
 
             this.canvas.height = sch * this.factor;
-            
+
             // this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
             // this.canvasGrd = this.context.createRadialGradient(
             //     this.canvas.width/2,
-            //         this.canvas.height/2, 
+            //         this.canvas.height/2,
             //         5,
             //         this.canvas.width/2,
             //         this.canvas.height/2,
@@ -304,9 +315,13 @@ export default defineComponent({
             console.log(resp.data);
         },
 
-        roomClicked(namespace:string, name:string)
+        roomClicked(namespace:string, name:string, oneroom: OneRoom)
         {
-            console.log(typeof name);
+		this.left_player_avatar = oneroom.left_player.image_url;
+		this.left_player_login = oneroom.left_player.login;
+		this.right_player_avatar = oneroom.right_player.image_url;
+		this.right_player_login = oneroom.right_player.login;
+
             this.canvas.width = this.canvas.offsetWidth ;
             this.factor = this.canvas.width / this.scw;
             this.canvas.height = this.sch * this.factor;
@@ -314,7 +329,7 @@ export default defineComponent({
                 this.socket.disconnect();
             }
             this.socket = io(`http://localhost:3000/${namespace}`);
-            
+
             this.socket.on('connect', () => {
                 this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('canvasWH', (canvas: any) => {
@@ -341,11 +356,11 @@ export default defineComponent({
         //this.factor = this.canvas.width / this.canvas.width;
 
         this.canvas.height = this.canvas.width * 0.7;
-        
+
         this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
         this.canvasGrd = this.context.createRadialGradient(
             this.canvas.width/2,
-                this.canvas.height/2, 
+                this.canvas.height/2,
                 5,
                 this.canvas.width/2,
                 this.canvas.height/2,
@@ -381,7 +396,8 @@ export default defineComponent({
     /* max-height: 800px; */
     /* position: absolute; */
     /* overflow: hidden; */
-    
+
 }
 
 </style>
+

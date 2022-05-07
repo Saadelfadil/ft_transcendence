@@ -1,65 +1,31 @@
-<!--<template>
-    <div class="container mx-auto">
-        <p id="msg"></p>
-        <div id="popup" class="popup">
-            <span class="msg fadeIn">Start In:</span>
-            <span id="countdown" class="countdown fadeIn">{{timer}}</span>
-        </div>
-        <div class="flex justify-between">
-            <div class="player">
-                <span id="player-left-name" class="mr-8">{{plName}}</span>
-                <span id="player-left-score"> {{playerLeft.score}} </span>
-            </div>
-            <div class="vs"> VS </div>
-            <div class="player">
-                <span id="player-right-score"> {{playerRight.score}} </span>
-                <span id="player-right-name" class="ml-8"> {{prName}} </span>
-            </div>
-        </div>
-    
-        <div id = "pong-table" class="pong-table flex justify-center">
-            <canvas id="canvas"></canvas>
-        </div>
-
-    </div>
-</template>-->
 
 <template>
     <div class="container mx-auto">
-      <!-- <p id="msg"></p>
-        <div id="popup" class="popup">
-            <span class="msg fadeIn">Start In:</span>
-            <span id="countdown" class="countdown fadeIn">{{timer}}</span>
-        </div>
-        <div class="flex justify-between">
-            <div class="player">
-                <span id="player-left-name" class="mr-8">{{plName}}</span>
-                <span id="player-left-score"> {{playerLeft.score}} </span>
-            </div>
-            <div class="vs"> VS </div>
-            <div class="player">
-                <span id="player-right-score"> {{playerRight.score}} </span>
-                <span id="player-right-name" class="ml-8"> {{prName}} </span>
-            </div>
-        </div> -->
 
     <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
-        <div class="flex flex-col">
-            <img :src="left_player_avatar" class="rounded-full max-w-xs w-24 items-center border" />
-            <div class="text-center"> {{left_player_login}} : {{playerLeft.score}}</div>
-        </div>
-        <div v-if="game_state == 0"> waiting... </div>
-	<div v-else-if="game_state == 1"> {{timer}} </div>
-	<div v-else>
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="right_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
+		    <div>{{left_player_login}} </div>
+		</div>
+		<div class="mt-2.5"> {{playerLeft.score}} </div>
+	</div>
+	<div>
+		<div v-if="game_state == 0"> waiting... </div>
+		<div v-else-if="game_state == 1"> {{timer}} </div>
+		<div v-else>
+		    <div class="mt-2.5">VS</div>
+		</div>
+	</div>
 
-            <div class="mt-[3rem]">VS</div>
-    </div>
+	<div class="flex justify-around bg-blue w-3/12">
+		<div class="flex flex-col">
+		    <img :src="right_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
+		    <div>{{right_player_login}} </div>
+		</div>
+		<div class="mt-2.5"> {{playerRight.score}} </div>
+	</div>
 
-        <div class="flex flex-col">
-            <img :src="right_player_avatar" class="rounded-full max-w-xs w-24 items-center border" />
-            <div>{{right_player_login}} : {{playerRight.score}}</div>
-        </div>
-        
     </div>
 
 
@@ -105,8 +71,8 @@ export default defineComponent({
             game_state: 0 as number,
             left_player_login: '' as string,
             right_player_login : '' as string,
-            left_player_avatar: '' as string,
-            right_player_avatar: '' as string,
+            left_player_avatar: 'https://www.techopedia.com/images/uploads/6e13a6b3-28b6-454a-bef3-92d3d5529007.jpeg' as string,
+            right_player_avatar: 'https://www.techopedia.com/images/uploads/6e13a6b3-28b6-454a-bef3-92d3d5529007.jpeg' as string,
             canvasGrd: 0 as any,
             context: 0 as any,
             logged: false as boolean,
@@ -115,7 +81,7 @@ export default defineComponent({
             scw: 0 as number,
             sch: 0 as number,
             playerRight: {
-                x: 0 as number, 
+                x: 0 as number,
                 y: 0 as number,
                 w: 0 as number,
                 h: 0 as number,
@@ -123,7 +89,7 @@ export default defineComponent({
                 color: ''  as string,
             } as Player,
             playerLeft: {
-                x: 0 as number, 
+                x: 0 as number,
                 y: 0 as number,
                 w: 0 as number,
                 h: 0 as number,
@@ -200,11 +166,11 @@ export default defineComponent({
             });
 
             this.canvas.height = sch * this.factor;
-            
+
             this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
             this.canvasGrd = this.context.createRadialGradient(
                 this.canvas.width/2,
-                    this.canvas.height/2, 
+                    this.canvas.height/2,
                     5,
                     this.canvas.width/2,
                     this.canvas.height/2,
@@ -258,13 +224,13 @@ export default defineComponent({
             }
         },
         matchup(){
-            
+
             //let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/matchup");
             this.socket.on('connect', () => {
-                
+
                 this.socket.emit('clientType', {userId: this.user_id ,type: 'play', room: ''});
-                
+
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
                     console.log(pos);
@@ -290,7 +256,7 @@ export default defineComponent({
                     }, 1000);
                     this.game_state = 1;
                 });
-                
+
                 this.socket.on('roomCreated', (room: string, players: string[]) => {
                     // msgHtml.innerHTML = `hello ${this.playerPos}`;
                     this.socket.emit('setRoom', room);
@@ -311,7 +277,7 @@ export default defineComponent({
                             }
                         });
                     });
-                    
+
 
                 });
 
@@ -378,7 +344,7 @@ export default defineComponent({
     /* max-height: 800px; */
     /* position: absolute; */
     /* overflow: hidden; */
-    
+
 }
 
 </style>
