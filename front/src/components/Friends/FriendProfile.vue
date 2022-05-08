@@ -1,6 +1,5 @@
 <template>
     <div>
-        <Navbar />
 
 <div class="h-full mt-5">
  
@@ -49,7 +48,6 @@
 <script lang="ts">
 
 import { defineComponent } from 'vue'
-import Navbar from './Navbar.vue';
 import router from '@/router';
 import axios from 'axios';
 
@@ -63,7 +61,6 @@ interface FriendProfile{
 
 
 export default defineComponent({
-  components: { Navbar },
     name: 'FriendProfile',
     data()
     {
@@ -81,9 +78,6 @@ export default defineComponent({
         user_name() : string{
             return this.user_info.login;
         }
-    },
-    component : { // s
-        Navbar,
     },
     methods: {
         async checkLogin()

@@ -1,7 +1,7 @@
 <template>
   
   <div>
-  <Navbar />
+
   <div class="grid grid-cols-1 min-w-full">
     <ul class="overflow-auto" style="height: 90vh;">
 
@@ -45,7 +45,7 @@
 import { defineComponent } from 'vue'
 import router from '@/router';
 import axios from 'axios';
-import Navbar from './Navbar.vue'
+
 
 export default defineComponent({
     name: 'Requests',
@@ -120,9 +120,6 @@ export default defineComponent({
             console.log(e);
         }
       },
-    },
-    components : {
-        Navbar,
     },
     async created(){
       await this.checkLogin();

@@ -1,7 +1,7 @@
 <template>
 
     <div>
-    <Navbar />
+
     <h3 class="px-4 pt-8">Play with Friends it's more fun!</h3>
 
     <div>
@@ -21,7 +21,7 @@
 import { defineComponent } from 'vue'
 import router from '@/router';
 import axios from 'axios';
-import Navbar from "./Navbar.vue"
+
 
 export default defineComponent({
     name: 'Add',
@@ -86,8 +86,6 @@ export default defineComponent({
                 this.msg = "";
         },
     },
-    components : {
-        Navbar,
-    }
+
 })
 </script>

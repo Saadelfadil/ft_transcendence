@@ -3,7 +3,7 @@
 
   <div>
   
-  <Navbar />
+
 
   <div class="grid grid-cols-1 min-w-full">
     <ul class="overflow-auto" style="height: 90vh;">
@@ -44,7 +44,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Navbar from "./Navbar.vue"
+
 
 export default defineComponent({
   name: 'Ignore',
@@ -60,8 +60,5 @@ export default defineComponent({
           console.log(arg)
       }
   },
-    components : {
-        Navbar,
-    }
 });
 </script>

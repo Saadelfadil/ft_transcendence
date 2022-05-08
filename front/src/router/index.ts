@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 // import HomeView from '../views/HomeView.vue'
 import ProfileBlock from '@/components/Profile.vue'
-import FriendsBlock from '@/components/Friends.vue'
 import LeaderBoardBlock from '@/components/LeaderBoard.vue'
 import MatchHistoryBlock from '@/components/MatchHistory.vue'
 import GameBlock from '@/components/GAME/Game.vue'
@@ -21,6 +20,8 @@ import Add from '@/components/Friends/Add.vue'
 import Ignore from '@/components/Friends/Ignore.vue'
 import Requests from '@/components/Friends/Requests.vue'
 import FriendProfile from '@/components/Friends/FriendProfile.vue'
+import UsersNavBarBlock from '@/components/UsersNavBar.vue'
+import UserFriendsBlock from '@/components/Friends/UserFriends.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -37,11 +38,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'profile',
     component: ProfileBlock
   },
-  {
-    path: '/users',
-    name: 'users',
-    component: FriendsBlock
-  },
+
   {
     path: '/leaderboard',
     name: 'leaderboard',
@@ -80,6 +77,40 @@ const routes: Array<RouteRecordRaw> = [
       },
     ]
   },
+
+  {
+  path: '/users',
+  name: 'users',
+  redirect: {path: '/users/requests'},
+  component: UsersNavBarBlock,
+  children: [
+    {
+      path: 'yourfriends',
+      name: 'YourFriends',
+      component: UserFriendsBlock,
+    },
+  {
+    path: 'add',
+    name: 'Add',
+    component: Add
+  },
+  {
+    path: 'requests',
+    name: 'Requests',
+    component: Requests
+  },
+    {
+      path: 'ignore',
+      name: 'Ignore',
+      component: Ignore
+    },
+    {
+      path: 'friendprofile',
+      name: 'FriendProfile',
+      component: FriendProfile,
+    }
+  ]
+},
   // {
   //   path: '/chat',
   //   name: 'chat',
@@ -108,31 +139,6 @@ const routes: Array<RouteRecordRaw> = [
   //     },
   //   ]
   // },
-  {
-    path: '/temp',
-    name: 'temp',
-    component: TEMP
-  },
-  {
-    path: '/users/add',
-    name: 'Add',
-    component: Add
-  },
-  {
-    path: '/users/requests',
-    name: 'Requests',
-    component: Requests
-  },
-  {
-    path: '/users/ignore',
-    name: 'Ignore',
-    component: Ignore
-  },
-  {
-    path: '/users/friendprofile',
-    name: 'FriendProfile',
-    component: FriendProfile,
-  },
 
   {
     // this object make sure it's the last one 

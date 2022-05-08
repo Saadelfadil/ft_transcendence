@@ -30,11 +30,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-    name: 'GameNavBarBlock',
-    data(){
-        return {
-        }   
-    },
+    name: 'GameNavBarBlock'
 })
 </script>
 
