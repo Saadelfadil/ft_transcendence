@@ -13,21 +13,21 @@ import { Match, matchPlayerData } from '../game.entities';
 import { roomDb, roomNode } from '../game.interface';
 import { GameRepository, MatchRepository } from '../game.repository';
 import { GameService } from '../game.service';
-import { MatchUpLogic } from './game.matchup.logic';
+import { LevelUpLogic } from './game.levelup.logic';
 
 @WebSocketGateway({
-  namespace: 'matchup',
+  namespace: 'levelup',
   cors: {
     origin: '*',
   }
 })
-export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     @InjectRepository(GameRepository) private gameRepository: GameRepository,
     @InjectRepository(MatchRepository) private matchRepository: MatchRepository,
     @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
-    private matchUpLogic: MatchUpLogic,
+    private levelUpLogic: LevelUpLogic,
   ){}
 
   @WebSocketServer()
@@ -41,16 +41,16 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     console.log('-----disconnect socket ------');
     console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
     this.clear(client);
-    console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);
-    console.log(`Rooms: ${this.matchUpLogic.rooms.size}`);
+    console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
+    console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
     console.log('-----end of disconnect socket ------\n');
-    //this.matchUpLogic.wclients.find(client.id)
-    //this.matchUpLogic.rmClient(client.id);
+    //this.levelUpLogic.wclients.find(client.id)
+    //this.levelUpLogic.rmClient(client.id);
     //this.logger.log(`client disconnected ${client}`);
   }
 
   checkRoomconnection(client: Socket){
-    let room = this.matchUpLogic.joinRoom(client);
+    let room = this.levelUpLogic.joinRoom(client);
     if (room){
       //client.data.room = room;
       //console.log(client.data.node);
@@ -61,7 +61,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         let newDbRoom = {} as roomDb;
         newDbRoom.name = room.id;
         newDbRoom.players = room.players;
-        newDbRoom.namespace = 'matchup';
+        newDbRoom.namespace = 'levelup';
         this.gameRepository.addRoom(newDbRoom);
         //this.gameRepository.getAllRooms();
       }, timer * 1000);
@@ -72,10 +72,10 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   handleConnection(client: Socket, ...args: any[]) {
     //this.gameService.rooms.push(client.id);
-    console.log('-----connect socket (matchup)------');
+    console.log('-----connect socket (levelup)------');
     console.log(`connect: ${client.id}`);
     console.log('-----end of connect socket ------\n');
-    //client.data = this.matchUpLogic.addClient(client.id); --> warmup logic
+    //client.data = this.levelUpLogic.addClient(client.id); --> warmup logic
   }
 
   @SubscribeMessage('initGame')
@@ -83,10 +83,10 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     //let initData : {};
     //console.log(`init: ${canvas.canvasW}, ${canvas.canvasH}`);
     //client.data.playerLeft = this.gameLogic.
-    this.matchUpLogic.initGmae();
-    client.data.node.playerLeft = this.matchUpLogic.playerLeft;
-    client.data.node.playerRight = this.matchUpLogic.playerRight;
-    client.data.node.ball = this.matchUpLogic.ball;
+    this.levelUpLogic.initGmae();
+    client.data.node.playerLeft = this.levelUpLogic.playerLeft;
+    client.data.node.playerRight = this.levelUpLogic.playerRight;
+    client.data.node.ball = this.levelUpLogic.ball;
     // client.data.node.playerLeft = data.playerLeft;
     // client.data.node.playerRight = data.playerRight;
     // client.data.node.ball = data.ball;
@@ -96,8 +96,8 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       pl: client.data.node.playerLeft,
       pr: client.data.node.playerRight,
       b: client.data.node.ball,
-      scw: this.matchUpLogic.canvasW,
-      sch: this.matchUpLogic.canvasH,
+      scw: this.levelUpLogic.canvasW,
+      sch: this.levelUpLogic.canvasH,
     });
     //if (client.data.pos === 'left')
       //this.startGame(client);
@@ -116,7 +116,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   @SubscribeMessage('setRoom')
   setRoom(client: any, room: string): void {
     client.data.room = room;
-    let node = this.matchUpLogic.rooms.find(Number(client.data.room));
+    let node = this.levelUpLogic.rooms.find(Number(client.data.room));
     if (node){
       client.data.roomStatus = 'play';
       client.data.node = node.data;
@@ -141,12 +141,12 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       this.initGame(client);
       this.checkRoomconnection(client);
 
-      // console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);
-      // this.matchUpLogic.wRooms.values().forEach(element => {
+      // console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
+      // this.levelUpLogic.wRooms.values().forEach(element => {
       //   console.log(element);
       // });
-      // console.log(`Rooms: ${this.matchUpLogic.rooms.size}`);
-      // this.matchUpLogic.rooms.values().forEach(element => {
+      // console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
+      // this.levelUpLogic.rooms.values().forEach(element => {
       //   console.log(element);
       // });
 
@@ -154,7 +154,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       console.log(data.room, 'stream');
       client.data.room = data.room;
       client.join(data.room);
-      client.emit('canvasWH', {scw: this.matchUpLogic.canvasW, sch: this.matchUpLogic.canvasH});
+      client.emit('canvasWH', {scw: this.levelUpLogic.canvasW, sch: this.levelUpLogic.canvasH});
     }
   }
 
@@ -166,13 +166,14 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       if (client.data.roomStatus === 'waiting'){
         client.leave(client.data.room);
         this.userRepository.update(client.data.userId, {in_game: false});
-        this.matchUpLogic.wRooms.remove(Number(client.data.room));
+        this.levelUpLogic.wRooms.remove(Number(client.data.room));
       } else if (client.data.roomStatus === 'play'){
         client.leave(client.data.room);
         this.server.to(client.data.room).emit('leaveRoom');
         clearInterval(client.data.node.gameLoop);
+        clearInterval(client.data.node.gameTimer);
         if (client.data.pos === 'left'){
-          this.matchRepository.addMatchData(client.data.node, 'matchup');
+          this.matchRepository.addMatchData(client.data.node, 'levelup');
           if (client.data.node.playerLeft.score > client.data.node.playerRight.score){
             this.userRepository.createQueryBuilder()
                                 .update(UserEntity).set({
@@ -203,36 +204,16 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           this.userRepository.update(Number(client.data.node.players[1]), {in_game: false});
         }
         //console.log(client.data.node);
-        this.matchUpLogic.rooms.remove(Number(client.data.room));
+        this.levelUpLogic.rooms.remove(Number(client.data.room));
         this.gameRepository.deleteRoom(client.data.room);
       }
     }
   }
 
-  // async addMatchData(data: roomNode){
-  //   let newMatch = new Match();
-  //   newMatch.data = [];
-  //   for (let i = 0; i < 2; i++){
-  //     let player = {} as matchPlayerData;
-  //     player.id = data.players[i];
-  //     if (i === 0)
-  //       player.score = data.playerLeft.score;
-  //     else
-  //       player.score = data.playerRight.score;
-  //     newMatch.data.push(player);
-  //   }
-  //   newMatch.date = new Date();
-  //   await newMatch.save();
-  // }
-
   startGame(client: any){
-    // let users = ['1', '2', '3', '4', '5', '6', '7'];
-    // let result = users.sort(() => .5 - Math.random()).slice(0,2);
-    // console.log(result);
-    // client.data.node.players[0] = result[0];
-    // client.data.node.players[1] = result[1];
+    this.startTime(client);
     client.data.node.gameLoop = setInterval(() => {
-        this.matchUpLogic.update(client.data);
+        this.levelUpLogic.update(client.data);
         this.server.to(client.data.room).emit("updateClient", {
           pl: client.data.node.playerLeft,
           pr: client.data.node.playerRight,
@@ -241,4 +222,21 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     }, 1000/64);
   }
 
+  
+  startTime(client: any){
+    let start = Date.now();
+    client.data.node.gameTimer = setInterval(() => {
+        let delta = Date.now() - start;
+        let timer = Math.floor(delta / 1000);
+        client.data.node.time = timer;
+        if (client.data.node.time % 5 === 0){
+          console.log("levelup");
+          client.data.node.ball.speed += 0.25;
+          client.data.node.playerLeft.h -= 2.5;
+          client.data.node.playerRight.h -= 2.5;
+        }
+        this.server.to(client.data.room).emit("updateTime", client.data.node.time);
+        console.log(timer);
+    }, 1000);
+  }
 }

@@ -10,6 +10,8 @@ import { WarmUpGateway } from './warmup/game.warmup.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameRepository, MatchRepository } from './game.repository';
 import { UserEntity } from 'src/user.entity';
+import { LevelUpGateway } from './levelup/game.levelup.gateway';
+import { LevelUpLogic } from './levelup/game.levelup.logic';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GameRepository,
@@ -22,7 +24,9 @@ import { UserEntity } from 'src/user.entity';
               MatchUpGateway,
               MatchUpLogic,
               WarmUpLogic,
-              WarmUpGateway
+              WarmUpGateway,
+              LevelUpGateway,
+              LevelUpLogic
             ]
 })
 export class GameModule {}

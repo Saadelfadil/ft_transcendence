@@ -31,6 +31,8 @@ export class roomNode{
     playerRight: Player = new Player();
     ball: Ball = new Ball();
     gameLoop: any;
+    gameTimer: any;
+    time: number = 0;
 }
 
 export interface roomDb{

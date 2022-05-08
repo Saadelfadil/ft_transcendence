@@ -30,4 +30,13 @@ export class UserEntity extends BaseEntity
 
     @Column({ type: 'boolean', nullable: true})
     in_game: boolean = false;
+
+    @Column({ type: 'int', nullable: true})
+    points: number = 0;
+
+    @Column({ type: 'int', nullable: true})
+    wins: number = 0;
+
+    @Column({ type: 'int', nullable: true})
+    loss: number = 0;
 }
