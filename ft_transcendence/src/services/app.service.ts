@@ -2,12 +2,12 @@ import { Get, Injectable, NotFoundException, Req, UnauthorizedException } from '
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { Response, Request } from 'express';
-import cloudinary from './utils/cloudinary';
-import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
-import { UserHistoryEntity } from './userHistory.entity';
+import cloudinary from '../utils/cloudinary';
+import { UserFriendsEntity } from '../entities/userFriends.entity';
+import { UserGameEntity } from '../entities/userGame.entity';
+import { UserHistoryEntity } from '../entities/userHistory.entity';
 const QRCode = require('qrcode');
 
 @Injectable()
@@ -88,7 +88,7 @@ export class AppService {
 		{
 			try {
 				// console.log(await QRCode.toDataURL([{account: "saad", key: text}]));
-				// return QRCode.toDataURL([  {data : "Account: saad\n", mode: "byte"},
+				// return QRCode.toDataURL([  {data : "Account: saad\n", mode: "byte"}]);
 				return QRCode.toDataURL(text);
 			} catch (error) {
 				console.error(error);
@@ -127,9 +127,5 @@ export class AppService {
 					console.error(error);
 				}
 			}
-			// if (body.twof != null)
-			// {
-			// 	await this.userRepository.update(user.id, {twof: body.twof});
-			// }
 		}
 }

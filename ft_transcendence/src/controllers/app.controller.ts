@@ -1,16 +1,16 @@
 import { Body, Controller, ForbiddenException, Get, NotFoundException, Post, Query, Redirect, Req, Res, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AppService } from './app.service';
+import { AppService } from '../services/app.service';
 import { Response, Request, request } from 'express';
-import Authenticator from './42-authentication';
-import { AuthenticatedGuard } from './auth.guard';
+import Authenticator from '../utils/42-authentication';
+import { AuthenticatedGuard } from '../guards/auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Index, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
-import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
-import { UserHistoryEntity } from './userHistory.entity';
+import { UserEntity } from '../entities/user.entity';
+import { UserFriendsEntity } from '../entities/userFriends.entity';
+import { UserGameEntity } from '../entities/userGame.entity';
+import { UserHistoryEntity } from '../entities/userHistory.entity';
 const speakeasy = require('speakeasy');
 
 @Controller('api')
@@ -20,14 +20,6 @@ export class AppController {
 		@InjectRepository(UserFriendsEntity) private readonly userFriendsEntity: Repository<UserFriendsEntity>,
 		@InjectRepository(UserGameEntity) private readonly userGameEntity: Repository<UserGameEntity>,
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>) { }
-
-
-	@Get('google')
-	@UseGuards(AuthGuard('google'))
-	async googleAuth(@Req() req)
-	{
-
-	}
 
 	@Post('getrequests')
 	async getRequests(@Body() body)
@@ -119,31 +111,6 @@ export class AppController {
 		}
 	}
 	
-
-	// @Post('getfrienddata')
-	// async getFriendData(@Body() body)
-	// {
-	// 	const { id, user_id} = body;
-	// 	let profileData : any;
-	// 	let isFriend = false;
-	// 	let frontId = 0;
-	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
-	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
-	// 	const { login, image_url} = await this.appService.getUserById(user_id);
-	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
-	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
-
-	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
-	// 		const userOpponent = await this.appService.getUserById(oppenentId);
-	// 		histObj.id = frontId;
-	// 		frontId++;
-			
-	// 	}));
-	// 	isFriend = user_friends.includes(id);
-
-	// 	return profileData;
-	// }
-	
 	@Post('requesttofriend')
 	async RequestToFriend(@Body() body)
 	{
@@ -187,87 +154,10 @@ export class AppController {
 		}
 	}
 
-	// Two Routes for User Friends
-	// @Post('array')
-	// async insertArray()
-	// {
-	// 	const userFriend = {
-	// 		"id": 62603,
-	// 		"user_friends": [],
-	// 		"user_blocked": [],
-	// 		"user_requested": [],
-	// 	}
-	// 	await this.userFriendsEntity.save(userFriend);
-	// }
-	
-	// Two Routes for User Friends
-	// @Post('array1')
-	// async insertArray1(@Body() body)
-	// {
-	// 	const { id, login } = body;
-	// 	// const userFriend = {
-	// 	// 	"id": 1337,
-	// 	// 	"email": "melghoud@1337.ma",
-	// 	// 	"login": "melghoud",
-	// 	// 	"image_url": "DSfsdfsfsdf",
-	// 	// }
-	// 	await this.userRepository.save({id: id, login: login});
-	// }
-
-	// @Post('arrayupdate')
-	// async updateArray()
-	// {
-	// 	const user = await  this.appService.getUserByIdFriend(100);
-	// 	const userFriends  = user.user_friends;
-	// 	userFriends.push(78880);
-	// 	await this.userFriendsEntity.update(100, {user_friends: userFriends});
-	// }
-
-	// Two Routes for User Game
-	// @Post('updategame')
-	// async updateGame(@Body() body)
-	// {
-	// 	let {winOrlost, score, id} = body;
-	// 	console.log(winOrlost);
-	// 	console.log(score);
-	// 	console.log(id);
-	// 	const user = await  this.appService.getUserByIdGame(id);
-	// 	score += +user.score;
-	// 	if (winOrlost)
-	// 		await this.userGameEntity.update(id, {wins: +user.wins + 1, score: score});
-	// 	await this.userGameEntity.update(id, {loses: +user.loses + 1, score: score});
-	// }
-
-	// Two Routes for User History
-	// @Post('array')
-	// async insertArray()
-	// {
-	// 	const userHistory = {
-	// 		"id": 100,
-	// 		"opponent": 99,
-	// 		"user_score": 75,
-	// 		"opponent_score": 50
-	// 	}
-	// 	await this.userHistoryEntity.save(userHistory);
-	// }
-
-	@Get('auth/google/callback')
-	@UseGuards(AuthGuard('google'))
-	googleAuthRedirect(@Req() req)
-	{
-		return this.appService.googleLogin(req);
-	}
-
 	@UseGuards(AuthenticatedGuard)
 	@Get('profile')
 	profile(@Req() request: Request) {
 		return this.appService.getUserDataFromJwt(request);
-	}
-
-	@UseGuards(AuthenticatedGuard)
-	@Get('game')
-	game() {
-		return "Hello to game route";
 	}
 
 	@UseGuards(AuthenticatedGuard)

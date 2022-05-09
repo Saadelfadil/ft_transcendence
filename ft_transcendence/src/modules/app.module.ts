@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserEntity } from './user.entity';
+import { AppController } from '../controllers/app.controller';
+import { AppService } from '../services/app.service';
+import { UserEntity } from '../entities/user.entity';
 import { ConfigModule } from '@nestjs/config';
-import { GoogleStrategy } from './google.strategy';
-import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
-import { UserHistoryEntity } from './userHistory.entity';
+import { UserFriendsEntity } from '../entities/userFriends.entity';
+import { UserGameEntity } from '../entities/userGame.entity';
+import { UserHistoryEntity } from '../entities/userHistory.entity';
 
 @Module({
   imports: [TypeOrmModule.forRoot(
@@ -35,6 +34,6 @@ import { UserHistoryEntity } from './userHistory.entity';
 ],
   controllers: [AppController],
   exports: [AppService],
-  providers: [AppService, GoogleStrategy],
+  providers: [AppService],
 })
 export class AppModule {}
