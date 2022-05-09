@@ -164,6 +164,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       //client.emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
+        this.server.to(client.data.room).emit('leaveRoom');
         client.leave(client.data.room);
         this.userRepository.update(client.data.userId, {in_game: false});
         this.levelUpLogic.wRooms.remove(Number(client.data.room));

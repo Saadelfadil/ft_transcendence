@@ -265,7 +265,7 @@ export default defineComponent({
 
                 this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
                     // this.playerPos = pos;
-                    // console.log(room);
+                    //console.log("roooooom",room);
                     // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];

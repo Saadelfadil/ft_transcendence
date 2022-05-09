@@ -239,9 +239,10 @@ export default defineComponent({
                     this.game_state = 0;
                 });
 
-                this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
+                this.socket.on('connectedToRoom', (room: string, timer: number, players: string[]) => {
                     // this.playerPos = pos;
-                    // console.log(room);
+                    console.log("roooooom", room);
+                    // this.socket.emit('setRoom', room, '');
                     // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];
@@ -292,6 +293,8 @@ export default defineComponent({
 
                 this.socket.on("leaveRoom", () => {
                     //this.socket.emit('clear');
+                    this.socket.disconnect();
+                    console.log('leave room');
                     this.$router.push('/profile');
                 });
                 console.log(this.socket.id);

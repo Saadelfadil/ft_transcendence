@@ -223,7 +223,6 @@ export default defineComponent({
         },
         async getUsers()
         {
-            console.log("array: ", this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',

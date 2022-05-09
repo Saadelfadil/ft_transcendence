@@ -53,9 +53,9 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     let room = this.matchUpLogic.joinRoom(client);
     if (room){
       //client.data.room = room;
-      //console.log(client.data.node);
+      //console.log("rooooooooom",room);
       let timer: number = 5;
-      this.server.to(room.id).emit('connectedToRoom', timer, room.players);
+      this.server.to(room.id).emit('connectedToRoom', room.id, timer, room.players);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
         let newDbRoom = {} as roomDb;
@@ -91,7 +91,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     // client.data.node.playerRight = data.playerRight;
     // client.data.node.ball = data.ball;
     //client.data.node.canvasW = data.canvasW;
-    console.log(client.data.node);
+    //console.log(client.data.node);
     client.emit("initData", {
       pl: client.data.node.playerLeft,
       pr: client.data.node.playerRight,
@@ -120,7 +120,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (node){
       client.data.roomStatus = 'play';
       client.data.node = node.data;
-      console.log(client.data.node);
+      //console.log(client.data.node);
       client.emit('startMouseEvent');
       console.log('mouse event sended');
       if (client.data.pos === 'left')
@@ -159,16 +159,19 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   clear(client: any){
+    console.log('cleaaaaar');
     if (client.data.type === 'stream'){
       client.leave(client.data.room);
       //client.emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
+        this.server.to(client.data.room).emit('leaveRoom');
         client.leave(client.data.room);
         this.userRepository.update(client.data.userId, {in_game: false});
         this.matchUpLogic.wRooms.remove(Number(client.data.room));
       } else if (client.data.roomStatus === 'play'){
         client.leave(client.data.room);
+        //console.log(client.data.room);
         this.server.to(client.data.room).emit('leaveRoom');
         clearInterval(client.data.node.gameLoop);
         if (client.data.pos === 'left'){
@@ -226,11 +229,6 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   // }
 
   startGame(client: any){
-    // let users = ['1', '2', '3', '4', '5', '6', '7'];
-    // let result = users.sort(() => .5 - Math.random()).slice(0,2);
-    // console.log(result);
-    // client.data.node.players[0] = result[0];
-    // client.data.node.players[1] = result[1];
     client.data.node.gameLoop = setInterval(() => {
         this.matchUpLogic.update(client.data);
         this.server.to(client.data.room).emit("updateClient", {
