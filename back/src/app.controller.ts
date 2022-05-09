@@ -485,6 +485,13 @@ export class AppController {
 		return users;
 	}
 
+	@Get('users')
+	async users(){
+		const query = this.userRepository.createQueryBuilder('UserEntity');
+        const matchs = await query.getMany();
+		console.log(matchs);
+        return matchs;
+	}
 
 		// @Post('getfrienddata')
 	// async getFriendData(@Body() body)

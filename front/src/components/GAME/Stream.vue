@@ -190,11 +190,7 @@ export default defineComponent({
         }
     },
     async created(){
-        await this.checkLogin();
-        if (!this.logged){
-            router.push({name: 'login'});
-            return ;
-        }
+
         await this.InitMatchHistory();
         await this.getUsers();
     },
@@ -223,6 +219,7 @@ export default defineComponent({
         },
         async getUsers()
         {
+            console.log("array: ", this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',
@@ -246,22 +243,6 @@ export default defineComponent({
                 return ;
             }
             router.push({name: 'FriendProfile', query: {friend_id: target_id}});
-        },
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-            }
         },
         startStreaming(stream_id:number)
         {

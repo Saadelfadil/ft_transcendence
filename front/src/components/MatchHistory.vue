@@ -21,7 +21,7 @@
                                     <div class="text-center mb-3">
                                         {{ matchs_info[index].type }}
                                     </div>
-                                    <div>
+                                    <div class="text-center">
                                         {{ matchs_info[index].data[0].score }} - {{ matchs_info[index].data[1].score }}
                                     </div>
                                 </div>
@@ -35,10 +35,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div>
-
-                            </div>
+     
                         </div>
 
                         </div>
@@ -89,16 +86,6 @@ export default defineComponent({
     },
     async created()
     {
-        // now i will get players from backend
-        ///////////////////
-        await this.checkLogin();
-        if (!this.logged){
-            router.push({name: 'login'});
-            return ;
-        }
-        //////////////////////
-
-
         await this.InitMatchHistory();
         await this.getUsers();
     },
@@ -111,12 +98,6 @@ export default defineComponent({
                     url: 'http://localhost:3000/game/matchs/' + (this.$route.query.history_id ? this.$route.query.history_id : '')
                 });
                 this.matchs_info = resp.data;
-
-                // start tests
-                // this.matchs_info  = [];
-                // this.matchs_info.push({id:0, data: [{id:58640, score:100}, {id:1200, score:50}], type:'matchup'});
-                // this.matchs_info.push({id:0, data: [{id:1300, score:600}, {id:1500, score:56}], type:'1v1'});
-                //end tests
                 this.users_ids = [];
                 this.matchs_info.map((inp:Match) => {
                     this.users_ids.push(+inp.data[0].id);
@@ -154,25 +135,6 @@ export default defineComponent({
             }
             router.push({name: 'FriendProfile', query: {friend_id: target_id}});
         },
-
-        //////////
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-            }
-        }
-        /////////////////////////
     },
     computed: {
         playerHistory(): Array<any>

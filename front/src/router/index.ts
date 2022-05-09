@@ -26,7 +26,7 @@ import UserFriendsBlock from '@/components/Friends/UserFriends.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: {name: 'login'}
+    redirect: {name: 'profile'}
   },
   {
     path: '/login',

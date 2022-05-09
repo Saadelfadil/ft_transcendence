@@ -18,14 +18,14 @@ import axios from 'axios';
 
 
 export default defineComponent({
-    name: 'loginBlock',
+    name: 'LoginBlock',
     data(){
         return {
-            logged: false as boolean
+            is_logged: false as boolean
         }
     },
     methods: {
-            async checkLogin(){
+            async redirectIfLogged(){
 
             try{
                 const resp = await axios({
@@ -36,16 +36,16 @@ export default defineComponent({
                     change: false
                 }
                 });
-                this.logged = true;
+                this.is_logged = true;
             }catch(e){
-                this.logged = false;
+                this.is_logged = false;
             }
         }
     },
 
     async created()
     {
-        console.log(this.$router.options.history.state.back);
+        console.log("you have come from: " ,this.$router.options.history.state.back);
         // if (router.options.history.state.back === '/profile')
         // {
         //     console.log('inside');
@@ -68,10 +68,11 @@ export default defineComponent({
                     console.log(error);
                 });
             }
-            await this.checkLogin();
-            if (this.logged)
+            await this.redirectIfLogged();
+            if (this.is_logged)
             {
                 router.replace({name: 'profile'});
+                return ;
             }
     }
 });

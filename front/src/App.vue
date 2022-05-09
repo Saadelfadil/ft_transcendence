@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import axios from 'axios';
-import store from '@/store';
+
 import ManagerBlock from './components/manager.vue';
 
 export default defineComponent({

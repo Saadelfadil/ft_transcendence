@@ -80,22 +80,7 @@ export default defineComponent({
         }
     },
     methods: {
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-            }
-        },
+
 
         async getExactUserData(_id:number) {
             try{
@@ -139,12 +124,7 @@ export default defineComponent({
         }
     },
     async created() {
-        await this.checkLogin();
-        if (!this.logged)
-        {
-            router.push({name: 'login'});
-            return ;
-        }
+
         this.validFriend(Number(this.$route.query.friend_id));
         await this.getExactUserData(Number(this.$route.query.friend_id));
     }

@@ -34,13 +34,6 @@ export default defineComponent({
             msg : "" as string
         }
     },
-    async created(){
-    await this.checkLogin();
-      if (!this.logged)
-      {
-          router.push({name: 'login'});
-      }
-    },
     methods : {
         async submit() {
             if (this.username.trim().length > 0)
@@ -65,22 +58,6 @@ export default defineComponent({
             }
             this.username = "";
         },
-              async checkLogin()
-      {
-          try{
-              const resp = await axios({
-                  method: 'get',
-                  url: 'http://localhost:8080/api/islogin',
-                  withCredentials: true
-              });
-              this.logged = true;
-              this.user_id = resp.data.id;
-          }
-          catch(e)
-          {
-              this.logged = false;
-          }
-      },
         userIsTyping(e:any){
             if (e.keyCode !== 13) // 13 is for enter
                 this.msg = "";

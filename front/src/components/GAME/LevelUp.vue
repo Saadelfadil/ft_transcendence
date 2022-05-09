@@ -1,10 +1,10 @@
 <template>
     <div class="container mx-auto">
-
+        <div v-if="start == 1">
     <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
 	<div class="flex justify-around bg-blue w-3/12">
 		<div class="flex flex-col">
-		    <img :src="right_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
+		    <img :src="left_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
 		    <div>{{left_player_login}} </div>
 		</div>
 		<div class="mt-2.5"> {{playerLeft.score}} </div>
@@ -36,6 +36,8 @@
         </div>
 
     </div>
+    <StartPlayingComp v-else @startPlaying="levelup"/>
+    </div>
 </template>
 
 
@@ -44,6 +46,7 @@ import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
 import { io } from "socket.io-client";
+import StartPlayingComp from './StartPlaying.vue';
 interface Player {
     x: number;
     y: number;
@@ -65,8 +68,12 @@ interface Ball {
 
 export default defineComponent({
     name: 'LevelUpBlock',
+        components:{
+        StartPlayingComp
+    },
     data(){
         return{
+            start: 0  as number,
             socket : null as any,
             canvas: 0 as any,
             game_state: 0 as number,
@@ -230,25 +237,10 @@ export default defineComponent({
                 this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-                router.push({name : 'login'});
-                return;
-            }
-        },
         levelup(){
+            this.start = 1;
+            window.addEventListener('beforeunload', this.tabClosed);
+            document.addEventListener('visibilitychange', this.tabChanged);
 
             //let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/levelup");
@@ -265,7 +257,7 @@ export default defineComponent({
 
                 this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
                     // this.playerPos = pos;
-                    //console.log("roooooom",room);
+                    // console.log(room);
                     // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];
@@ -339,18 +331,28 @@ export default defineComponent({
                 router.push({name: 'profile'});
                 return ;
             }
-        }
+        },
+        tabClosed(event:any){
+            if (this.socket)
+                this.socket.disconnect();
+        },
+        tabChanged(event:any){
+            this.tabClosed(event);
+            router.replace({name: 'profile'});
+        },
     },
-    async mounted(){
-        console.log('levelup mounted');
-        await this.checkLogin();
-        //await this.isUserPlaying();
-        this.levelup();
+    beforeUnmount(){
+        if (this.start === 1) // which means event was added before
+        {
+            window.removeEventListener('beforeunload', this.tabClosed);
+            document.removeEventListener('visibilitychange', this.tabChanged);
+        }
     },
     unmounted(){
         console.log('levelup unmounted');
         //this.socket.emit("stopTime");
-        this.socket.disconnect();
+        if (this.socket)
+            this.socket.disconnect();
     },
 })
 </script>
