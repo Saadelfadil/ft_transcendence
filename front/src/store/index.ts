@@ -5,7 +5,7 @@ interface message{
 	room_id: number;
 	from_id: number;
 	username: string;
-	avatar: string;
+	image_url: string;
 	msg: string;
 	created: string;
 }
@@ -160,7 +160,7 @@ export default createStore({
     },
     addMessageToRoomMsgs(state: any, msg:message)
     {
-      // msg.id = state.chatPublicMsgs[state.chatPublicMsgs.length - 1].id;
+      console.log("called with: ", msg);
       state.chatPublicMsgs.push(msg);
     },
     updatePlayers(state:any, players:Array<Player>)

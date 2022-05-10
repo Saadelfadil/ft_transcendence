@@ -54,9 +54,7 @@ export default defineComponent({
             logged: false as boolean,
         }
     },
-    async created(){
-        await this.checkLogin();
-    },
+
     props: {
         twof_qrcode: String,
         twof_secret: String
@@ -156,21 +154,6 @@ export default defineComponent({
                 withCredentials: true
             });
 
-        },
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-            }
-            catch(e)
-            {
-                this.logged = false;
-            }
         }
     }
 

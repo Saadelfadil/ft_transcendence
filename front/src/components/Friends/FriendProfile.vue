@@ -33,8 +33,16 @@
         </router-link>
         
         </div>
-        <p> Wins : {{user_info.wins}}</p>
-        <p> Loses : {{user_info.loses}}</p>
+         <div class="w-full p-8 mx-2 flex justify-around">
+        <div class="bg-green-500 rounded-lg font-bold text-white text-center px-4 py-3">
+            wins: {{user_info.wins}}
+        </div>
+        <div class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3">
+            Loses: {{user_info.wins}}
+        </div>
+        </div>
+       <!-- <p> Wins : {{user_info.wins}}</p>
+        <p> Loses : {{user_info.loses}}</p>-->
     </div>
     
 
@@ -80,22 +88,7 @@ export default defineComponent({
         }
     },
     methods: {
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-            }
-        },
+
 
         async getExactUserData(_id:number) {
             try{
@@ -106,8 +99,9 @@ export default defineComponent({
                         user_id:this.user_id    
                     },
                     url: 'http://localhost:8080/api/exactuser',
-                    withCredentials: true
+                    withCredentials: true,
                 });
+                
                 this.user_info = resp.data;
             }catch(e){
                 console.log(e);
@@ -126,6 +120,7 @@ export default defineComponent({
                     withCredentials: true
                 });
                 this.user_info.is_friend = true;
+                
             }catch(e){
                 console.log(e);
             }
@@ -138,15 +133,13 @@ export default defineComponent({
             }
         }
     },
-    async created() {
-        await this.checkLogin();
-        if (!this.logged)
+    watch:{
+        async user_id()
         {
-            router.push({name: 'login'});
-            return ;
+            this.validFriend(Number(this.$route.query.friend_id));
+            await this.getExactUserData(Number(this.$route.query.friend_id));
+
         }
-        this.validFriend(Number(this.$route.query.friend_id));
-        await this.getExactUserData(Number(this.$route.query.friend_id));
     }
 
 })

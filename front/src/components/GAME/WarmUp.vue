@@ -1,21 +1,5 @@
 <template>
     <div class="container mx-auto">
-        <!-- <p id="msg"></p>
-        <div id="popup" class="popup">
-            <span class="msg fadeIn">{{timeMsg}}</span>
-            <span id="countdown" class="countdown fadeIn">{{timer}}</span>
-        </div>
-        <div class="flex justify-center">
-            <div class="player">
-                <span id="player-left-name" class="">{{plName}}</span>
-                <span id="player-left-score"> : {{playerLeft.score}} </span>
-            </div>
-            <div class="mx-8 vs"> VS </div>
-            <div class="player">
-                <span id="player-right-score"> {{playerRight.score}} : </span>
-                <span id="player-right-name" class=""> AI </span>
-            </div>
-        </div> -->
 
         
 	<!-- start of nav bar of streeam-->
@@ -208,25 +192,6 @@ export default  defineComponent({
                 this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
-
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
-                router.push({name : 'login'});
-                return;
-            }
-        },
         warmup()
         {
             // let popup : any = document.getElementById("popup");
@@ -308,7 +273,6 @@ export default  defineComponent({
     },
     async mounted(){
         console.log('warmup mounted');
-        await this.checkLogin();
         await this.fillPlayersData();
         //await this.isUserPlaying();
         this.warmup();

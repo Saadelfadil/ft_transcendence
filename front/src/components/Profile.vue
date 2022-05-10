@@ -77,6 +77,8 @@ import router from '@/router';
 
 import InitAuthBlock from './auth/initAuth.vue';
 
+
+
 export default defineComponent({
     name: 'ProfileBlock',
     components: {
@@ -108,14 +110,9 @@ export default defineComponent({
         }
     },
     async created(){
-        await this.checkLogin();
-        if (!this.logged)
-            router.push({name: 'login'});
-
+        console.log("PROFILE COMPONENT: " ,this.$router.options.history);
         await this.getUserInfo();
-
         store.commit('set_verify', this.auth_switch && this.auth2_enabled);
-
         if (this.auth2_enabled && this.auth_switch)
             this.state = 1;
     },
@@ -289,22 +286,6 @@ export default defineComponent({
             catch(e)
             {
                 console.error('error happend');
-            }
-        },
-        async checkLogin()
-        {
-            try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
-                });
-                this.logged = true;
-                this.auth_switch = resp.data.is_login_db;
-            }
-            catch(e)
-            {
-                this.logged = false;
             }
         }
     },

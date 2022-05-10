@@ -57,7 +57,7 @@
                 </router-link>
               </li>
               
-              <!--<li class="mb-6">
+              <li class="mb-6">
                 <router-link :to="{name: 'chat'}">
                   <span>
                     <svg class="fill-current h-8 w-8 mx-auto text-gray-300 hover:text-green-500" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@
                     </svg>
                     </span>
                   </router-link>
-                </li> -->
+                </li>
 
             </ul>
           </div>

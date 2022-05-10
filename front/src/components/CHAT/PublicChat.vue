@@ -36,7 +36,7 @@
                                 >
 
 
-								<div v-if="isJoined(room.id)" @click="getRoomData(room.id, room.name)">
+								<div v-if="isJoined(room.id)" @click="getRoomData(room.id)">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" style="float: left; margin-right: 8px;"  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
 									</svg>
@@ -44,7 +44,7 @@
 								</div>
 
 
-								<div v-else @click="joinToRoom(room.id, room.locked, room.name)" >
+								<div v-else @click="joinToRoom(room.id, room.locked)" >
 									<div v-if="!room.locked" >
 										<svg  xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"  style="float: left; margin-right: 8px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
@@ -137,7 +137,7 @@ const globalComponent = defineComponent({
             try {
 
                 const resp = await axios.get(
-					`http://localhost:3000/api/v1/room`,
+					`http://localhost:8080/room`,
 					{
 						headers: { Authorization: `Bearer ${this.token}` }
 					}
@@ -151,13 +151,13 @@ const globalComponent = defineComponent({
                 console.log(`while trying to get data for rooms ${e}`);
             }
         },
-        joinToRoom(room_id:number, is_locked:boolean, room_name:string)
+        joinToRoom(room_id:number, is_locked:boolean)
         {
             // probably this function shoould by async
             if (is_locked)
                 this.joinToPrivateRoom(room_id);
             else
-                joinTheRoom(this.userId, room_id, '', room_name);
+                joinTheRoom(this.userId, room_id, '');
         },
         joinToPrivateRoom(room_id:number)
         {
@@ -171,16 +171,16 @@ const globalComponent = defineComponent({
                 // i will send password to backend to chek if password is correct
                 // just for testing i'm assuming that password is correct so i will fill the store
                 // and redirect him to chat messages block
-                joinTheRoom(this.userId, room.id, tmp_pass, room.name);
+                joinTheRoom(this.userId, room.id, tmp_pass);
             }else{
                 this.invalid_pass = true;
             }
         },
         
-        async getRoomData(room_id:number, room_name:string)
+        async getRoomData(room_id:number)
         {       
             // const resp = await axios.get(
-			// 	`http://localhost:3000/api/v1/room/${room_id}/messages`,
+			// 	`http://localhost:8080ß/room/${room_id}/messages`,
 			// 	{
 			// 		headers: { Authorization: `Bearer ${store.getters.getUserToken}` }
 			// 	}
@@ -195,7 +195,7 @@ const globalComponent = defineComponent({
 
 
 
-            router.push({name: 'chatpublicmsg', query: { roomId: room_id, room_name: room_name}});
+            router.push({name: 'chatpublicmsg', query: { roomId: room_id}});
         },
         userIsTyping(e:any)
         {
@@ -246,7 +246,7 @@ export default globalComponent;
 
 
 const socket = io("http://localhost:8000")
-const joinTheRoom = (userId: number, roomId: number, password: string, room_name:string) => {
+const joinTheRoom = (userId: number, roomId: number, password: string) => {
 	socket.emit(
 		'join-room',
 		{ 
@@ -260,7 +260,7 @@ const joinTheRoom = (userId: number, roomId: number, password: string, room_name
 			// join-room callback
 			if(response.status)
 			{
-				globalComponent.methods!.getRoomData(roomId, room_name);
+				globalComponent.methods!.getRoomData(roomId);
 			}
 			else
 			{

@@ -174,7 +174,7 @@ export default defineComponent({
 
 
 				const resp = await axios.post(
-					`http://localhost:3000/api/v1/room`,
+					`http://localhost:8080/room`,
 					{
 						"name": this.tmp_name,
 						"locked": this.tmp_password.length > 0 ? true : false,

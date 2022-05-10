@@ -59,25 +59,6 @@ export default defineComponent({
         }
     },
     methods : {
-      func(arg: string) {
-        console.log(arg);
-      },
-      async checkLogin()
-      {
-          try{
-              const resp = await axios({
-                  method: 'get',
-                  url: 'http://localhost:8080/api/islogin',
-                  withCredentials: true
-              });
-              this.logged = true;
-              this.user_id = resp.data.id;
-          }
-          catch(e)
-          {
-              this.logged = false;
-          }
-      },
       async getFriendsRequest()
       {
           try{
@@ -88,6 +69,7 @@ export default defineComponent({
                   withCredentials: true,
               });
               this.user = resp.data;
+              console.log(resp.data);
           }
           catch(e)
           {
@@ -121,14 +103,10 @@ export default defineComponent({
         }
       },
     },
-    async created(){
-      await this.checkLogin();
-      if (!this.logged)
-      {
-          router.push({name: 'login'});
+    watch:{
+      async user_id(){
+          await this.getFriendsRequest();  
       }
-
-      await this.getFriendsRequest();      
     }
 })
 </script>

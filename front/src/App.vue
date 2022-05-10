@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import axios from 'axios';
-import store from '@/store';
+
 import ManagerBlock from './components/manager.vue';
 
 export default defineComponent({
@@ -22,11 +22,18 @@ export default defineComponent({
   {
 	  return {
 			token : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjQ5NjE3MDQ1LCJleHAiOjE2NTIyMDkwNDV9.wI-kuAjS-PDo43WRL0MaZpNKVkBxW5QvYIXxMK0oz5Y',
-
+			user_id: 0 as number,
 	  }
   },
-  created(){
-	   this.persist();
+//   created(){
+// 	  console.log("in app");
+// 	   this.persist();
+//    },
+   watch: {
+	   user_id(){
+		   if (this.user_id !== 0)
+		   	this.persist();
+	   }
    },
   methods: {
     async persist() {
@@ -34,7 +41,7 @@ export default defineComponent({
 		try {
 
 			const resp = await axios.get(
-				`http://localhost:3000/api/v1/users/1/current`,
+				`http://localhost:3000/users/${String(this.user_id)}/current`,
 				{
 					headers: { Authorization: `Bearer ${this.token}` }
 				}

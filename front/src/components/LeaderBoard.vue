@@ -1,52 +1,54 @@
 <template>
-            <div>
+    <!-- <div> -->
     <div class="grid grid-cols-1 min-w-full border rounded">
-                <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
-                    <li>
-                        <div class="px-6"
-                        v-for="player in players" :key="player.player_id"
-                        >
-                        <div class="flex justify-between items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
-
-                          
-                                <div class="ml-2">
-                                    <router-link :to="{ name : 'FriendProfile', query: {friend_id: 58640}}">
-                                        <img :src="getImg(player.player_avatar)"   class="rounded-full max-w-xs w-16 items-center border" />
-		                                <div class="text-center"> username </div>
-                                    </router-link>
-                                </div>
-                                
-                                <div class="flex flex-row ">
-                                        <div class="bg-green-500 rounded-lg font-bold text-white text-center px-4 py-3 mr-5">
-                                            wins: 1420
-                                        </div>
-                                        <div  class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3  ">
-                                            loses : 45
-                                        </div>
+        <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
+            <li>
+                <div class="px-6"
+                v-for="leader in all_leaders" :key="leader.id"
+                >
+                    <div class="flex justify-between items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
+                        <div class="ml-2">
+                            <router-link :to="{ name : 'FriendProfile', query: {friend_id: leader.id}}">
+                                <img :src="leader.image_url"   class="rounded-full max-w-xs w-16 items-center border" />
+                                <div class="text-center"> {{leader.login}} </div>
+                            </router-link>
+                        </div>
+                            <div class="flex flex-row ">
+                                    <div class="bg-green-500 rounded-lg font-bold text-white text-center px-4 py-3 mr-5">
+                                        wins: {{leader.wins}}
                                     </div>
-                                <div>
-
-                            <div class="rounded-lg font-bold text-center px-4 py-3  mr-6">
-                                {{ player.player_score }}
+                                    <div  class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3  ">
+                                        loses : {{leader.loss}}
+                                    </div>
                             </div>
-
+                            <div>
+                                <div class="rounded-lg font-bold text-center px-4 py-3  mr-6">
+                                    {{ leader.points}}
+                                </div>
                             </div>
                         </div>
 
-                        </div>
+                </div>
 
-                    </li>
-                </ul>
-            </div>
-        </div>
+            </li>
+        </ul>
+    </div>
+    <!-- </div> -->
 </template>
 
 
 <script lang="ts">
-import store from '@/store'
 import { defineComponent } from 'vue'
 import axios from 'axios'
-import router from '@/router';
+
+interface Leader{
+    id:number;
+    login: string;
+    image_url: string;
+    wins:number;
+    loss:number;
+    points:number;
+}
 
 export default defineComponent({
     name: 'LeaderBoardBlock',
@@ -55,50 +57,33 @@ export default defineComponent({
         return {
             user_id: '' as string,
             logged: false as boolean,
-            msg: 'LeaderBoard here' as string
+            all_leaders: [] as Array<Leader>
         }
     },
     async created()
     {
-        await this.checkLogin();
-        if (!this.logged){
-            router.push({name: 'login'});
-            return ;
-        }
-        // now i will get players from backend
-        this.initPlayers();
+        await this.initPlayers();
     },
     methods:{
-        async checkLogin()
+        async initPlayers()
         {
             try{
                 const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true
+                    method: 'GET',
+                    url: 'http://localhost:8080/api/users'
                 });
-                this.logged = true;
-                this.user_id = resp.data.id;
-            }
-            catch(e)
-            {
-                this.logged = false;
+                this.all_leaders = resp.data;
+            }catch(e){
+                console.log(e);
             }
         },
-        getImg(player_avatar:string)
-        {
-            return require('../assets/' + player_avatar);
-        },
-        async initPlayers()
-        {
-            const res = await axios.get('http://localhost:8003/players');
-            store.commit('updatePlayers', res.data);
+        based_on_points(a:Leader, b:Leader){
+            return a.points > b.points;
         }
     },
     computed: {
-        players(): Array<any>
-        {
-            return store.getters.getPlayers;
+        leaders() : Array<Leader> {
+            return this.all_leaders.sort((this.based_on_points as any));
         }
     }
 })

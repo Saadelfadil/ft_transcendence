@@ -21,8 +21,8 @@ export class Rooms {
 	@Column()
 	owner_id: number;
 
-	@Column("int", { array: true })
-	admins: number[];
+	@Column("int", { array: true , default: [] })
+	admins: number[] = [];
 
 
 }

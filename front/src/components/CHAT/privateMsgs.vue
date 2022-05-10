@@ -17,20 +17,10 @@
 					<button @click="profileClicked" class="mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Profile</button>
 
 
-					<div v-if="clickeduser_id != user_id" class="w-full">
-						<div v-if="clickeduser_id != user_id || true" class="w-full">
-							<button @click="inviteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Invite </button>
-							<button v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" @click="banClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Ban</button>
-							<input  v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" v-focus class="w-full px-4 py-2 rounded-lg text-center mb-2 border-2 border-blue-500" :class="{'border-red-500' : invalidTime}" type="text" v-model="numOfSeconds" placeholder="seconds"/>
-							<button v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" @click="muteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Mute</button>
-						</div>
-
-						<div v-if="isOwner" class="w-full">
-							<button v-if=" !roomInfo.admins.includes(clickeduser_id) " @click="addAdmin" class="mb-2 w-full bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Set as admin</button>
-							<button v-else @click="removeAdmin" class="mb-2 w-full bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Remove admin</button>
-						</div>
+					<div v-if="clickedUserId != userId || true" class="w-full">
+						<button @click="inviteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Invite </button>
 					</div>
-		
+	
 					
 				
 				</div>
@@ -42,17 +32,6 @@
 
 
 
-		<nav class="font-sans flex flex-col text-center content-center sm:flex-row sm:text-left sm:justify-between py-2 px-6 bg-white shadow sm:items-baseline w-full">
-
-		<div class="mb-2 sm:mb-0 flex flex-row">
-			{{ (this.roomInfo != null) ? this.roomInfo.name : '' }} <!-- will display room name username should be changed to roomName maybe -->
-		</div>
-
-		<div class="sm:mb-0 self-center">
-			<button @click="leaveRoom" class="bg-blue-500 font-bold text-white  px-5 rounded">leave</button>
-		</div>
-		</nav>
-
 
 
 	<div class="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
@@ -63,7 +42,7 @@
 			<div class="flex items-start" >
 				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
-					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="msg.image_url" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
+					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="'http://localhost:3000/uploads/'+msg.avatar" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
 					<span class="block"> {{ msg.username }} </span>
 				</div>
 				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
@@ -117,21 +96,24 @@ interface message{
 
 
 const globalComponentRoomMessages =  defineComponent({
-   name: 'ChatPublicRoomMsg',
+   name: 'PrivateMsgsBlock',
    data()
    {
       return {
-		user_id: 0 as number,
-		clickeduser_id: 0 as number,
+		clickedUserId: 0 as number,
 		ownerId: 0 as number,
 		isOwner: false as boolean,
 		isAdmin: false as boolean,
 		numOfSeconds: '' as string,
 		isPopUp: false as boolean,
         curMsgData: '' as string,
-        roomId: Number(this.$route.query.roomId),
+        uId: Number(this.$route.query.uId),
+		roomId: 1,
+		token: '' as string,
+		userId: 0,
 		username: '' as string,
 		avatar: '' as string,
+		joinedRooms: [] as number[],
 		blockedList: [] as number[],
 		roomInfo: null as any,
 		invalidTime: false as boolean,
@@ -139,61 +121,71 @@ const globalComponentRoomMessages =  defineComponent({
    },
    mounted() {
 
-		// if (localStorage.blockedList) {
-		// 	this.blockedList = localStorage.blockedList;
-		// }
-	   this.getRoomsMessages();
-	   this.getRoomsInfo();
-	   joinTheRoom(localStorage.user_id, this.roomId);
+		if (localStorage.userId) {
+			this.userId = localStorage.userId;
+		}
+		if (localStorage.token) {
+			this.token = localStorage.token;
+		}
+		if (localStorage.avatar) {
+			this.avatar = localStorage.avatar;
+		}
+		if (localStorage.username) {
+			this.username = localStorage.username;
+		}
+		if (localStorage.joinedRooms) {
+			this.joinedRooms = localStorage.joinedRooms;
+		}
+		if (localStorage.blockedList) {
+
+			this.blockedList = localStorage.blockedList;
+
+		}
+	   this.getUserMessages();
+	   joinTheRoom(localStorage.userId, this.uId); // TODO
   	},
    methods: {
-	   async getRoomsInfo()
+		async getUserMessages()
         {
+
+			console.log(this.blockedList)
 
 			// Append roomId to the url
             const resp = await axios.get(
-				`http://localhost:8080/room/${this.roomId}`,
+				`http://localhost:3000/messages/${this.uId}`,
 				// `http://localhost:3000/room/1/messages`,
-				// {
-				// 	headers: { Authorization: `Bearer ${this.token}` }
-				// }
-			);
-            this.roomInfo = resp.data;
-			this.isAdmin = this.roomInfo.admins.includes(localStorage.user_id);
-			this.isOwner = localStorage.user_id == this.roomInfo.owner_id;
-			this.ownerId = this.roomInfo.owner_id;
-        },
-		async getRoomsMessages()
-        {
-
-			// Append roomId to the url
-            const resp = await axios.get(
-				`http://localhost:8080/room/${this.roomId}/messages`,
+				{
+					headers: { Authorization: `Bearer ${this.token}` }
+				}
 			);
             const data = resp.data;
             store.commit('updatePublicRoomMsgs', data);
+            // now i will redirect him to chat block messages
         },
       addMessage()
       {
+
          const tmp = this.curMsgData.trim();
          if (tmp.length !== 0)
          {
-			handleSubmitNewMessage(this.user_id, this.username, this.avatar, this.roomId, tmp);
+			handleSubmitNewMessage(this.userId, this.username, this.avatar, this.uId, tmp);
 			this.curMsgData = '';
          }
+
+			console.log(this.blockedList)
+
       },
 
 	  newMessage(data: any)
       {
-		  this.blockedList = [];
-			if( !this.blockedList.includes(data.from) )
+			if( !localStorage.blockedList.includes(data.from) )
 		  	{
 			  	const msgObj = {
                   	id: 0,
 					room_id: 0,
 					from_id: data.from,
 					username: data.username,
-					image_url: data.avatar,
+					avatar: data.avatar,
 					msg: data.message,
 					created: Date.now(),
 				};
@@ -213,18 +205,10 @@ const globalComponentRoomMessages =  defineComponent({
 			var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
 			return time;
 	  },
-	  leaveRoom()
-	  {
-		  leaveTheRoom(this.user_id, this.roomId);
-	  },
-	  goBackToRoomsList()
-	  {
-		  router.push({name: 'chatpublic'});
-	  },
 	  userIconClicked(msg:message)
 	  {
 		  	this.isPopUp = true;
-			this.clickeduser_id = msg.from_id;
+			this.clickedUserId = msg.from_id;
 		  	console.log(`message clicked`);
 	  },
 	  disablePopUp()
@@ -234,81 +218,26 @@ const globalComponentRoomMessages =  defineComponent({
 	  },
 	  profileClicked()
 	  {
-		  console.log(this.clickeduser_id);
-		  if (this.user_id !== this.clickeduser_id)
-		  {
-			  router.push({name: 'FriendProfile', query: {friend_id: this.clickeduser_id}});
-			return ;
-		  }
-		  router.push({name: 'profile'});
+		  console.log(`profile clicked`);
+		  this.isPopUp = false;
 	  },
 	  inviteClicked()
 	  {
 		  console.log(`invite clicked`);
 		  this.isPopUp = false;
 	  },
-	  async muteClicked()
-	  {
-		  if (Number.isInteger(+this.numOfSeconds) && +this.numOfSeconds > 0)
-		  {
-			  	// TODO : axios:
-				//   if success
-				const resp = await axios.post(
-					`http://localhost:8080/ban`,
-					{
-						"banned": false,
-						"room_id": this.roomId,
-						"user_id": this.clickeduser_id,
-						"duration": +this.numOfSeconds
-					},
-					// {
-					// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-					// }
-				);
 
-				if(!resp.data.status)
-				{
-					this.numOfSeconds = '';
-			  		this.invalidTime = false;
-		  			this.isPopUp = false;
-				}
-		  }
-		  else
-		  {
-			  this.invalidTime = true;
-			  return ;
-		  }
-	  },
-	  async banClicked()
-	  {
-		  	const resp = await axios.post(
-				`http://localhost:8080/ban`,
-				{
-					"banned": true,
-					"room_id": this.roomId,
-					"user_id": this.clickeduser_id,
-					"duration": 0
-				},
-				// {
-				// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-				// }
-			);
 
-			if(!resp.data.status)
-			{
-				this.isPopUp = false;
-			}
-	  },
 	async addAdmin()
 	{
 		const resp = await axios.post(
-			`http://localhost:8080/room/${this.roomId}/add-admin`,
+			`http://localhost:3000/room/${this.roomId}/add-admin`,
 			{
-				"user_id": this.clickeduser_id
+				"userId": this.clickedUserId
 			},
-			// {
-			// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-			// }
+			{
+				headers: { Authorization: `Bearer ${localStorage.token}` }
+			}
 		);
 
 		if(!resp.data.status)
@@ -317,24 +246,7 @@ const globalComponentRoomMessages =  defineComponent({
 		}
 
 	},
-	async removeAdmin()
-	{
-		const resp = await axios.post(
-			`http://localhost:8080/room/${this.roomId}/remove-admin`,
-			{
-				"user_id": this.clickeduser_id
-			},
-			// {
-			// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-			// }
-		);
 
-		if(!resp.data.status)
-		{
-			this.isPopUp = false;
-		}
-
-	}
    },
 
    directives: {
@@ -366,7 +278,14 @@ export default globalComponentRoomMessages;
 //:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
-const socket = io("http://localhost:8000")
+const socket = io("http://localhost:7000")
+
+const getRoomName = (userId: number, uId: number) => {
+	if(userId < uId)
+		return userId+"-"+uId;
+	else
+		return uId+"-"+userId;
+}
 
 // receive message
 socket.on("message", ({ data }) => {
@@ -374,18 +293,18 @@ socket.on("message", ({ data }) => {
 })
 
 // send message
-const handleSubmitNewMessage = (from: number, username: string, avatar: string, roomName: number, message: string) => {
+const handleSubmitNewMessage = (from: number, username: string, avatar: string, to: number, message: string) => {
 
-	const messageData = {
+		const messageData = {
 						from: from,
+						to: to,
 						username: username,
 						avatar: avatar,
-						roomName: roomName,
+						roomName: getRoomName(from, to),
 						message: message
-					}
-
+					};
 	socket.emit(
-				'chat-room',
+				'private-chat',
 				{ 
 					data: messageData
 				},
@@ -393,7 +312,6 @@ const handleSubmitNewMessage = (from: number, username: string, avatar: string, 
 				(response: any) => {
 					if(response.status)
 					{
-						console.log("useduujgyhfgtdfsaa");
 						globalComponentRoomMessages.methods!.newMessage(messageData);
 					}
 				}
@@ -403,43 +321,16 @@ const handleSubmitNewMessage = (from: number, username: string, avatar: string, 
 
 
 // // join room
-const joinTheRoom = (user_id: number, roomId: number) => {
+const joinTheRoom = (userId: number, uId: number) => {
 	socket.emit(
-		'join-room-m',
+		'join-user',
 		{ 
 			data: {
-				from: user_id,
-				roomName: roomId,
+				roomName: getRoomName(userId, uId), // TODO smallerId-biggerId
 			}
 		}
 	)
 }
-
-
-
-const leaveTheRoom = (user_id: number, roomId: number) => {
-	socket.emit(
-		'leave-room',
-		{ 
-			data: {
-				from: user_id,
-				roomName: roomId
-			}
-		},
-		(response: any) => {
-			// join-room callback
-			if(response.status)
-			{
-				globalComponentRoomMessages.methods!.goBackToRoomsList();
-			}
-			else
-			{
-				console.log("Error joining the room"); // ok
-			}
-		}
-	)
-}
-
 
 
 

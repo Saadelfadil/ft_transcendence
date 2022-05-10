@@ -56,12 +56,12 @@ export class BlockService {
 	async blockedList(sessionId: number) {
 
 		const data = await getConnection().query(`
-			SELECT public."user".*  FROM
+			SELECT public."users".*  FROM
 				public."block"
 				JOIN
-						public."user"
+						public."users"
 					ON
-						public."user".id = ANY(public."block".blocked)
+						public."users".id = ANY(public."block".blocked)
 				WHERE public."block".user_id = ${sessionId}
 		`);
 
@@ -71,12 +71,12 @@ export class BlockService {
 	blockedListUsers(sessionId: number) {
 
 		return getConnection().query(`
-			SELECT public."user".*  FROM
+			SELECT public."users".*  FROM
 				public."block"
 				JOIN
-						public."user"
+						public."users"
 					ON
-						public."user".id = ANY(public."block".blocked)
+						public."users".id = ANY(public."block".blocked)
 				WHERE public."block".user_id = ${sessionId}
 		`);
 	}

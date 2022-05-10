@@ -43,6 +43,6 @@ export class UserEntity extends BaseEntity
     @Column({ type: 'int', nullable: true})
     loss: number = 0;
 
-    @Column("int", { array: true })
+    @Column("int", { array: true , default: []})
 	joinedRooms: number [] = [];
 }

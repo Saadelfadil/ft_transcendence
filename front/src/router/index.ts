@@ -26,7 +26,7 @@ import UserFriendsBlock from '@/components/Friends/UserFriends.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: {name: 'login'}
+    redirect: {name: 'profile'}
   },
   {
     path: '/login',
@@ -111,34 +111,34 @@ const routes: Array<RouteRecordRaw> = [
     }
   ]
 },
-  // {
-  //   path: '/chat',
-  //   name: 'chat',
-  //   redirect: {path: '/chat/public'},
-  //   component: ChatBlock,
-  //   children: [
-  //     {
-  //       path: 'private',
-  //       name: 'chatprivate',
-  //       component: PrivateChatBlock,
-  //     },
-  //     {
-  //       path: 'public',
-  //       name: 'chatpublic',
-  //       component: PublicChatBlock
-  //     },
-  //     {
-  //       path: 'createroom',
-  //       name: 'chatcreateroom',
-  //       component: CreateRoomBlock,
-  //     },
-  //     {
-  //       path: 'chatpublicmsg',
-  //       name: 'chatpublicmsg',
-  //       component: ChatPublicMsgBlock
-  //     },
-  //   ]
-  // },
+  {
+    path: '/chat',
+    name: 'chat',
+    redirect: {path: '/chat/public'},
+    component: ChatBlock,
+    children: [
+      {
+        path: 'private',
+        name: 'chatprivate',
+        component: PrivateChatBlock,
+      },
+      {
+        path: 'public',
+        name: 'chatpublic',
+        component: PublicChatBlock
+      },
+      {
+        path: 'createroom',
+        name: 'chatcreateroom',
+        component: CreateRoomBlock,
+      },
+      {
+        path: 'chatpublicmsg',
+        name: 'chatpublicmsg',
+        component: ChatPublicMsgBlock
+      },
+    ]
+  },
 
   {
     // this object make sure it's the last one 

@@ -63,7 +63,7 @@ export class RoomService {
 		let whereBlock: string;
 
 		if( excludeUsersList.length > 0 )
-			whereBlock = `AND public."user".id NOT IN ( ${excludeUsersList.join(",")} )`;
+			whereBlock = `AND public."users".id NOT IN ( ${excludeUsersList.join(",")} )`;
 		else
 			whereBlock = ``;
 
@@ -71,9 +71,9 @@ export class RoomService {
 			SELECT *  FROM
 				public."room_message"
 				JOIN
-						public."user"
+						public."users"
 					ON
-						public."user".id = public."room_message".from_id
+						public."users".id = public."room_message".from_id
 				WHERE public."room_message".room_id = ${roomId} 
 				${whereBlock}
 				ORDER BY

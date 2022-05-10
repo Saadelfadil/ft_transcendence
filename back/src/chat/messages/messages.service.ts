@@ -28,11 +28,11 @@ export class MessagesService {
 	async findOne(sessionId: number, userId: number) {
 
 		return getConnection().query(`
-			SELECT public."message".*, public."user".username, public."user".id, public."user".avatar  FROM
+			SELECT public."message".*, public."users".username, public."users".id, public."users".avatar  FROM
 				public."message"
 				INNER JOIN
-					public."user"
-						ON public."message".from_id = public."user".id
+					public."users"
+						ON public."message".from_id = public."users".id
 				WHERE public."message".from_id = ${userId} AND public."message".to_id = ${sessionId}
 				OR public."message".from_id = ${sessionId} AND public."message".to_id = ${userId}
 				ORDER BY
@@ -46,11 +46,11 @@ export class MessagesService {
 				*/
 
 			// 	INNER JOIN
-			// 	public."user"
+			// 	public."users"
 			// ON
-			// 	( public."message".from_id = public."user".id AND public."message".from_id != ${sessionId} )
+			// 	( public."message".from_id = public."users".id AND public."message".from_id != ${sessionId} )
 			// 	OR 
-			// 	( public."message".to_id = public."user".id AND public."message".to_id != ${sessionId} )
+			// 	( public."message".to_id = public."users".id AND public."message".to_id != ${sessionId} )
 
 
 
@@ -76,16 +76,15 @@ export class MessagesService {
 	}
 
 	async getChatList(sessionId: number) {
-
 		return getConnection().query(`
 			SELECT * FROM
 				public."message"
 					INNER JOIN
-							public."user"
+							public."users"
 						ON
-							( public."message".from_id = public."user".id AND public."message".from_id != ${sessionId} )
+							( public."message".from_id = public."users".id AND public."message".from_id != ${sessionId} )
 						OR 
-							( public."message".to_id = public."user".id AND public."message".to_id != ${sessionId} )
+							( public."message".to_id = public."users".id AND public."message".to_id != ${sessionId} )
 					INNER JOIN 
 							(
 								SELECT user_id, max(created) m FROM
@@ -106,6 +105,7 @@ export class MessagesService {
 						ORDER BY
 							created DESC
 				`);
+
 	}
 
 	async remove(sessionId: number, userId: number) {

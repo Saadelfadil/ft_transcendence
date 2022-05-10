@@ -276,7 +276,7 @@ export class AppController {
 	async loginOrNot(@Req() request: Request, @Query() query) {
 		try {
 			const user = await this.appService.getUserDataFromJwt(request);
-			return {is_login_db: user.is_login, id: user.id};
+			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login};
 		} catch (error) {
 			throw new ForbiddenException();
 		}
@@ -478,6 +478,7 @@ export class AppController {
 
 		for (let i = 0; i < length; i +=  2)
 		{
+			console.log("id: ", usersId[i]);
 			const { id, login, image_url} = await this.appService.getUserById(usersId[i]);
 			tmp =  await this.appService.getUserById(usersId[i + 1]);
 			users.push({left_player: {id, login, image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
@@ -521,13 +522,11 @@ export class AppController {
 
 		const {login, image_url} = await this.appService.getUserById(friend_id);
 		
-		// const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
-		const wins = 78;
-		const loses = 45;
+		const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
 
-		// const { user_friends } = await this.appService.getUserByIdFriend(user_id);
-		const user_friends = [1200];
 
+		const { user_friends} = await this.appService.getUserByIdFriend(user_id);
+		
 		user_friends.map((fr_id) => {
 			if (fr_id === friend_id)
 			{
@@ -535,6 +534,17 @@ export class AppController {
 				return ;
 			}
 		});
+		if (!tmp){
+			const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
+			console.log(user_requested);
+			user_requested.map((fr_id) => {
+				if (fr_id === user_id)
+				{
+					tmp = true;
+					return ;
+				}
+			});
+		}
 		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loses};
 	}
 
