@@ -366,7 +366,7 @@ export default globalComponentRoomMessages;
 //:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
-const socket = io("http://localhost:8000")
+const socket = io("http://localhost:8080")
 
 // receive message
 socket.on("message", ({ data }) => {
