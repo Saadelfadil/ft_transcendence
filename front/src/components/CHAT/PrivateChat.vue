@@ -72,31 +72,26 @@ const globalComponent = defineComponent({
             user_room_pass: '' as string,
             typing_room_id: -1 as number,    
 			token: '' as String,
-			userId: 0,
+			user_id: 0,
 			username: '' as String,
 			avatar: '' as String,
 			joinedRooms: [] as Number[],        
         }
     },
-	mounted() {
-		if (localStorage.userId) {
-			this.userId = localStorage.userId;
-		}
-		if (localStorage.token) {
-			this.token = localStorage.token;
-		}
-		if (localStorage.avatar) {
-			this.avatar = localStorage.avatar;
-		}
-		if (localStorage.username) {
-			this.username = localStorage.username;
-		}
-		if (localStorage.joinedRooms) {
-			this.joinedRooms = localStorage.joinedRooms;
-		}
-        this.getUsers();
+	// mounted() {
 
-  	},
+	// 	if (localStorage.joinedRooms) {
+	// 		this.joinedRooms = localStorage.joinedRooms;
+	// 	}
+    //     this.getUsers();
+
+  	// },
+      watch:{
+          user_id(){
+              this.joinedRooms = []; // just for testing
+              this.getUsers();
+          }
+      },
     methods: {
         async getUsers()
         {

@@ -106,31 +106,27 @@ const globalComponent = defineComponent({
             user_room_pass: '' as string,
             typing_room_id: -1 as number,    
 			token: '' as String,
-			userId: 0,
+			user_id: 0,
 			username: '' as String,
 			avatar: '' as String,
 			joinedRooms: [] as Number[],        
         }
     },
-	mounted() {
-		if (localStorage.userId) {
-			this.userId = localStorage.userId;
-		}
-		if (localStorage.token) {
-			this.token = localStorage.token;
-		}
-		if (localStorage.avatar) {
-			this.avatar = localStorage.avatar;
-		}
-		if (localStorage.username) {
-			this.username = localStorage.username;
-		}
-		if (localStorage.joinedRooms) {
-			this.joinedRooms = localStorage.joinedRooms;
-		}
-        this.getRooms();
+	// mounted() {
+	// 	if (localStorage.joinedRooms) {
+	// 		this.joinedRooms = localStorage.joinedRooms;
+	// 	}
+        
 
-  	},
+  	// },
+      watch:{
+          user_id(){
+              console.log("called with id: ", this.username);
+              console.log("called avatar: ", this.avatar);
+              this.getRooms();
+              this.joinedRooms = []; // testing
+          }
+      },
     methods: {
         async getRooms()
         {
@@ -153,11 +149,12 @@ const globalComponent = defineComponent({
         },
         joinToRoom(room_id:number, is_locked:boolean)
         {
+            console.log("joing to: ", room_id);
             // probably this function shoould by async
             if (is_locked)
                 this.joinToPrivateRoom(room_id);
             else
-                joinTheRoom(this.userId, room_id, '');
+                joinTheRoom(this.user_id, room_id, '');
         },
         joinToPrivateRoom(room_id:number)
         {
@@ -171,14 +168,15 @@ const globalComponent = defineComponent({
                 // i will send password to backend to chek if password is correct
                 // just for testing i'm assuming that password is correct so i will fill the store
                 // and redirect him to chat messages block
-                joinTheRoom(this.userId, room.id, tmp_pass);
+                joinTheRoom(this.user_id, room.id, tmp_pass);
             }else{
                 this.invalid_pass = true;
             }
         },
         
         async getRoomData(room_id:number)
-        {       
+        {     
+            console.log("called get room data");  
             // const resp = await axios.get(
 			// 	`http://localhost:8080ß/room/${room_id}/messages`,
 			// 	{
@@ -246,12 +244,12 @@ export default globalComponent;
 
 
 const socket = io("http://localhost:8000")
-const joinTheRoom = (userId: number, roomId: number, password: string) => {
+const joinTheRoom = (user_id: number, roomId: number, password: string) => {
 	socket.emit(
 		'join-room',
 		{ 
 			data: {
-				from: userId,
+				from: user_id,
 				roomName: roomId,
 				password: password
 			}

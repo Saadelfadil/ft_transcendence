@@ -142,10 +142,16 @@ const globalComponentRoomMessages =  defineComponent({
 		// if (localStorage.blockedList) {
 		// 	this.blockedList = localStorage.blockedList;
 		// }
-	   this.getRoomsMessages();
-	   this.getRoomsInfo();
-	   joinTheRoom(localStorage.user_id, this.roomId);
+
   	},
+	  watch:{
+		  user_id(){
+			  console.log("current id: ", this.user_id);
+			this.getRoomsMessages();
+			this.getRoomsInfo();
+			joinTheRoom(this.user_id, this.roomId);
+		  }
+	},
    methods: {
 	   async getRoomsInfo()
         {
@@ -159,8 +165,8 @@ const globalComponentRoomMessages =  defineComponent({
 				// }
 			);
             this.roomInfo = resp.data;
-			this.isAdmin = this.roomInfo.admins.includes(localStorage.user_id);
-			this.isOwner = localStorage.user_id == this.roomInfo.owner_id;
+			this.isAdmin = this.roomInfo.admins.includes(this.user_id);
+			this.isOwner = this.user_id == this.roomInfo.owner_id;
 			this.ownerId = this.roomInfo.owner_id;
         },
 		async getRoomsMessages()
@@ -185,7 +191,7 @@ const globalComponentRoomMessages =  defineComponent({
 
 	  newMessage(data: any)
       {
-		  this.blockedList = [];
+		  this.blockedList = []; /// removed later
 			if( !this.blockedList.includes(data.from) )
 		  	{
 			  	const msgObj = {
@@ -366,7 +372,7 @@ export default globalComponentRoomMessages;
 //:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
-const socket = io("http://localhost:8080")
+const socket = io("http://localhost:8000")
 
 // receive message
 socket.on("message", ({ data }) => {

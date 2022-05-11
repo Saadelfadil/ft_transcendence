@@ -17,7 +17,7 @@
 					<button @click="profileClicked" class="mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Profile</button>
 
 
-					<div v-if="clickedUserId != userId || true" class="w-full">
+					<div v-if="clickeduser_id != user_id || true" class="w-full">
 						<button @click="inviteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Invite </button>
 					</div>
 	
@@ -100,7 +100,7 @@ const globalComponentRoomMessages =  defineComponent({
    data()
    {
       return {
-		clickedUserId: 0 as number,
+		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
 		isOwner: false as boolean,
 		isAdmin: false as boolean,
@@ -110,7 +110,7 @@ const globalComponentRoomMessages =  defineComponent({
         uId: Number(this.$route.query.uId),
 		roomId: 1,
 		token: '' as string,
-		userId: 0,
+		user_id: 0,
 		username: '' as string,
 		avatar: '' as string,
 		joinedRooms: [] as number[],
@@ -119,31 +119,27 @@ const globalComponentRoomMessages =  defineComponent({
 		invalidTime: false as boolean,
       }
    },
-   mounted() {
+//    mounted() {
 
-		if (localStorage.userId) {
-			this.userId = localStorage.userId;
-		}
-		if (localStorage.token) {
-			this.token = localStorage.token;
-		}
-		if (localStorage.avatar) {
-			this.avatar = localStorage.avatar;
-		}
-		if (localStorage.username) {
-			this.username = localStorage.username;
-		}
-		if (localStorage.joinedRooms) {
-			this.joinedRooms = localStorage.joinedRooms;
-		}
-		if (localStorage.blockedList) {
+// 		if (localStorage.joinedRooms) {
+// 			this.joinedRooms = localStorage.joinedRooms;
+// 		}
+// 		if (localStorage.blockedList) {
 
-			this.blockedList = localStorage.blockedList;
+// 			this.blockedList = localStorage.blockedList;
 
-		}
-	   this.getUserMessages();
-	   joinTheRoom(localStorage.userId, this.uId); // TODO
-  	},
+// 		}
+// 	   this.getUserMessages();
+// 	   joinTheRoom(localStorage.user_id, this.uId); // TODO
+//   	},
+	  watch:{
+		  user_id(){
+			  this.joinedRooms = []; // testing;
+			  this.blockedList = []; // testing
+			  	this.getUserMessages();
+	    		joinTheRoom(localStorage.user_id, this.uId); // TODO
+		  }
+	  },
    methods: {
 		async getUserMessages()
         {
@@ -168,7 +164,7 @@ const globalComponentRoomMessages =  defineComponent({
          const tmp = this.curMsgData.trim();
          if (tmp.length !== 0)
          {
-			handleSubmitNewMessage(this.userId, this.username, this.avatar, this.uId, tmp);
+			handleSubmitNewMessage(this.user_id, this.username, this.avatar, this.uId, tmp);
 			this.curMsgData = '';
          }
 
@@ -208,7 +204,7 @@ const globalComponentRoomMessages =  defineComponent({
 	  userIconClicked(msg:message)
 	  {
 		  	this.isPopUp = true;
-			this.clickedUserId = msg.from_id;
+			this.clickeduser_id = msg.from_id;
 		  	console.log(`message clicked`);
 	  },
 	  disablePopUp()
@@ -233,7 +229,7 @@ const globalComponentRoomMessages =  defineComponent({
 		const resp = await axios.post(
 			`http://localhost:3000/room/${this.roomId}/add-admin`,
 			{
-				"userId": this.clickedUserId
+				"user_id": this.clickeduser_id
 			},
 			{
 				headers: { Authorization: `Bearer ${localStorage.token}` }
@@ -280,11 +276,11 @@ export default globalComponentRoomMessages;
 
 const socket = io("http://localhost:7000")
 
-const getRoomName = (userId: number, uId: number) => {
-	if(userId < uId)
-		return userId+"-"+uId;
+const getRoomName = (user_id: number, uId: number) => {
+	if(user_id < uId)
+		return user_id+"-"+uId;
 	else
-		return uId+"-"+userId;
+		return uId+"-"+user_id;
 }
 
 // receive message
@@ -321,12 +317,12 @@ const handleSubmitNewMessage = (from: number, username: string, avatar: string, 
 
 
 // // join room
-const joinTheRoom = (userId: number, uId: number) => {
+const joinTheRoom = (user_id: number, uId: number) => {
 	socket.emit(
 		'join-user',
 		{ 
 			data: {
-				roomName: getRoomName(userId, uId), // TODO smallerId-biggerId
+				roomName: getRoomName(user_id, uId), // TODO smallerId-biggerId
 			}
 		}
 	)

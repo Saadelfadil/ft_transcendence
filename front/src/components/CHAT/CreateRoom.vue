@@ -180,9 +180,9 @@ export default defineComponent({
 						"locked": this.tmp_password.length > 0 ? true : false,
 						"password": this.tmp_password
 					},
-					{
-						headers: { Authorization: `Bearer ${localStorage.token}` }
-					}
+					// {
+					// 	headers: { Authorization: `Bearer ${localStorage.token}` }
+					// }
 				);
 
 	            if(!resp.data.status)
