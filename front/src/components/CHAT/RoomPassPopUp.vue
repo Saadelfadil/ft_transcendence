@@ -23,7 +23,7 @@ export default defineComponent({
         }
     },
     emits: ['checkpass'],
-    name: 'RoomPassPopUp',
+    name: 'RoomPassPopUpBlock',
     data(){
         return {
             user_room_pass: '' as string,

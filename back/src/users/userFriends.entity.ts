@@ -7,12 +7,12 @@ export class UserFriendsEntity extends BaseEntity
     id: number;
     
 
-    @Column("int", { array: true })
+    @Column("int", { array: true , default: []})
     user_friends: number[];
 
-    @Column("int", { array: true })
+    @Column("int", { array: true , default: []})
     user_blocked: number[];
 
-    @Column("int", { array: true })
+    @Column("int", { array: true , default: []})
     user_requested: number[];
 }

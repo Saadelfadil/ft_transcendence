@@ -45,7 +45,7 @@
 		<nav class="font-sans flex flex-col text-center content-center sm:flex-row sm:text-left sm:justify-between py-2 px-6 bg-white shadow sm:items-baseline w-full">
 
 		<div class="mb-2 sm:mb-0 flex flex-row">
-			{{ (this.roomInfo != null) ? this.roomInfo.name : '' }} <!-- will display room name username should be changed to roomName maybe -->
+			{{ (roomInfo != null) ? roomInfo.name : '' }} <!-- will display room name username should be changed to roomName maybe -->
 		</div>
 
 		<div class="sm:mb-0 self-center">
@@ -63,8 +63,8 @@
 			<div class="flex items-start" >
 				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
-					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="msg.image_url" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
-					<span class="block"> {{ msg.username }} </span>
+					<img class="hidden sm:block w-full h-auto rounded-full max-w-xs w-32 items-center border" loading="lazy" :src="msg.image_url" alt=""  style="width: 50px; margin: auto;">
+					<span class="block text-center"> {{ msg.username }} </span>
 				</div>
 				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
 				<span class="block"> {{ msg.msg }} </span>

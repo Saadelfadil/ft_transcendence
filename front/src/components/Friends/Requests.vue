@@ -48,7 +48,7 @@ import axios from 'axios';
 
 
 export default defineComponent({
-    name: 'Requests',
+    name: 'RequestsBlock',
     data()
     {
         return {

@@ -47,7 +47,7 @@ import { defineComponent } from "vue";
 
 
 export default defineComponent({
-  name: 'Ignore',
+  name: 'IgnoreBlock',
   data() {
     return {
       login: "ayghazal" as string,

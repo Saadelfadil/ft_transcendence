@@ -55,7 +55,8 @@
                         <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                             <div class="flex items-center">
                                 <div class="ml-2">
-                                    <div class="cursor-pointer" @click="redirect_left_player(oneroom.left_player.id)">
+                                    <div  @click="redirect_left_player(oneroom.left_player.id)"
+                                    :class="isValidToClick(oneroom.left_player.id)">
                                         <img id="showImage" class="rounded-full max-w-xs w-16 items-center border" :src="oneroom.left_player.image_url">
                                         <div class="text-center">{{oneroom.left_player.login}}</div>
                                     </div>
@@ -68,7 +69,7 @@
 
                             <div class="flex items-center">
                                 <div class="ml-5">
-                                    <div class="cursor-pointer" @click="redirect_left_player(oneroom.right_player.id)">
+                                    <div :class="isValidToClick(oneroom.right_player.id)" @click="redirect_left_player(oneroom.right_player.id)">
                                         <img id="showImage" class="rounded-full max-w-xs w-16 items-center border" :src="oneroom.right_player.image_url">
                                         <div class="text-center">{{oneroom.right_player.login}}</div>
                                     </div>
@@ -138,7 +139,7 @@ interface OneRoom{
 };
 
 export default defineComponent({
-    name: 'ProfileBlock',
+    name: 'StreamBlock',
     components: {
     },
     data()
@@ -195,6 +196,11 @@ export default defineComponent({
         await this.getUsers();
     },
     methods:{
+        isValidToClick(id:number){
+            if (id)
+                return 'cursor-pointer';
+            return '';
+        },
         async InitMatchHistory()
         {
             try{
@@ -234,7 +240,7 @@ export default defineComponent({
         },
         redirect_left_player(target_id:number)
         {
-            if (target_id === -1) {
+            if (target_id === 0) {
                 // which means playes against robot
                 return ;
             }
@@ -334,26 +340,28 @@ export default defineComponent({
             });
         }
     },
-    mounted(){
-        this.factor = 1;
-        this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        this.canvas.width = this.canvas.offsetWidth ;
-        //this.factor = this.canvas.width / this.canvas.width;
+    watch:{
+        user_id(){
+            this.factor = 1;
+            this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+            this.canvas.width = this.canvas.offsetWidth ;
+            //this.factor = this.canvas.width / this.canvas.width;
 
-        this.canvas.height = this.canvas.width * 0.7;
+            this.canvas.height = this.canvas.width * 0.7;
 
-        this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
-        this.canvasGrd = this.context.createRadialGradient(
-            this.canvas.width/2,
-                this.canvas.height/2,
-                5,
+            this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
+            this.canvasGrd = this.context.createRadialGradient(
                 this.canvas.width/2,
-                this.canvas.height/2,
-                this.canvas.height
-            );
-        this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
-        this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
-        this.renderGame();
+                    this.canvas.height/2,
+                    5,
+                    this.canvas.width/2,
+                    this.canvas.height/2,
+                    this.canvas.height
+                );
+            this.canvasGrd.addColorStop(0, "rgb(177,255,185)");
+            this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
+            this.renderGame();
+        }
     },
     unmounted(){
         console.log('stream unmounted');

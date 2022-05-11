@@ -443,9 +443,9 @@ export class AppController {
 			if (!data)
 				throw new UnauthorizedException();
 			const user :any = await this.appService.getUserById(data['id']);
-			const { wins, loses } = await this.appService.getUserByIdGame(data['id']);
-			user.wins = wins;
-			user.loses = loses;
+		
+			user.wins = user.wins;
+			user.loses = user.loss;
 			return user;
 		} catch (error) {
 			throw new UnauthorizedException();
@@ -478,7 +478,6 @@ export class AppController {
 
 		for (let i = 0; i < length; i +=  2)
 		{
-			console.log("id: ", usersId[i]);
 			const { id, login, image_url} = await this.appService.getUserById(usersId[i]);
 			tmp =  await this.appService.getUserById(usersId[i + 1]);
 			users.push({left_player: {id, login, image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
@@ -512,6 +511,13 @@ export class AppController {
 	// 	return profileData;
 	// }
 
+	@Get('users')
+	async users(){
+		const query = this.userRepository.createQueryBuilder('UserEntity');
+        const matchs = await query.getMany();
+		console.log(matchs);
+        return matchs;
+	}
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('exactuser')
@@ -520,9 +526,9 @@ export class AppController {
 		let tmp = false;
 		const {friend_id, user_id} = body;
 
-		const {login, image_url} = await this.appService.getUserById(friend_id);
+		const {login, image_url,  wins, loss} = await this.appService.getUserById(friend_id);
 		
-		const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
+		// const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
 
 
 		const { user_friends} = await this.appService.getUserByIdFriend(user_id);
@@ -536,7 +542,6 @@ export class AppController {
 		});
 		if (!tmp){
 			const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
-			console.log(user_requested);
 			user_requested.map((fr_id) => {
 				if (fr_id === user_id)
 				{
@@ -545,7 +550,7 @@ export class AppController {
 				}
 			});
 		}
-		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loses};
+		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loss};
 	}
 
 	@Post('logout')

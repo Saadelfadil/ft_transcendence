@@ -69,7 +69,7 @@ interface FriendProfile{
 
 
 export default defineComponent({
-    name: 'FriendProfile',
+    name: 'FriendProfileBlock',
     data()
     {
         return {

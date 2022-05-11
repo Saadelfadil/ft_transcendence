@@ -19,8 +19,9 @@ export default {
     methods: {
         async checkLogin()
         {
+            console.log("component name: ", (this as any).$options.name);
             if ((this as any).$options.name === "RouterLink" || 
-            (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === undefined) return 
+            (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === "LoginBlock") return 
             try{
                 const resp = await axios({
                     method: 'get',
@@ -43,6 +44,5 @@ export default {
     },
     async created(){
         await (this as any).checkLogin();
-        console.log("user id ", (this as any).user_id);
     }
 }

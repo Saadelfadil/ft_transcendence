@@ -49,7 +49,7 @@ import axios from 'axios';
 
 
 export default defineComponent({
-    name: 'FriendsBlock',
+    name: 'UserFriendsBlock',
     data()
     {
         return {

@@ -9,7 +9,9 @@
                         <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                             <div class="flex items-center">
                                 <div class="ml-2">
-                                    <div class="cursor-pointer" @click="redirect_left_player(onehistory.left_player.id)">
+                                    <div @click="redirect_left_player(onehistory.left_player.id)"
+                                    :class="isValidToClick(onehistory.left_player.id)"
+                                    >
                                         <img id="showImage" class="rounded-full max-w-xs w-32 items-center border" :src="onehistory.left_player.image_url">
                                         <div class="text-center">{{onehistory.left_player.login}}</div>
                                     </div>
@@ -29,7 +31,9 @@
 
                             <div class="flex items-center">
                                 <div class="ml-5">
-                                    <div class="cursor-pointer" @click="redirect_left_player(onehistory.right_player.id)">
+                                    <div  @click="redirect_left_player(onehistory.right_player.id)"
+                                        :class="isValidToClick(onehistory.right_player.id)"
+                                    >
                                         <img id="showImage" class="rounded-full max-w-xs w-32 items-center border" :src="onehistory.right_player.image_url">
                                         <div class="text-center">{{onehistory.right_player.login}}</div>
                                     </div>
@@ -72,7 +76,7 @@ interface OneHistory
 };
 
 export default defineComponent({
-    name: 'LeaderBoardBlock',
+    name: 'MatchHistoryBlock',
     data()
     {
         return {
@@ -90,6 +94,11 @@ export default defineComponent({
         await this.getUsers();
     },
     methods:{
+        isValidToClick(id:number){
+            if (id)
+                return 'cursor-pointer';
+            return '';
+        },
         async InitMatchHistory()
         {
             try{
@@ -125,7 +134,7 @@ export default defineComponent({
         },
         redirect_left_player(target_id:number)
         {
-            if (target_id === -1) {
+            if (target_id === 0) {
                 // which means playes against robot
                 return ;
             }

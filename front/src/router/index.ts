@@ -81,7 +81,7 @@ const routes: Array<RouteRecordRaw> = [
   {
   path: '/users',
   name: 'users',
-  redirect: {path: '/users/requests'},
+  redirect: {name: 'Requests'},
   component: UsersNavBarBlock,
   children: [
     {

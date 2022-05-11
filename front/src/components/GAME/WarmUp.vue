@@ -70,7 +70,7 @@ interface Ball {
 }
 
 export default  defineComponent({
-    
+    name: 'WarmUpBlock',
     data() {
         return {
             game_state: 0 as number,
@@ -271,11 +271,13 @@ export default  defineComponent({
             }
         }
     },
-    async mounted(){
-        console.log('warmup mounted');
-        await this.fillPlayersData();
-        //await this.isUserPlaying();
-        this.warmup();
+    watch:{
+        async user_id(){
+            console.log("at warm up: ", this.user_id);
+            await this.fillPlayersData();
+            //await this.isUserPlaying();
+            this.warmup();
+        }
     },
     unmounted(){
         console.log('warmup unmounted');
@@ -304,55 +306,6 @@ export default  defineComponent({
     
 }
 
-/* .msg {
-    font-size: 28px;
-} */
 
-/* .countdown {
-    font-size: 35px;
-}
-
-.popup {
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    top: 48%;
-    text-align: center;
-}
-
-.fadeIn {
-    -webkit-animation-name: fadeIn;
-    animation-name: fadeIn;
-    -webkit-animation-duration: 1s;
-    animation-duration: 1s;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    }
-    @-webkit-keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-    }
-    @keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-} 
-
-.match-data {
-    text-align: center;
-}
-
-.vs{
-    font-size: 30px;
-    font-weight: bold;
-}
-
-.player {
-    font-size: 20px;
-}
-
-.pong-table {
-
-} */
 
 </style>

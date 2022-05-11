@@ -24,7 +24,7 @@ import axios from 'axios';
 
 
 export default defineComponent({
-    name: 'Add',
+    name: 'AddBlock',
     data()
     {
         return {

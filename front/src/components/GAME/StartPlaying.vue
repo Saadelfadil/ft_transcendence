@@ -12,6 +12,7 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
     emits: ['startPlaying'],
+    name: 'StartPlayingBlock',
     methods: {
         startPressed(){
             this.$emit('startPlaying');

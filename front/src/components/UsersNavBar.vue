@@ -15,7 +15,7 @@ import { defineComponent } from 'vue';
 import Navbar from './Friends/Navbar.vue';
 
 export default defineComponent({
-    name: 'FriendsBlock',
+    name: 'UsersNavBarBlock',
     components : {
         Navbar,
     }
