@@ -4,7 +4,7 @@ import { CreateMessageDto } from "./dto/create-message.dto";
 import { MessagesService } from "./messages.service";
 
 
-@WebSocketGateway(7000, {cors: true })
+@WebSocketGateway(8001, {cors: true })
 export class MessageGateway {
 
 	constructor(

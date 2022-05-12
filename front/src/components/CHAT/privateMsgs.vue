@@ -42,7 +42,7 @@
 			<div class="flex items-start" >
 				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
-					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="'http://localhost:3000/uploads/'+msg.avatar" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
+					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="'http://localhost:8080/uploads/'+msg.avatar" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
 					<span class="block"> {{ msg.username }} </span>
 				</div>
 				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
@@ -136,20 +136,44 @@ const globalComponentRoomMessages =  defineComponent({
 
 	watch:{
 		async user_id(){
+			this.uId = +this.$route.query.uId;
 			this.joinedRooms = []; // testing;
 			this.blockedList = []; // testing
-			console.log("called in private msgs");
+			await Promise.all([this.getJoinedRooms(), this.getBlockedList()]).then(
+				(output:Array<any>) => {
+					console.log("from backend here");
+					console.log(output[0].data);
+					console.log(output[1].data);
+					this.joinedRooms = output[0].data.joinedRooms;
+					this.blockedList = output[1].data.blockedList;
+				}
+			);
 			await this.getUserMessages();
 	    	joinTheRoom(this.user_id, this.uId); // TODO
 		}
 	},
    methods: {
+		getJoinedRooms(){
+			return axios({
+				method: 'POST',
+				url: `http://localhost:8080/api/joinedAndBlockedRooms`,
+                data: {id:this.user_id}
+			})/*.then((resp:any)=>{
+				console.log(`tests ${resp.data.joinedRooms}`);
+			});*/
+		},
+		getBlockedList(){
+			return axios({
+				method: 'GET',
+				url: 'http://localhost:8080/block/users'
+			});
+		},
 		async getUserMessages()
         {
 			console.log(this.blockedList)
 			// Append roomId to the url
             const resp = await axios.get(
-				`http://localhost:3000/messages/${this.uId}`,
+				`http://localhost:8080/messages/${this.uId}`,
 				// `http://localhost:3000/room/1/messages`,
 				// {
 				// 	headers: { Authorization: `Bearer ${this.token}` }
@@ -163,7 +187,7 @@ const globalComponentRoomMessages =  defineComponent({
 		joinedAndBlocked(){
 			axios({
 				method: 'get',
-				url: `http://localhost:3000/messages/${this.uId}`
+				url: `http://localhost:8080/messages/${this.uId}`
 			}).then((data)=>{
 				console.log(`tests ${data}`);
 			});
@@ -237,7 +261,7 @@ const globalComponentRoomMessages =  defineComponent({
 	async addAdmin()
 	{
 		const resp = await axios.post(
-			`http://localhost:3000/room/${this.roomId}/add-admin`,
+			`http://localhost:8080/room/${this.roomId}/add-admin`,
 			{
 				"user_id": this.clickeduser_id
 			},
@@ -284,7 +308,7 @@ export default globalComponentRoomMessages;
 //:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
-const socket = io("http://localhost:8000")
+const socket = io("http://localhost:8001")
 
 const getRoomName = (user_id: number, uId: number) => {
 	if(user_id < uId)

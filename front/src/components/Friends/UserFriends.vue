@@ -29,7 +29,7 @@
             <div class=" flex gap-x-4">
               <button @click="removeFriend(login.id)" class='py-2 px-4 border-red-400 text-red-400 hover:shadow-lg rounded-md border'>Unfriend</button>
               <button @click="func('Block')" class='py-2 px-4 border-red-400 text-red-400 hover:shadow-lg rounded-md border'>Block</button>
-              <button @click="func('Message')" class='py-2 px-4 border-blue-400 text-blue-400 hover:shadow-lg rounded-md border'>Message</button>
+              <button @click="directMessage(login.id)" class='py-2 px-4 border-blue-400 text-blue-400 hover:shadow-lg rounded-md border'>Message</button>
             </div>
 
           </div>
@@ -60,6 +60,9 @@ export default defineComponent({
         }
     },
     methods : {
+      directMessage(friend_id:number){
+        router.push({name: 'privatemsgs', query: {uId:friend_id}});
+      },
       async getFriends()
       {
           try{

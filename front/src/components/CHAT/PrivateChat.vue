@@ -93,7 +93,7 @@ const globalComponent = defineComponent({
             try {
 
                 const resp = await axios.get(
-					`http://localhost:3000/messages`,
+					`http://localhost:8080/messages`,
 					// {
 					// 	headers: { Authorization: `Bearer ${this.token}` }
 					// }

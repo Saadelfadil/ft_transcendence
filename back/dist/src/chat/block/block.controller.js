@@ -45,6 +45,7 @@ let BlockController = class BlockController {
     }
 };
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -53,6 +54,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BlockController.prototype, "blockUser", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Get)('users'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -60,6 +62,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BlockController.prototype, "blockedList", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Delete)(),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -68,6 +71,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BlockController.prototype, "unBlockUser", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Req)()),

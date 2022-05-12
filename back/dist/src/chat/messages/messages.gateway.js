@@ -51,7 +51,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MessageGateway.prototype, "joinRoom", null);
 MessageGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)(7000, { cors: true }),
+    (0, websockets_1.WebSocketGateway)(8001, { cors: true }),
     __metadata("design:paramtypes", [block_service_1.BlockService,
         messages_service_1.MessagesService])
 ], MessageGateway);

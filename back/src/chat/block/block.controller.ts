@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Req, ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
 import { AppService } from 'src/users/app.service';
 import { AuthenticatedGuard } from 'src/users/auth.guard';
 import { BlockService } from './block.service';
@@ -12,6 +12,7 @@ export class BlockController {
 		private readonly userService: AppService,
 		) {}
 
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
 	async blockUser(@Body() createBlockDto: CreateBlockDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
@@ -20,6 +21,7 @@ export class BlockController {
 		return this.blockService.blockUser(sessionId, createBlockDto);
 	}
 
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('users')
 	async blockedList(@Req() req: Request) {
 		// const sessionId: number = 1;
@@ -29,6 +31,7 @@ export class BlockController {
 		return this.blockService.blockedListUsers(sessionId); // Return list of all blocked users
 	}
 	
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Delete()
 	async unBlockUser(@Body() createBlockDto: CreateBlockDto, @Req() req: Request) {
 		// const sessionId: number = 1;
@@ -38,6 +41,7 @@ export class BlockController {
 		return this.blockService.unBlockUser(sessionId, createBlockDto);
 	}
 
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get(':id')
 	async isBlocked(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
 		// const sessionId: number = 1;

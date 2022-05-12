@@ -20,7 +20,7 @@
             "
             v-for="login in user" :key="login.id"
           >
-          <router-link :to="{ name : 'FriendProfile'}">
+          <router-link :to="{ name : 'FriendProfile', query: {friend_id: login.id}}">
             <p class='py-2 px-4 border-gray-900 text-gray-900 hover:shadow-md rounded-md cursor-pointer'>
               {{ login.login }}
             </p>
