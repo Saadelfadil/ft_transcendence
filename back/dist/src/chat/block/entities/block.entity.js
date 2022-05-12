@@ -22,7 +22,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Block.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)("int", { array: true }),
+    (0, typeorm_1.Column)("int", { array: true, default: [] }),
     __metadata("design:type", Array)
 ], Block.prototype, "blocked", void 0);
 Block = __decorate([

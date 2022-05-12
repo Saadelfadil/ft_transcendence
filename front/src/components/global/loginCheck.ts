@@ -33,6 +33,7 @@ export default {
                 (this as any).user_id = resp.data.id;
                 (this as any).avatar = resp.data.image_url;
                 (this as any).username = resp.data.login;
+                (this as any).joinedRooms = resp.data.joinedRooms;
             }
             catch(e)
             {

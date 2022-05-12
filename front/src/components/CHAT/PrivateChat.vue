@@ -1,7 +1,7 @@
 <template>
     <div>
     <div class="grid grid-cols-1 min-w-full border rounded">
-                <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
+                <ul class="overflow-auto hideScrollBar" style="height: 85vh;">
                     <li>
                         <div class="px-6"
                             v-for="message in privateList" :key="message.user_id"
@@ -42,11 +42,6 @@
 
 
 <script lang="ts">
-// interface Room{
-//     room_id : number; // i use this variable as index be carful
-//     room_name: string;
-//     is_locked: boolean;
-// }
 
 interface Room{
     id : number; // i use this variable as index be carful
@@ -75,7 +70,8 @@ const globalComponent = defineComponent({
 			user_id: 0,
 			username: '' as String,
 			avatar: '' as String,
-			joinedRooms: [] as Number[],        
+			joinedRooms: [] as Number[], // i do not know why this var is here (!!!!!) 
+            privateList: [] as Array<any>,   
         }
     },
 	// mounted() {
@@ -88,7 +84,6 @@ const globalComponent = defineComponent({
   	// },
       watch:{
           user_id(){
-              this.joinedRooms = []; // just for testing
               this.getUsers();
           }
       },
@@ -99,35 +94,23 @@ const globalComponent = defineComponent({
 
                 const resp = await axios.get(
 					`http://localhost:3000/messages`,
-					{
-						headers: { Authorization: `Bearer ${this.token}` }
-					}
+					// {
+					// 	headers: { Authorization: `Bearer ${this.token}` }
+					// }
 				);
                 const data = resp.data;
-
-                store.commit('updatePrivateList', data);
+                this.privateList = data.resp;
             }
 			catch(e)
             {
                 console.log(`while trying to get data for rooms ${e}`);
             }
         },
-
-  
-        
         async getUserData(user_id:number)
         {       
-
             router.push({name: 'privatemsgs', query: { uId: user_id}});
         },
  
-    },
-
-    computed: {
-        privateList() : Array<any>
-        {
-            return store.getters.getPrivateList;
-        }
     }
 })
 

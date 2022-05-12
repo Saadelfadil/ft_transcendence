@@ -90,7 +90,7 @@ export default defineComponent({
             user_info: {
                 user_name: '' as string,
                 user_id: 0 as number,
-                avatar_file_name: 'logo.png' as string, /* i will place image in assets folder and avatar_url i will get it in from database*/
+                avatar_file_name: '' as string, /* i will place image in assets folder and avatar_url i will get it in from database*/
                 avatar_file_obj: null as any,
                 twof_qrcode: '' as string,
                 twof_secret: '' as string,
@@ -278,7 +278,6 @@ export default defineComponent({
                     this.user_info.twof_secret = response.data.twof_secret;
                     this.user_info.wins = response.data.wins;
                     this.user_info.loses = response.data.loses;
-                    store.commit('updateUserData', {user_name: this.user_info.user_name, user_id: this.user_info.user_id});
                 }, (error) => {
                     console.log(error);
                 });

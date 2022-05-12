@@ -146,10 +146,6 @@ export default defineComponent({
         },
     },
     computed: {
-        playerHistory(): Array<any>
-        {
-            return store.getters.getPlayerHistory;
-        },
         historyDisplay() : Array<OneHistory>
         {
             return this.match_display.reverse();

@@ -4,10 +4,14 @@ import ProfileBlock from '@/components/Profile.vue'
 import LeaderBoardBlock from '@/components/LeaderBoard.vue'
 import MatchHistoryBlock from '@/components/MatchHistory.vue'
 import GameBlock from '@/components/GAME/Game.vue'
+
+
 import ChatBlock from '@/components/CHAT/Chat.vue'
 import PublicChatBlock from '@/components/CHAT/PublicChat.vue'
 import PrivateChatBlock from '@/components/CHAT/PrivateChat.vue'
 import CreateRoomBlock from '@/components/CHAT/CreateRoom.vue'
+import PrivateMsgsBlock from '@/components/CHAT/privateMsgs.vue'
+
 import ErrorPageBlock from '@/components/ErrorPage.vue';
 import ChatPublicMsgBlock from '@/components/CHAT/ChatPublicRoomMsg.vue'
 import LoginBlock from '@/components/login.vue';
@@ -126,6 +130,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'public',
         name: 'chatpublic',
         component: PublicChatBlock
+      },
+      {
+        path: 'privatemsgs',
+        name: 'privatemsgs',
+        component : PrivateMsgsBlock
       },
       {
         path: 'createroom',

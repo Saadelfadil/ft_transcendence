@@ -74,9 +74,12 @@ export declare class AppController {
         wins: number;
         loses: number;
     }>;
-    logout(response: Response): Promise<string>;
     getloginbyid(body: any): Promise<{
         login: string;
         image_url: string;
     }>;
+    getUserJoindAndBlocked(body: any): Promise<{
+        joinedRooms: number[];
+    }>;
+    logout(response: Response): Promise<string>;
 }

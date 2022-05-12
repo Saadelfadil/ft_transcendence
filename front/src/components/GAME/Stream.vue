@@ -5,7 +5,7 @@
 
   <div class="border-b-2 block md:flex" style="height:80vh">
 
-    <div class="w-full md:w-3/6  bg-blue">
+    <div class="w-full md:w-3/6">
 
         <div class="overflow-auto" style="height: 80vh;">
 

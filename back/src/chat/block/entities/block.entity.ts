@@ -8,7 +8,7 @@ export class Block {
 	@Column()
 	user_id: number;
 
-	@Column("int", { array: true })
+	@Column("int", { array: true , default: []})
 	blocked: number[];
 
 }

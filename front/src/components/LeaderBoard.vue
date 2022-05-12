@@ -4,7 +4,7 @@
         <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
             <li>
                 <div class="px-6"
-                v-for="leader in all_leaders" :key="leader.id"
+                v-for="leader in leaders" :key="leader.id"
                 >
                     <div class="flex justify-between items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                         <div class="ml-2">
@@ -76,14 +76,14 @@ export default defineComponent({
             }catch(e){
                 console.log(e);
             }
-        },
-        based_on_points(a:Leader, b:Leader){
-            return a.points > b.points;
         }
     },
     computed: {
         leaders() : Array<Leader> {
-            return this.all_leaders.sort((this.based_on_points as any));
+            return this.all_leaders.sort((a, b) => {
+                let win = b.wins - a.wins;
+                return (win === 0) ? b.points - a.points : win;
+            });
         }
     }
 })

@@ -339,14 +339,19 @@ let AppController = class AppController {
         }
         return { login: login, image_url: image_url, is_friend: tmp, wins: wins, loses: loss };
     }
-    async logout(response) {
-        response.clearCookie('jwt');
-        return "Cookies Clean";
-    }
     async getloginbyid(body) {
         const { id } = body;
         const { login, image_url } = await this.appService.getUserById(id);
         return { login: login, image_url: image_url };
+    }
+    async getUserJoindAndBlocked(body) {
+        const { id } = body;
+        const { joinedRooms } = await this.appService.getUserById(id);
+        return { joinedRooms: joinedRooms };
+    }
+    async logout(response) {
+        response.clearCookie('jwt');
+        return "Cookies Clean";
     }
 };
 __decorate([
@@ -496,13 +501,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getExactUser", null);
 __decorate([
-    (0, common_1.Post)('logout'),
-    __param(0, (0, common_1.Res)({ passthrough: true })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AppController.prototype, "logout", null);
-__decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Post)('getloginbyid'),
     __param(0, (0, common_1.Body)()),
@@ -510,6 +508,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getloginbyid", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
+    (0, common_1.Post)('joinedAndBlockedRooms'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "getUserJoindAndBlocked", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "logout", null);
 AppController = __decorate([
     (0, common_1.Controller)('api'),
     __param(2, (0, typeorm_2.InjectRepository)(user_entity_1.UserEntity)),

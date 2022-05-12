@@ -12,6 +12,8 @@ import { UserFriendsEntity } from './userFriends.entity';
 import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 import { match } from 'assert';
+import { use } from 'passport';
+import { join } from 'path';
 const speakeasy = require('speakeasy');
 
 @Controller('api')
@@ -553,18 +555,27 @@ export class AppController {
 		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loss};
 	}
 
+	@UseGuards(AuthenticatedGuard)
+	@Post('getloginbyid')
+	async getloginbyid(@Body() body){
+		const {id} = body;
+		const {login, image_url} = await this.appService.getUserById(id);
+		return {login: login, image_url: image_url};
+	}
+	@UseGuards(AuthenticatedGuard)
+	@Post('joinedAndBlockedRooms')
+	async getUserJoindAndBlocked(@Body() body){
+		const {id} = body;
+		const {joinedRooms} = await this.appService.getUserById(id);
+		return {joinedRooms: joinedRooms}; // i will add here blocked rooms too
+	}
+
+
 	@Post('logout')
 	async logout(@Res({ passthrough: true }) response: Response) {
 		response.clearCookie('jwt');
 		return "Cookies Clean";
 	}
 
-	@UseGuards(AuthenticatedGuard)
-    @Post('getloginbyid')
-    async getloginbyid(@Body() body){
-        const {id} = body;
-        const {login, image_url} = await this.appService.getUserById(id);
-        return {login: login, image_url: image_url};
-    }
 
 }

@@ -146,10 +146,10 @@ const globalComponentRoomMessages =  defineComponent({
   	},
 	  watch:{
 		  user_id(){
-			  console.log("current id: ", this.user_id);
-			this.getRoomsMessages();
-			this.getRoomsInfo();
-			joinTheRoom(this.user_id, this.roomId);
+				console.log("current id: ", this.user_id);
+				this.getRoomsMessages();
+				this.getRoomsInfo();
+				joinTheRoom(this.user_id, this.roomId);
 		  }
 	},
    methods: {

@@ -113,12 +113,13 @@ const globalComponentRoomMessages =  defineComponent({
 		user_id: 0,
 		username: '' as string,
 		avatar: '' as string,
-		joinedRooms: [] as number[],
+		joinedRooms: [] as number[], // i do not know why this var is here
 		blockedList: [] as number[],
 		roomInfo: null as any,
 		invalidTime: false as boolean,
       }
    },
+
 //    mounted() {
 
 // 		if (localStorage.joinedRooms) {
@@ -132,32 +133,41 @@ const globalComponentRoomMessages =  defineComponent({
 // 	   this.getUserMessages();
 // 	   joinTheRoom(localStorage.user_id, this.uId); // TODO
 //   	},
-	  watch:{
-		  user_id(){
-			  this.joinedRooms = []; // testing;
-			  this.blockedList = []; // testing
-			  	this.getUserMessages();
-	    		joinTheRoom(localStorage.user_id, this.uId); // TODO
-		  }
-	  },
+
+	watch:{
+		async user_id(){
+			this.joinedRooms = []; // testing;
+			this.blockedList = []; // testing
+			console.log("called in private msgs");
+			await this.getUserMessages();
+	    	joinTheRoom(this.user_id, this.uId); // TODO
+		}
+	},
    methods: {
 		async getUserMessages()
         {
-
 			console.log(this.blockedList)
-
 			// Append roomId to the url
             const resp = await axios.get(
 				`http://localhost:3000/messages/${this.uId}`,
 				// `http://localhost:3000/room/1/messages`,
-				{
-					headers: { Authorization: `Bearer ${this.token}` }
-				}
+				// {
+				// 	headers: { Authorization: `Bearer ${this.token}` }
+				// }
 			);
             const data = resp.data;
+			console.log(data);
             store.commit('updatePublicRoomMsgs', data);
             // now i will redirect him to chat block messages
         },
+		joinedAndBlocked(){
+			axios({
+				method: 'get',
+				url: `http://localhost:3000/messages/${this.uId}`
+			}).then((data)=>{
+				console.log(`tests ${data}`);
+			});
+		},
       addMessage()
       {
 
@@ -231,9 +241,9 @@ const globalComponentRoomMessages =  defineComponent({
 			{
 				"user_id": this.clickeduser_id
 			},
-			{
-				headers: { Authorization: `Bearer ${localStorage.token}` }
-			}
+			// {
+			// 	headers: { Authorization: `Bearer ${localStorage.token}` }
+			// }
 		);
 
 		if(!resp.data.status)
@@ -274,7 +284,7 @@ export default globalComponentRoomMessages;
 //:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
-const socket = io("http://localhost:7000")
+const socket = io("http://localhost:8000")
 
 const getRoomName = (user_id: number, uId: number) => {
 	if(user_id < uId)

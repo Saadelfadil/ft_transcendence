@@ -1,7 +1,7 @@
 <template>
     <div>
     <div class="grid grid-cols-1 min-w-full border rounded">
-                <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
+                <ul class="overflow-auto hideScrollBar" style="height: 85vh;">
                     <li>
                         <div class="px-6"
                             v-for="room in rooms" :key="room.id"
@@ -22,7 +22,7 @@
                                             @keypress="userIsTyping"
                                             autoComplete="true" type="password" name="serch" placeholder="Password" class="bg-white h-10 px-5 pr-20 rounded-full text-sm focus:outline-none"
                                             v-model="user_room_pass"
-                                            :class="{'bg-pink-500' : invalid_pass}"
+                                            :class="badInput"
                                             >
                                         </div>
                                     </div>
@@ -75,11 +75,7 @@
 
 
 <script lang="ts">
-// interface Room{
-//     room_id : number; // i use this variable as index be carful
-//     room_name: string;
-//     is_locked: boolean;
-// }
+
 
 interface Room{
     id : number; // i use this variable as index be carful
@@ -120,33 +116,29 @@ const globalComponent = defineComponent({
 
   	// },
       watch:{
-          user_id(){
-              console.log("called with id: ", this.username);
-              console.log("called avatar: ", this.avatar);
-              this.getRooms();
-              this.joinedRooms = []; // testing
+          async user_id(){
+            await Promise.all([this.newGetRooms(), this.getJoinedRooms()]).then((output:Array<any>) => {
+                store.commit('updateRooms', output[0].data);
+                this.joinedRooms = output[1].data.joinedRooms;
+            });
           }
       },
     methods: {
-        async getRooms()
-        {
-            try {
-
-                const resp = await axios.get(
-					`http://localhost:8080/room`,
-					{
-						headers: { Authorization: `Bearer ${this.token}` }
-					}
-				);
-                const data = resp.data;
-
-                store.commit('updateRooms', data);
-            }
-			catch(e)
-            {
-                console.log(`while trying to get data for rooms ${e}`);
-            }
+        newGetRooms(){
+            return axios({
+                method: 'get',
+                url: `http://localhost:8080/room`,
+            });
         },
+		getJoinedRooms(){
+			return axios({
+				method: 'POST',
+				url: `http://localhost:8080/api/joinedAndBlockedRooms`,
+                data: {id:this.user_id}
+			})/*.then((resp:any)=>{
+				console.log(`tests ${resp.data.joinedRooms}`);
+			});*/
+		},
         joinToRoom(room_id:number, is_locked:boolean)
         {
             console.log("joing to: ", room_id);
@@ -168,31 +160,20 @@ const globalComponent = defineComponent({
                 // i will send password to backend to chek if password is correct
                 // just for testing i'm assuming that password is correct so i will fill the store
                 // and redirect him to chat messages block
+                console.log("joining to private with pass: ", tmp_pass);
                 joinTheRoom(this.user_id, room.id, tmp_pass);
             }else{
-                this.invalid_pass = true;
+                this.passIsInvalid();
             }
         },
-        
+        passIsInvalid(){
+            this.invalid_pass = true;
+        },
         async getRoomData(room_id:number)
         {     
             console.log("called get room data");  
-            // const resp = await axios.get(
-			// 	`http://localhost:8080ß/room/${room_id}/messages`,
-			// 	{
-			// 		headers: { Authorization: `Bearer ${store.getters.getUserToken}` }
-			// 	}
-			// );
-            // const data = resp.data;
-			// store.commit('setRoomId', room_id);
-            // store.commit('updatePublicRoomMsgs', data);
-            // now i will redirect him to chat block messages
 
 			store.commit('setRoomId', room_id);
-
-
-
-
             router.push({name: 'chatpublicmsg', query: { roomId: room_id}});
         },
         userIsTyping(e:any)
@@ -211,10 +192,13 @@ const globalComponent = defineComponent({
         ignorePassword()
         {
             this.typing_room_id = -1;
+            this.invalid_pass = false;
             this.user_room_pass = '';
         },
 		isJoined(id:number)
 		{
+            if (this.joinedRooms === undefined)
+                return true; // maybe false
 			return this.joinedRooms.includes(id);
 		}
     },
@@ -230,6 +214,11 @@ const globalComponent = defineComponent({
         rooms() : Array<Room>
         {
             return store.getters.getRooms;
+        },
+        badInput(): string {
+            if (this.invalid_pass)
+                return 'bg-red-600';
+            return '';
         }
     }
 })
@@ -263,6 +252,7 @@ const joinTheRoom = (user_id: number, roomId: number, password: string) => {
 			else
 			{
 				console.log("Error joining the room"); // ok
+                globalComponent.methods!.passIsInvalid();
 			}
 		}
 	)
