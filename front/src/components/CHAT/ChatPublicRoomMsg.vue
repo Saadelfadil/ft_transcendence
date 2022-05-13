@@ -63,7 +63,7 @@
 			<div class="flex items-start" >
 				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
-					<img class="hidden sm:block w-full h-auto rounded-full max-w-xs w-32 items-center border" loading="lazy" :src="msg.image_url" alt=""  style="width: 50px; margin: auto;">
+					<img class="hidden sm:block w-full h-auto rounded-full max-w-xs w-32 items-center border w-14" loading="lazy" :src="msg.image_url" alt=""  style="margin: auto;">
 					<span class="block text-center"> {{ msg.username }} </span>
 				</div>
 				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">

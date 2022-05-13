@@ -18,15 +18,12 @@
                                 :class="'bg-green-500 hover:bg-green-600'"
                                 >
 
-
-								<div @click="getUserData(message.user_id)">
+                                <div @click="getUserData(message.user_id)">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" style="float: left; margin-right: 8px;"  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
 									</svg>
 									<span>Chat</span>
 								</div>
-
-
 
                                 </div>
                             </div>
@@ -53,7 +50,6 @@ interface Room{
 
 import { defineComponent } from 'vue'
 import axios from 'axios';
-import store from '@/store';
 import router from '@/router';
 
 const globalComponent = defineComponent({
@@ -74,14 +70,6 @@ const globalComponent = defineComponent({
             privateList: [] as Array<any>,   
         }
     },
-	// mounted() {
-
-	// 	if (localStorage.joinedRooms) {
-	// 		this.joinedRooms = localStorage.joinedRooms;
-	// 	}
-    //     this.getUsers();
-
-  	// },
       watch:{
           user_id(){
               this.getUsers();
@@ -94,9 +82,6 @@ const globalComponent = defineComponent({
 
                 const resp = await axios.get(
 					`http://localhost:8080/messages`,
-					// {
-					// 	headers: { Authorization: `Bearer ${this.token}` }
-					// }
 				);
                 const data = resp.data;
                 this.privateList = data.resp;

@@ -510,7 +510,7 @@ __decorate([
 ], AppController.prototype, "getloginbyid", null);
 __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
-    (0, common_1.Post)('joinedAndBlockedRooms'),
+    (0, common_1.Post)('joinedRooms'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

@@ -28,7 +28,7 @@ let MessagesService = class MessagesService {
     }
     async findOne(sessionId, userId) {
         return (0, typeorm_2.getConnection)().query(`
-			SELECT public."message".*, public."users".username, public."users".id, public."users".avatar  FROM
+			SELECT public."message".*, public."users".username, public."users".id, public."users".image_url  FROM
 				public."message"
 				INNER JOIN
 					public."users"

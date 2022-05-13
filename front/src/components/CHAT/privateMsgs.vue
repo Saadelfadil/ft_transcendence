@@ -17,7 +17,7 @@
 					<button @click="profileClicked" class="mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Profile</button>
 
 
-					<div v-if="clickeduser_id != user_id || true" class="w-full">
+					<div v-if="clickeduser_id != user_id" class="w-full">
 						<button @click="inviteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Invite </button>
 					</div>
 	
@@ -40,11 +40,12 @@
 		
 		<div class="chat-message" v-for="msg in currentMsgs" :key="msg.id">
 			<div class="flex items-start" >
-				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
-					<img class="hidden sm:block w-full h-auto" loading="lazy" :src="'http://localhost:8080/uploads/'+msg.avatar" alt="" width="50px" height="50px" style="width: 50px; margin: auto;">
-					<span class="block"> {{ msg.username }} </span>
+					<img class="hidden sm:block w-full h-auto rounded-full max-w-xs w-32 items-center border w-14" loading="lazy" :src="msg.image_url" style="margin: auto;">
+					<span class="block text-center"> {{ msg.username }} </span>
 				</div>
+
+
 				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
 				<span class="block"> {{ msg.msg }} </span>
 				<span class="block text-xs text-right"> {{ timestampToDateTime(+msg.created) }} </span>
@@ -88,18 +89,19 @@ interface message{
 	id: number;
 	room_id: number;
 	from_id: number;
-	avatar: string;
+	image_url: string;
 	username: string;
 	msg: string;
 	created: string;
 }
 
 
-const globalComponentRoomMessages =  defineComponent({
+export default  defineComponent({
    name: 'PrivateMsgsBlock',
    data()
    {
       return {
+		socket : io("http://localhost:8001"),
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
 		isOwner: false as boolean,
@@ -107,60 +109,41 @@ const globalComponentRoomMessages =  defineComponent({
 		numOfSeconds: '' as string,
 		isPopUp: false as boolean,
         curMsgData: '' as string,
-        uId: Number(this.$route.query.uId),
+        uId: Number(this.$route.query.uId), // probably means friend id that you are talking to
 		roomId: 1,
 		token: '' as string,
 		user_id: 0,
 		username: '' as string,
 		avatar: '' as string,
-		joinedRooms: [] as number[], // i do not know why this var is here
-		blockedList: [] as number[],
+		joinedRooms: [] as Array<number>, // i do not know why this var is here
+		blockedList: [] as Array<number>,
 		roomInfo: null as any,
 		invalidTime: false as boolean,
       }
    },
 
-//    mounted() {
-
-// 		if (localStorage.joinedRooms) {
-// 			this.joinedRooms = localStorage.joinedRooms;
-// 		}
-// 		if (localStorage.blockedList) {
-
-// 			this.blockedList = localStorage.blockedList;
-
-// 		}
-// 	   this.getUserMessages();
-// 	   joinTheRoom(localStorage.user_id, this.uId); // TODO
-//   	},
-
 	watch:{
 		async user_id(){
-			this.uId = +this.$route.query.uId;
-			this.joinedRooms = []; // testing;
-			this.blockedList = []; // testing
 			await Promise.all([this.getJoinedRooms(), this.getBlockedList()]).then(
 				(output:Array<any>) => {
 					console.log("from backend here");
-					console.log(output[0].data);
-					console.log(output[1].data);
-					this.joinedRooms = output[0].data.joinedRooms;
-					this.blockedList = output[1].data.blockedList;
+					console.log("joined rooms: ", output[0].data.joinedRooms);
+					console.log("blocked list: ", output[1].data);
+					this.joinedRooms = Array(output[0].data.joinedRooms);
+					this.blockedList =  Array(output[1].data);
 				}
 			);
 			await this.getUserMessages();
-	    	joinTheRoom(this.user_id, this.uId); // TODO
-		}
+			this.acceptingMsg();
+		},
 	},
    methods: {
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
-				url: `http://localhost:8080/api/joinedAndBlockedRooms`,
+				url: `http://localhost:8080/api/joinedRooms`,
                 data: {id:this.user_id}
-			})/*.then((resp:any)=>{
-				console.log(`tests ${resp.data.joinedRooms}`);
-			});*/
+			});
 		},
 		getBlockedList(){
 			return axios({
@@ -170,19 +153,12 @@ const globalComponentRoomMessages =  defineComponent({
 		},
 		async getUserMessages()
         {
-			console.log(this.blockedList)
-			// Append roomId to the url
+			console.log(`display blocked list ${this.blockedList}`)
             const resp = await axios.get(
 				`http://localhost:8080/messages/${this.uId}`,
-				// `http://localhost:3000/room/1/messages`,
-				// {
-				// 	headers: { Authorization: `Bearer ${this.token}` }
-				// }
 			);
             const data = resp.data;
-			console.log(data);
             store.commit('updatePublicRoomMsgs', data);
-            // now i will redirect him to chat block messages
         },
 		joinedAndBlocked(){
 			axios({
@@ -198,24 +174,51 @@ const globalComponentRoomMessages =  defineComponent({
          const tmp = this.curMsgData.trim();
          if (tmp.length !== 0)
          {
-			handleSubmitNewMessage(this.user_id, this.username, this.avatar, this.uId, tmp);
+			 console.log("trying to send");
+			this.NewhandleSubmitNewMessage(tmp);
 			this.curMsgData = '';
          }
-
-			console.log(this.blockedList)
-
       },
 
+	NewhandleSubmitNewMessage(message:string){
+			const messageData = {
+				from: this.user_id,
+				to: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: getRoomName(this.user_id, this.uId),
+				message: message
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+						this.newMessage(messageData);
+					}
+				}
+			)
+	},
+
+	acceptingMsg(){
+		this.socket.on("message", ({data}) => {
+			this.newMessage(data);
+		});
+	},
 	  newMessage(data: any)
       {
-			if( !localStorage.blockedList.includes(data.from) )
+			if( !this.blockedList.includes(data.from) )
 		  	{
 			  	const msgObj = {
                   	id: 0,
 					room_id: 0,
 					from_id: data.from,
 					username: data.username,
-					avatar: data.avatar,
+					image_url: data.avatar,
 					msg: data.message,
 					created: Date.now(),
 				};
@@ -225,21 +228,21 @@ const globalComponentRoomMessages =  defineComponent({
 	  },
 	  timestampToDateTime(unix_timestamp: number)
 	  {
-			var a = new Date(unix_timestamp);
-			var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-			var year = a.getFullYear();
-			var month = months[a.getMonth()];
-			var date = a.getDate();
-			var hour = a.getHours();
-			var min = a.getMinutes();
-			var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
+			let a = new Date(unix_timestamp);
+			let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+			let year = a.getFullYear();
+			let month = months[a.getMonth()];
+			let date = a.getDate();
+			let hour = a.getHours();
+			let min = a.getMinutes();
+			let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
 			return time;
 	  },
 	  userIconClicked(msg:message)
 	  {
 		  	this.isPopUp = true;
 			this.clickeduser_id = msg.from_id;
-		  	console.log(`message clicked`);
+		  	console.log(`message clicked ${msg.from_id} user id is ${this.user_id}`);
 	  },
 	  disablePopUp()
 	  {
@@ -248,8 +251,12 @@ const globalComponentRoomMessages =  defineComponent({
 	  },
 	  profileClicked()
 	  {
-		  console.log(`profile clicked`);
-		  this.isPopUp = false;
+		this.isPopUp = false;
+		if (this.clickeduser_id !== this.user_id){
+			router.push({name: 'FriendProfile', query: {friend_id: this.clickeduser_id}});
+			return;
+		}
+		router.push({name: 'profile'});
 	  },
 	  inviteClicked()
 	  {
@@ -265,9 +272,6 @@ const globalComponentRoomMessages =  defineComponent({
 			{
 				"user_id": this.clickeduser_id
 			},
-			// {
-			// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-			// }
 		);
 
 		if(!resp.data.status)
@@ -299,17 +303,6 @@ const globalComponentRoomMessages =  defineComponent({
 
 })
 
-export default globalComponentRoomMessages;
-
-
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-
-
-const socket = io("http://localhost:8001")
-
 const getRoomName = (user_id: number, uId: number) => {
 	if(user_id < uId)
 		return user_id+"-"+uId;
@@ -317,57 +310,7 @@ const getRoomName = (user_id: number, uId: number) => {
 		return uId+"-"+user_id;
 }
 
-// receive message
-socket.on("message", ({ data }) => {
-	globalComponentRoomMessages.methods!.newMessage(data);
-})
 
-// send message
-const handleSubmitNewMessage = (from: number, username: string, avatar: string, to: number, message: string) => {
-
-		const messageData = {
-						from: from,
-						to: to,
-						username: username,
-						avatar: avatar,
-						roomName: getRoomName(from, to),
-						message: message
-					};
-	socket.emit(
-				'private-chat',
-				{ 
-					data: messageData
-				},
-				// send message callback
-				(response: any) => {
-					if(response.status)
-					{
-						globalComponentRoomMessages.methods!.newMessage(messageData);
-					}
-				}
-			)
-	}
-
-
-
-// // join room
-const joinTheRoom = (user_id: number, uId: number) => {
-	socket.emit(
-		'join-user',
-		{ 
-			data: {
-				roomName: getRoomName(user_id, uId), // TODO smallerId-biggerId
-			}
-		}
-	)
-}
-
-
-
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 </script>
 

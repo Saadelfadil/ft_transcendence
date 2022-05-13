@@ -34,6 +34,7 @@ let MessagesController = class MessagesController {
         return this.messagesService.create(sessionId, createMessageDto);
     }
     async findAll(req) {
+        console.log(`normal get request`);
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
         return this.messagesService.getChatList(sessionId);
@@ -50,6 +51,7 @@ let MessagesController = class MessagesController {
     }
 };
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -58,6 +60,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MessagesController.prototype, "create", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -65,6 +68,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MessagesController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Req)()),
@@ -73,6 +77,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MessagesController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Req)()),

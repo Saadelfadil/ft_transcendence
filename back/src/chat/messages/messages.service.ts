@@ -28,7 +28,7 @@ export class MessagesService {
 	async findOne(sessionId: number, userId: number) {
 
 		return getConnection().query(`
-			SELECT public."message".*, public."users".username, public."users".id, public."users".avatar  FROM
+			SELECT public."message".*, public."users".username, public."users".id, public."users".image_url  FROM
 				public."message"
 				INNER JOIN
 					public."users"

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpException, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpException, ClassSerializerInterceptor, HttpStatus, UseGuards, Req, UseInterceptors } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -20,6 +20,7 @@ export class MessagesController {
 	// Save message
 		- from_id, to_id, msg
 	*/
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
 	async create(@Body() createMessageDto: CreateMessageDto,  @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
@@ -32,8 +33,10 @@ export class MessagesController {
 	}
 
 	// Display Users list with thier last msg
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get()
 	async findAll(@Req() req: Request) {
+		console.log(`normal get request`);
 		// const sessionId : number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
@@ -43,17 +46,17 @@ export class MessagesController {
 	}
 
 	// Get my messages with user (:id)
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get(':id')
 	async findOne(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
 		// const sessionId : number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		
-
 		return this.messagesService.findOne(sessionId, +id);
 	}
 
 	// Delete all messages that i've had with this user
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Delete(':id')
 	async remove(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
 		// const sessionId : number = 1;

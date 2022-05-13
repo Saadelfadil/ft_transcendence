@@ -133,7 +133,7 @@ const globalComponent = defineComponent({
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
-				url: `http://localhost:8080/api/joinedAndBlockedRooms`,
+				url: `http://localhost:8080/api/joinedRooms`,
                 data: {id:this.user_id}
 			})/*.then((resp:any)=>{
 				console.log(`tests ${resp.data.joinedRooms}`);

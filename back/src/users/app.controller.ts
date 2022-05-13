@@ -563,7 +563,7 @@ export class AppController {
 		return {login: login, image_url: image_url};
 	}
 	@UseGuards(AuthenticatedGuard)
-	@Post('joinedAndBlockedRooms')
+	@Post('joinedRooms')
 	async getUserJoindAndBlocked(@Body() body){
 		const {id} = body;
 		const {joinedRooms} = await this.appService.getUserById(id);
