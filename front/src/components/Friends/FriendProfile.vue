@@ -89,9 +89,18 @@ export default defineComponent({
         }
     },
     methods: {
-        blockUser(){
+        async blockUser(){
             // logged user this.user_id
             // to be blocked this.$route.query.friend_id
+            const resp = await axios({
+                method: 'POST',
+                data: {
+                    user_id: this.user_id,
+                    user_blocked_id: this.$route.query.friend_id,
+                }
+            });
+            // assuming that backend is success
+            this.user_info.is_blocked = true;
         },
     directMessage(){
         router.push({name: 'privatemsgs', query: {uId:this.$route.query.friend_id}});
