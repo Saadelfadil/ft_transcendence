@@ -69,7 +69,7 @@ let RoomController = class RoomController {
         const sessionId = user.id;
         const roomData = await this.roomService.findOne(+roomId);
         if (sessionId == roomData.owner_id || roomData.admins.includes(sessionId)) {
-            return this.roomService.addRoomAdmin(+roomId, +data['userId']);
+            return this.roomService.addRoomAdmin(+roomId, +data['user_id']);
         }
         else
             throw new common_1.HttpException({ message: 'Unauthorized operation' }, common_1.HttpStatus.UNAUTHORIZED);
@@ -79,7 +79,7 @@ let RoomController = class RoomController {
         const sessionId = user.id;
         const roomData = await this.roomService.findOne(+roomId);
         if (sessionId == roomData.owner_id || roomData.admins.includes(sessionId)) {
-            const saved = await this.roomService.removeRoomAdmin(+roomId, +data['userId']);
+            const saved = await this.roomService.removeRoomAdmin(+roomId, +data['user_id']);
             if (saved)
                 return { status: true };
             else

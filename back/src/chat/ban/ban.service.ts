@@ -25,7 +25,9 @@ export class BanService {
 		if(createBanDto.user_id == roomData.owner_id)
 			throw new HttpException({ message: 'You can\'t ban the room crater!' }, HttpStatus.UNAUTHORIZED);
 
+		// console.log(`room id is ${createBanDto.room_id} user id ${createBanDto.user_id}`);
 		const bannedUser = await this.findUserInRoom(createBanDto.room_id, createBanDto.user_id);
+		
 		if( bannedUser )
 		{
 			bannedUser.created = Date.now();
@@ -76,10 +78,14 @@ export class BanService {
 
 
 	async findUserInRoom(roomId: number, userId: number) {
+
 		const data = await this.bansRepository.findOne({
 			room_id: roomId,
 			user_id: userId,
 		});
+		
+		// when i reques http://localhost:8080/ban data returnd is undefind i have checked room id and user id both are correct 
+
 		// if (!data)
 		// 	throw new HttpException({ error: 'User Not Found' }, HttpStatus.NOT_FOUND);
 
