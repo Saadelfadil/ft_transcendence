@@ -240,8 +240,8 @@ export default defineComponent({
                 `http://localhost:8080/room/${this.clickedRoom.id}`,
 			);
             this.isPopUp = false;
-
-            // delete room with id clickedRoom.id
+            //removeRoomWithId
+            store.commit('removeRoomWithId', this.clickedRoom.id);
         },
         async updateRoomPassword(newpass:string){
             console.log(`new password ${newpass}`);
@@ -255,10 +255,7 @@ export default defineComponent({
 					},
 				);
             this.isPopUp = false;
-            if (newpass.length === 0)
-            {
-                // change room  from public to private
-            }
+            store.commit('updateRoomAccess', {room_id:this.clickedRoom.id, access: newpass.length !== 0 ? true: false});
         },
     },
     directives:

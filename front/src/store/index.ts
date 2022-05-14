@@ -87,6 +87,25 @@ export default createStore({
     {
       	state.rooms.push(room);
     },
+    updateRoomAccess(state:any, newRoomState:{room_id:number, access:boolean}){
+      // state.rooms[newRoomState.index].locked = newRoomState.access;
+      state.rooms.map((room:Room, index:number) => {
+        if (room.id === newRoomState.room_id)
+        {
+          state.rooms[index].locked = newRoomState.access;
+          return ;
+        }
+      });
+    },
+    removeRoomWithId(state:any, room_id:number){
+      state.rooms.map((room:Room, index:number) => {
+        if (room.id === room_id)
+        {
+          state.rooms.splice(index, 1);
+          return ;
+        }
+      });
+    },
     updateChatState(state:any, index:number)
     {
       state.chatState.index = index;

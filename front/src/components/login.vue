@@ -45,13 +45,6 @@ export default defineComponent({
 
     async created()
     {
-        console.log("you have come from: " ,this.$router.options.history.state.back);
-        // if (router.options.history.state.back === '/profile')
-        // {
-        //     console.log('inside');
-        //     return ;
-        // }
-        // need to solve loop profile -> login login->profile ...
         if (this.$route.query.code !== undefined && this.$route.query.code !== null && this.$route.query.code !== "")
             {
                 await axios({
@@ -71,6 +64,7 @@ export default defineComponent({
             await this.redirectIfLogged();
             if (this.is_logged)
             {
+                console.log("you are already logged");
                 router.replace({name: 'profile'});
                 return ;
             }
