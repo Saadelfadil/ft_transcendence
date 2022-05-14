@@ -21,10 +21,10 @@
            message
         </div>
 
-        <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
+        <div v-if="!user_info.is_blocked" class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="blockUser">
            block
         </div>
-        <div @click="addFriend" class="w-28  cursor-pointer bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6" v-if="!user_info.is_friend">
+        <div v-if="!user_info.is_friend" class="w-28  cursor-pointer bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6"  @click="addFriend">
             Add
         </div>
 
@@ -65,6 +65,7 @@ interface FriendProfile{
     is_friend:boolean;
     wins:number;
     loses:number;
+    is_blocked:boolean;
 };
 
 
@@ -76,7 +77,7 @@ export default defineComponent({
             msg_status : "offline",
             user_id: 0 as number,
             logged: false as boolean,
-            user_info: {login:'', image_url:'', is_friend:false, wins:0, loses:0} as FriendProfile
+            user_info: {login:'', image_url:'', is_friend:false, wins:0, loses:0, is_blocked:false} as FriendProfile
         }
     },
     computed: {
@@ -88,13 +89,16 @@ export default defineComponent({
         }
     },
     methods: {
+        blockUser(){
+            // logged user this.user_id
+            // to be blocked this.$route.query.friend_id
+        },
     directMessage(){
         router.push({name: 'privatemsgs', query: {uId:this.$route.query.friend_id}});
         // what is the deff between message with friend and not
     },
-        async getExactUserData(_id:number) {
-            try{
-                const resp = await axios({
+        getExactUserData(_id:number) {
+            return axios({
                     method: 'post',
                     data: {
                         friend_id:_id,
@@ -103,11 +107,6 @@ export default defineComponent({
                     url: 'http://localhost:8080/api/exactuser',
                     withCredentials: true,
                 });
-                
-                this.user_info = resp.data;
-            }catch(e){
-                console.log(e);
-            }
         },
         async addFriend()
         {
@@ -133,14 +132,22 @@ export default defineComponent({
                 router.replace({name: 'profile'});
                 return ;
             }
-        }
+        },
+        getBlockedList(){
+			return axios({
+				method: 'GET',
+				url: 'http://localhost:8080/block/users'
+			});
+		},
     },
     watch:{
         async user_id()
         {
             this.validFriend(Number(this.$route.query.friend_id));
-            await this.getExactUserData(Number(this.$route.query.friend_id));
-
+            await Promise.all([this.getBlockedList(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
+                this.user_info.is_blocked = resps[0].data.includes(Number(this.$route.query.friend_id));
+                this.user_info = resps[1].data;
+            });
         }
     }
 

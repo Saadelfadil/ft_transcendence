@@ -151,21 +151,20 @@ export default  defineComponent({
 		invalidTime: false as boolean,
       }
    },
-   mounted() {
-
-		// if (localStorage.blockedList) {
-		// 	this.blockedList = localStorage.blockedList;
-		// }
-
-  	},
-	  watch:{
-		  user_id(){
-				console.log("current id: ", this.user_id);
-				this.chatStartUp();
-				this.getRoomsMessages();
-				this.getRoomsInfo();
-				this.joinTheRoom();
-		  }
+	watch:{
+		async user_id(){
+			console.log("current id: ", this.user_id);
+			this.chatStartUp();
+			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBlockedList()]).then((resps:Array<any>) =>{
+				store.commit('updatePublicRoomMsgs', resps[0].data);
+				this.roomInfo = resps[1].data;
+				this.isAdmin = this.roomInfo.admins.includes(this.user_id);
+				this.isOwner = this.user_id == this.roomInfo.owner_id;
+				this.ownerId = this.roomInfo.owner_id;
+				this.blockedList = resps[2].data;
+			});
+			this.joinTheRoom();
+		}
 	},
    methods: {
 	   chatStartUp(){
@@ -173,6 +172,12 @@ export default  defineComponent({
 			this.newMessage(data);
 		})
 	   },
+	    getBlockedList(){
+			return axios({
+				method: 'GET',
+				url: 'http://localhost:8080/block/users'
+			});
+		},
 	   handleSubmitNewMessage(msg:string){
 		   	const messageData = {
 						from: this.user_id,
@@ -211,23 +216,31 @@ export default  defineComponent({
 		declineInvite(msgObj:message){
 
 		},
-	   async getRoomsInfo()
+	   getRoomsInfo()
         {
-            const resp = await axios.get(
-				`http://localhost:8080/room/${this.roomId}`,
-			);
-            this.roomInfo = resp.data;
-			this.isAdmin = this.roomInfo.admins.includes(this.user_id);
-			this.isOwner = this.user_id == this.roomInfo.owner_id;
-			this.ownerId = this.roomInfo.owner_id;
+            // const resp = await axios.get(
+			// 	`http://localhost:8080/room/${this.roomId}`,
+			// );
+            // this.roomInfo = resp.data;
+			// this.isAdmin = this.roomInfo.admins.includes(this.user_id);
+			// this.isOwner = this.user_id == this.roomInfo.owner_id;
+			// this.ownerId = this.roomInfo.owner_id;
+			return axios({
+				method: 'GET',
+				url: `http://localhost:8080/room/${this.roomId}`,
+			});
         },
-		async getRoomsMessages()
+		getRoomsMessages()
         {
-            const resp = await axios.get(
-				`http://localhost:8080/room/${this.roomId}/messages`,
-			);
-            const data = resp.data;
-            store.commit('updatePublicRoomMsgs', data);
+            // const resp = await axios.get(
+			// 	`http://localhost:8080/room/${this.roomId}/messages`,
+			// );
+            // const data = resp.data;
+            // store.commit('updatePublicRoomMsgs', data);
+			return axios({
+				method: 'GET',
+				url: `http://localhost:8080/room/${this.roomId}/messages`,
+			});
         },
       addMessage()
       {
@@ -241,7 +254,6 @@ export default  defineComponent({
 
 	  newMessage(data: any)
       {
-		  this.blockedList = []; /// removed later
 			if( !this.blockedList.includes(data.from) )
 		  	{
 			  	const msgObj = {
