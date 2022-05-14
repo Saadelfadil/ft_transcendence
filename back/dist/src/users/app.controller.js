@@ -311,6 +311,16 @@ let AppController = class AppController {
         }
         return users;
     }
+    async retUsersList(body) {
+        let SingleUser;
+        let users = [];
+        const { usersId } = body;
+        await Promise.all(usersId.map(async (user_id) => {
+            const { login, id } = await this.appService.getUserById(user_id);
+            users.push({ login: login, id: id });
+        }));
+        return { users: users };
+    }
     async users() {
         const query = this.userRepository.createQueryBuilder('UserEntity');
         const matchs = await query.getMany();
@@ -486,6 +496,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "allUser", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
+    (0, common_1.Post)('listofusers'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "retUsersList", null);
 __decorate([
     (0, common_1.Get)('users'),
     __metadata("design:type", Function),

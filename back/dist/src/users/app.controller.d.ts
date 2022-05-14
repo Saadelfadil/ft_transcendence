@@ -66,6 +66,12 @@ export declare class AppController {
             image_url: string;
         };
     }[]>;
+    retUsersList(body: any): Promise<{
+        users: {
+            login: string;
+            id: number;
+        }[];
+    }>;
     users(): Promise<UserEntity[]>;
     getExactUser(body: any): Promise<{
         login: string;

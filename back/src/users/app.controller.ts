@@ -489,6 +489,24 @@ export class AppController {
 	}
 
 
+	@UseGuards(AuthenticatedGuard)
+	@Post('listofusers')
+	async retUsersList(@Body() body){
+		let SingleUser : {
+			login:string;
+			id:number;
+		}
+		let users : Array<typeof SingleUser> = [];
+		const {usersId} = body;
+		await Promise.all(
+			usersId.map(async (user_id:any) =>{
+				const { login, id } = await this.appService.getUserById(user_id);
+				users.push({login:login, id:id});
+			})
+		);
+		return {users:users};
+	}
+
 		// @Post('getfrienddata')
 	// async getFriendData(@Body() body)
 	// {
