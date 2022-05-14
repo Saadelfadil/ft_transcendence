@@ -179,14 +179,19 @@ export default  defineComponent({
 			this.curMsgData = '';
          }
       },
-
+	getRoomName(){
+		if(this.user_id < this.uId)
+			return this.user_id+"-"+this.uId;
+		else
+			return this.uId+"-"+this.user_id;
+	},
 	NewhandleSubmitNewMessage(message:string){
 			const messageData = {
 				from: this.user_id,
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: getRoomName(this.user_id, this.uId),
+				roomName: this.getRoomName,
 				message: message
 			};
 			this.socket.emit(
@@ -302,13 +307,6 @@ export default  defineComponent({
    }
 
 })
-
-const getRoomName = (user_id: number, uId: number) => {
-	if(user_id < uId)
-		return user_id+"-"+uId;
-	else
-		return uId+"-"+user_id;
-}
 
 
 

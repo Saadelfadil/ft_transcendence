@@ -4,12 +4,12 @@
                 <ul class="overflow-auto hideScrollBar" style="height: 85vh;">
                     <li>
                         <div class="px-6"
-                            v-for="message in privateList" :key="message.user_id"
+                            v-for="message in private_msgs" :key="message.user_id"
                         >
                         <div class="flex justify-between items-center h-16 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                             <div class="flex items-center">
                             <div class="ml-2" >
-                                <div class="text-sm font-light" style="color: #2d00ff;">  {{ message.username }} </div>
+                                <div class="text-sm font-light" style="color: #2d00ff;">  {{ message.username }}  </div>
                             </div>
                             </div>
                             <div>
@@ -52,7 +52,7 @@ import { defineComponent } from 'vue'
 import axios from 'axios';
 import router from '@/router';
 
-const globalComponent = defineComponent({
+export default defineComponent({
     name: 'PrivateChatBlock',
     components:{
     },
@@ -72,6 +72,7 @@ const globalComponent = defineComponent({
     },
       watch:{
           user_id(){
+              console.log("used");
               this.getUsers();
           }
       },
@@ -83,8 +84,7 @@ const globalComponent = defineComponent({
                 const resp = await axios.get(
 					`http://localhost:8080/messages`,
 				);
-                const data = resp.data;
-                this.privateList = data.resp;
+                this.privateList = resp.data;
             }
 			catch(e)
             {
@@ -96,24 +96,16 @@ const globalComponent = defineComponent({
             router.push({name: 'privatemsgs', query: { uId: user_id}});
         },
  
+    },
+    computed:{
+        private_msgs() : Array<any>{
+            return this.privateList;
+        },
     }
 })
 
-export default globalComponent;
 
 
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-
-
-
-
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
-//:::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 </script>
 
