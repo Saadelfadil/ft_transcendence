@@ -23,6 +23,8 @@ export class BanController {
 	async create(@Body() createBanDto: CreateBanDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+
+		createBanDto.created =  Date.now();
 		
 		const roomData = await this.roomService.findOne(createBanDto.room_id);
 		return this.banService.create(sessionId, roomData, createBanDto);
@@ -62,6 +64,7 @@ export class BanController {
 
 		const roomData = await this.roomService.findOne(+roomId);
 		return this.banService.unbanUserFromRoom(sessionId, roomData, +roomId, +userId);
+
 	}
 
 }

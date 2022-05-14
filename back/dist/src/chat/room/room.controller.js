@@ -16,12 +16,12 @@ exports.RoomController = void 0;
 const common_1 = require("@nestjs/common");
 const room_service_1 = require("./room.service");
 const create_room_dto_1 = require("./dto/create-room.dto");
-const update_room_dto_1 = require("./dto/update-room.dto");
 const create_room_message_dto_1 = require("./dto/create-room-message.dto");
 const block_service_1 = require("../block/block.service");
 const ban_service_1 = require("../ban/ban.service");
 const auth_guard_1 = require("../../users/auth.guard");
 const app_service_1 = require("../../users/app.service");
+const change_password_dto_1 = require("./dto/change-password.dto");
 let RoomController = class RoomController {
     constructor(roomService, blockService, userService, banService) {
         this.roomService = roomService;
@@ -40,10 +40,10 @@ let RoomController = class RoomController {
     findOne(id) {
         return this.roomService.findOne(+id);
     }
-    async update(id, updateRoomDto, req) {
+    async update(id, changePasswordDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        return this.roomService.update(sessionId, +id, updateRoomDto);
+        return this.roomService.update(sessionId, +id, changePasswordDto);
     }
     async remove(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
@@ -119,7 +119,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_room_dto_1.UpdateRoomDto, Object]),
+    __metadata("design:paramtypes", [String, change_password_dto_1.ChangePasswordDto, Object]),
     __metadata("design:returntype", Promise)
 ], RoomController.prototype, "update", null);
 __decorate([

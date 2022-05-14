@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
 import { CreateRoomMessageDto } from './dto/create-room-message.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomMessage } from './entities/room-message.entity';
 import { Rooms } from './entities/room.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 export declare class RoomService {
     private roomsRepository;
     private roomsMessagesRepository;
@@ -20,7 +20,7 @@ export declare class RoomService {
     saveMessageToRoom(sessionId: number, createRoomMessageDto: CreateRoomMessageDto): Promise<RoomMessage>;
     findAll(): Promise<Rooms[]>;
     findOne(id: number): Promise<Rooms>;
-    update(sessionId: number, id: number, updateRoomDto: UpdateRoomDto): Promise<Rooms>;
+    update(sessionId: number, id: number, changePasswordDto: ChangePasswordDto): Promise<Rooms>;
     remove(sessionId: number, id: number): Promise<Rooms>;
     checkAuth(roomId: number, password: string): Promise<boolean>;
     addRoomAdmin(roomId: number, userId: number): Promise<{

@@ -20,7 +20,8 @@
 					<div v-if="clickeduser_id != user_id" class="w-full">
 						<div v-if="clickeduser_id != user_id" class="w-full">
 							<button @click="inviteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Invite </button>
-							<button v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" @click="banClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Ban</button>
+							<button v-if="((isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner) && !bannedUsers.includes(clickeduser_id)" @click="banClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Ban</button>
+							<button v-if="((isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner) && bannedUsers.includes(clickeduser_id)" @click="unBanClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">unBan</button>
 							<input  v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" v-focus class="w-full px-4 py-2 rounded-lg text-center mb-2 border-2 border-blue-500" :class="{'border-red-500' : invalidTime}" type="text" v-model="numOfSeconds" placeholder="seconds"/>
 							<button v-if="(isAdmin && !roomInfo.admins.includes(clickeduser_id)) || isOwner" @click="muteClicked" class="w-full mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Mute</button>
 						</div>
@@ -59,7 +60,7 @@
 	</div>
 	<div id="messages" v-godown  class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
 		
-		<div class="chat-message" v-for="msg in currentMsgs" :key="msg.id">
+		<div class="chat-message" v-for="(msg, index) in currentMsgs" :key="index">
 			<div class="flex items-start" >
 				
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
@@ -149,19 +150,22 @@ export default  defineComponent({
 		blockedList: [] as number[],
 		roomInfo: null as any,
 		invalidTime: false as boolean,
+		bannedUsers: [] as Array<number>,
       }
    },
 	watch:{
 		async user_id(){
 			console.log("current id: ", this.user_id);
 			this.chatStartUp();
-			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBlockedList()]).then((resps:Array<any>) =>{
+			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBlockedList(), this.getBannedUsers()]).then((resps:Array<any>) =>{
+				console.log(resps[0].data);
 				store.commit('updatePublicRoomMsgs', resps[0].data);
 				this.roomInfo = resps[1].data;
 				this.isAdmin = this.roomInfo.admins.includes(this.user_id);
 				this.isOwner = this.user_id == this.roomInfo.owner_id;
 				this.ownerId = this.roomInfo.owner_id;
 				this.blockedList = resps[2].data;
+				this.bannedUsers = resps[3].data;
 			});
 			this.joinTheRoom();
 		}
@@ -176,6 +180,12 @@ export default  defineComponent({
 			return axios({
 				method: 'GET',
 				url: 'http://localhost:8080/block/users'
+			});
+		},
+		getBannedUsers(){
+			return axios({
+				method: 'GET',
+				url: `http://localhost:8080/ban/room/${this.roomId}/banned`,
 			});
 		},
 	   handleSubmitNewMessage(msg:string){
@@ -334,6 +344,8 @@ export default  defineComponent({
 		  console.log(`invite clicked`);
 		  this.isPopUp = false;
 	  },
+
+	  ///ban/room/4/user/59490
 	  async muteClicked()
 	  {
 		  if (Number.isInteger(+this.numOfSeconds) && +this.numOfSeconds > 0)
@@ -350,12 +362,9 @@ export default  defineComponent({
 					},
 				);
 
-				if(!resp.data.status)
-				{
-					this.numOfSeconds = '';
-			  		this.invalidTime = false;
-		  			this.isPopUp = false;
-				}
+				this.isPopUp = false;
+				this.numOfSeconds = '';
+				this.invalidTime = false;
 		  }
 		  else
 		  {
@@ -374,11 +383,22 @@ export default  defineComponent({
 					"duration": 0
 				},
 			);
-
-			if(resp.data.status)
+		this.isPopUp = false;
+		this.bannedUsers.push(this.clickeduser_id);
+	  },
+	  async unBanClicked(){
+		const resp = await axios.delete(
+			`http://localhost:8080/ban/room/${this.roomId}/user/${this.clickeduser_id}`,
+		);
+		this.isPopUp = false;
+		this.bannedUsers.map((id,index) => {
+			
+			if (id === this.clickeduser_id)
 			{
-				this.isPopUp = false;
+				this.bannedUsers.splice(index, 1);
+				return ;
 			}
+		})
 	  },
 	async addAdmin()
 	{

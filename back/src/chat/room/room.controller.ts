@@ -8,6 +8,8 @@ import { BanService } from 'src/chat/ban/ban.service';
 import { AuthenticatedGuard } from 'src/users/auth.guard';
 import { Request } from 'express';
 import { AppService } from 'src/users/app.service';
+import passport from 'passport';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('room')
@@ -45,11 +47,12 @@ export class RoomController {
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Patch(':id')
-	async update(@Param('id', ParseIntPipe) id: string, @Body() updateRoomDto: UpdateRoomDto, @Req() req: Request) {
+	async update(@Param('id', ParseIntPipe) id: string, @Body() changePasswordDto: ChangePasswordDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId: number = 1;
-		return this.roomService.update(sessionId, +id, updateRoomDto);
+		return this.roomService.update(sessionId, +id, changePasswordDto);
+
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)

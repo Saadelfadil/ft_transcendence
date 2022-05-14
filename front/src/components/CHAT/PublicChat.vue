@@ -235,14 +235,30 @@ export default defineComponent({
                 return true; // maybe false
 			return this.joinedRooms.includes(id);
 		},
-        removeRoom(){
-            console.log(`room ${this.clickedRoom} removed`);
+        async removeRoom(){
+            const resp = await axios.delete(
+                `http://localhost:8080/room/${this.clickedRoom.id}`,
+			);
             this.isPopUp = false;
+
+            // delete room with id clickedRoom.id
         },
-        updateRoomPassword(newpass:string){
+        async updateRoomPassword(newpass:string){
             console.log(`new password ${newpass}`);
             // if password changed correctly
             // this.isPopUp = false;
+
+            const resp = await axios.patch(
+					`http://localhost:8080/room/${this.clickedRoom.id}`,
+					{
+                        password: newpass
+					},
+				);
+            this.isPopUp = false;
+            if (newpass.length === 0)
+            {
+                // change room  from public to private
+            }
         },
     },
     directives:

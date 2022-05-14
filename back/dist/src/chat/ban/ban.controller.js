@@ -30,6 +30,7 @@ let BanController = class BanController {
     async create(createBanDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        createBanDto.created = Date.now();
         const roomData = await this.roomService.findOne(createBanDto.room_id);
         return this.banService.create(sessionId, roomData, createBanDto);
     }

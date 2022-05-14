@@ -88,22 +88,26 @@ let RoomService = class RoomService {
             throw new common_1.HttpException({ message: 'Room Not Found' }, common_1.HttpStatus.NOT_FOUND);
         return data;
     }
-    async update(sessionId, id, updateRoomDto) {
+    async update(sessionId, id, changePasswordDto) {
         const room = await this.findOne(id);
-        if (sessionId == room.owner_id)
+        if (sessionId != room.owner_id)
             throw new common_1.HttpException({ message: 'You can\'t edit this room!' }, common_1.HttpStatus.UNAUTHORIZED);
-        room.name = updateRoomDto.name;
-        if (updateRoomDto.locked) {
+        room.password = changePasswordDto.password;
+        if (changePasswordDto.password != "") {
+            room.locked = true;
             const saltOrRounds = 10;
-            const password = updateRoomDto.password;
+            const password = changePasswordDto.password;
             const hash = await bcrypt.hash(password, saltOrRounds);
             room.password = hash;
+        }
+        else {
+            room.locked = false;
         }
         return this.roomsRepository.save(room);
     }
     async remove(sessionId, id) {
         const room = await this.findOne(id);
-        if (sessionId == room.owner_id)
+        if (sessionId != room.owner_id)
             throw new common_1.HttpException({ message: 'You can\'t edit this room!' }, common_1.HttpStatus.UNAUTHORIZED);
         if (room)
             return this.roomsRepository.remove(room);

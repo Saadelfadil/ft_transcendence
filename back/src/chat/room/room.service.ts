@@ -7,6 +7,7 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomMessage } from './entities/room-message.entity';
 import { Rooms } from './entities/room.entity';
 import * as bcrypt from 'bcrypt';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class RoomService {
@@ -102,20 +103,25 @@ export class RoomService {
 		return data;
 	}
 
-	async update(sessionId: number ,id: number, updateRoomDto: UpdateRoomDto) {
+	async update(sessionId: number ,id: number, changePasswordDto: ChangePasswordDto) {
 		const room = await this.findOne(id);
 
-		if(sessionId == room.owner_id)
+		if(sessionId != room.owner_id)
 			throw new HttpException({ message: 'You can\'t edit this room!' }, HttpStatus.UNAUTHORIZED);
 
-		room.name = updateRoomDto.name;
+		room.password = changePasswordDto.password;
 
-		if( updateRoomDto.locked )
+		if( changePasswordDto.password != "" )
 		{
+			room.locked = true;
 			const saltOrRounds = 10;
-			const password = updateRoomDto.password;
+			const password = changePasswordDto.password;
 			const hash = await bcrypt.hash(password, saltOrRounds);
 			room.password = hash;
+		}
+		else
+		{
+			room.locked = false;
 		}
 		
 		return this.roomsRepository.save(room);
@@ -123,7 +129,7 @@ export class RoomService {
 
 	async remove(sessionId: number, id: number) {
 		const room = await this.findOne(id);
-		if(sessionId == room.owner_id)
+		if(sessionId != room.owner_id)
 			throw new HttpException({ message: 'You can\'t edit this room!' }, HttpStatus.UNAUTHORIZED);
 
 		if(room)

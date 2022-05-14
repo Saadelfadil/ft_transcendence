@@ -53,13 +53,8 @@ export default defineComponent({
     },
     methods: {
         updateRoomSetting(){
-           this.new_pass = this.new_pass.trim();
-           if (this.new_pass.length !== 0){
-               this.$emit('update-room-password', this.new_pass);
-           }else
-           {
-               this.invalid_pass = true;
-           }
+            this.new_pass = this.new_pass.trim();
+            this.$emit('update-room-password', this.new_pass);
         },
         removeRoom()
         {
