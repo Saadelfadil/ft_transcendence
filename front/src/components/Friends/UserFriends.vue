@@ -28,7 +28,6 @@
             
             <div class=" flex gap-x-4">
               <button @click="removeFriend(login.id)" class='py-2 px-4 border-red-400 text-red-400 hover:shadow-lg rounded-md border'>Unfriend</button>
-              <button @click="func('Block')" class='py-2 px-4 border-red-400 text-red-400 hover:shadow-lg rounded-md border'>Block</button>
               <button @click="directMessage(login.id)" class='py-2 px-4 border-blue-400 text-blue-400 hover:shadow-lg rounded-md border'>Message</button>
             </div>
 

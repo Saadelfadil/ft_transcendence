@@ -94,9 +94,9 @@ export default defineComponent({
             // to be blocked this.$route.query.friend_id
             const resp = await axios({
                 method: 'POST',
+                url: 'http://localhost:8080/block',
                 data: {
-                    user_id: this.user_id,
-                    user_blocked_id: this.$route.query.friend_id,
+                    blocked: this.$route.query.friend_id,
                 }
             });
             // assuming that backend is success

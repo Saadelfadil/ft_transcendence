@@ -107,7 +107,7 @@ export default defineComponent({
                     url: 'http://localhost:3000/game/matchs/' + (this.$route.query.history_id ? this.$route.query.history_id : '')
                 });
                 this.matchs_info = resp.data;
-                this.users_ids = [];
+                this.users_ids = []; // do not remove this line
                 this.matchs_info.map((inp:Match) => {
                     this.users_ids.push(+inp.data[0].id);
                     this.users_ids.push(+inp.data[1].id);
