@@ -47,7 +47,7 @@ let MessagesController = class MessagesController {
     async remove(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        return this.messagesService.remove(sessionId, +id);
+        return this.messagesService.removeMessage(sessionId, +id);
     }
 };
 __decorate([

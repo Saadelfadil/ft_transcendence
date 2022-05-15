@@ -341,7 +341,7 @@ export default  defineComponent({
 	  },
 	  inviteClicked()
 	  {
-		  console.log(`invite clicked`);
+		  console.log(`from room invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
 		  this.isPopUp = false;
 	  },
 

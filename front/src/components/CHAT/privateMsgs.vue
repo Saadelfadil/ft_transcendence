@@ -93,6 +93,8 @@ interface message{
 	username: string;
 	msg: string;
 	created: string;
+	inviteStatus: number;
+    isInvite: boolean;
 }
 
 
@@ -185,13 +187,14 @@ export default  defineComponent({
 		else
 			return this.uId+"-"+this.user_id;
 	},
-	NewhandleSubmitNewMessage(message:string){
+	NewhandleSubmitNewMessage(message:string, isInvite = false){
 			const messageData = {
 				from: this.user_id,
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName,
+				isInvite: isInvite,
 				message: message
 			};
 			this.socket.emit(
@@ -265,7 +268,12 @@ export default  defineComponent({
 	  },
 	  inviteClicked()
 	  {
-		  console.log(`invite clicked`);
+		//   let val:boolean = false;
+		//   this.NewhandleSubmitNewMessage('', val);  // working here
+		// user id is this.user_id
+		// clicked user id is this.clickeduser_id
+		  console.log(`private invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
+
 		  this.isPopUp = false;
 	  },
 

@@ -3,5 +3,7 @@ export declare class Message {
     from_id: number;
     to_id: number;
     msg: string;
+    isInvite: boolean;
+    inviteStatus: number;
     created: number;
 }

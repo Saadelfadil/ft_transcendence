@@ -56,6 +56,16 @@ export class MessagesController {
 	}
 
 	// Delete all messages that i've had with this user
+	// @UseInterceptors(ClassSerializerInterceptor)
+	// @Delete(':id')
+	// async remove(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
+	// 	// const sessionId : number = 1;
+	// 	const user = await this.userService.getUserDataFromJwt(req);
+	// 	const sessionId: number = user.id;
+		
+	// 	return this.messagesService.remove(sessionId, +id);
+	// }
+
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Delete(':id')
 	async remove(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
@@ -63,6 +73,6 @@ export class MessagesController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		
-		return this.messagesService.remove(sessionId, +id);
+		return this.messagesService.removeMessage(sessionId, +id);
 	}
 }

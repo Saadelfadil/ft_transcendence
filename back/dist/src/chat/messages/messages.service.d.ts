@@ -5,7 +5,8 @@ export declare class MessagesService {
     private messageRepository;
     constructor(messageRepository: Repository<Message>);
     create(sessionId: number, createMessageDto: CreateMessageDto): Promise<Message>;
+    findOneMessage(id: number): Promise<Message>;
     findOne(sessionId: number, userId: number): Promise<any>;
     getChatList(sessionId: number): Promise<any>;
-    remove(sessionId: number, userId: number): Promise<import("typeorm").DeleteResult>;
+    removeMessage(sessionId: number, messageId: number): Promise<false | import("typeorm").DeleteResult>;
 }

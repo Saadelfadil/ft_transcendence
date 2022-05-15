@@ -24,6 +24,9 @@ export class MessagesService {
 		return this.messageRepository.save(newMessage);
 	}
 
+	async findOneMessage(id: number) {
+		return this.messageRepository.findOne(id);
+	}
 
 	async findOne(sessionId: number, userId: number) {
 
@@ -108,26 +111,40 @@ export class MessagesService {
 
 	}
 
-	async remove(sessionId: number, userId: number) {
+	// async remove(sessionId: number, userId: number) {
 
-		return this.messageRepository.createQueryBuilder('message').delete()
-			.where(new Brackets(qb => {
-				qb.where('from_id = :id', {
-					id: userId,
-				});
-				qb.andWhere('to_id = :id2', {
-					id2: sessionId,
-				});                               
-			}))
-			.orWhere(new Brackets(qb => {
-				qb.where('to_id = :id3', {
-					id3: userId,
-				});
-				qb.andWhere('from_id = :id4', {
-					id4: sessionId,
-				});                               
-			}))
-			.execute();
+	// 	return this.messageRepository.createQueryBuilder('message').delete()
+	// 		.where(new Brackets(qb => {
+	// 			qb.where('from_id = :id', {
+	// 				id: userId,
+	// 			});
+	// 			qb.andWhere('to_id = :id2', {
+	// 				id2: sessionId,
+	// 			});                               
+	// 		}))
+	// 		.orWhere(new Brackets(qb => {
+	// 			qb.where('to_id = :id3', {
+	// 				id3: userId,
+	// 			});
+	// 			qb.andWhere('from_id = :id4', {
+	// 				id4: sessionId,
+	// 			});                               
+	// 		}))
+	// 		.execute();
+	// }
+
+	async removeMessage(sessionId: number, messageId: number)
+	{
+		const message = await this.findOneMessage(messageId);
+		if(message)
+		{
+			if(message.from_id == sessionId || message.to_id == sessionId)
+			{
+				return this.messageRepository.delete(messageId);
+			}
+		}
+		return false;
+		
 	}
 
 

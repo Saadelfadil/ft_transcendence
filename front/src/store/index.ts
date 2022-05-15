@@ -8,6 +8,8 @@ interface message{
 	image_url: string;
 	msg: string;
 	created: string;
+  inviteStatus: number;
+  isInvite: boolean;
 }
 
 interface PlayerHistory
@@ -33,6 +35,7 @@ interface Room{
     locked: boolean;
     owner_id: number;
     admins: number[];
+
 }
 
 

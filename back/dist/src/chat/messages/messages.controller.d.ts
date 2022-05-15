@@ -11,5 +11,5 @@ export declare class MessagesController {
     create(createMessageDto: CreateMessageDto, req: Request): Promise<import("./entities/message.entity").Message>;
     findAll(req: Request): Promise<any>;
     findOne(id: string, req: Request): Promise<any>;
-    remove(id: string, req: Request): Promise<import("typeorm").DeleteResult>;
+    remove(id: string, req: Request): Promise<false | import("typeorm").DeleteResult>;
 }

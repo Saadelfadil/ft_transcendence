@@ -30,6 +30,14 @@ __decorate([
     __metadata("design:type", String)
 ], Message.prototype, "msg", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Boolean)
+], Message.prototype, "isInvite", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Message.prototype, "inviteStatus", void 0);
+__decorate([
     (0, typeorm_1.Column)('bigint'),
     __metadata("design:type", Number)
 ], Message.prototype, "created", void 0);

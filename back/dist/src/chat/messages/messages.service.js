@@ -26,6 +26,9 @@ let MessagesService = class MessagesService {
         newMessage.from_id = sessionId;
         return this.messageRepository.save(newMessage);
     }
+    async findOneMessage(id) {
+        return this.messageRepository.findOne(id);
+    }
     async findOne(sessionId, userId) {
         return (0, typeorm_2.getConnection)().query(`
 			SELECT public."message".*, public."users".username, public."users".id, public."users".image_url  FROM
@@ -70,25 +73,14 @@ let MessagesService = class MessagesService {
 							created DESC
 				`);
     }
-    async remove(sessionId, userId) {
-        return this.messageRepository.createQueryBuilder('message').delete()
-            .where(new typeorm_2.Brackets(qb => {
-            qb.where('from_id = :id', {
-                id: userId,
-            });
-            qb.andWhere('to_id = :id2', {
-                id2: sessionId,
-            });
-        }))
-            .orWhere(new typeorm_2.Brackets(qb => {
-            qb.where('to_id = :id3', {
-                id3: userId,
-            });
-            qb.andWhere('from_id = :id4', {
-                id4: sessionId,
-            });
-        }))
-            .execute();
+    async removeMessage(sessionId, messageId) {
+        const message = await this.findOneMessage(messageId);
+        if (message) {
+            if (message.from_id == sessionId || message.to_id == sessionId) {
+                return this.messageRepository.delete(messageId);
+            }
+        }
+        return false;
     }
 };
 MessagesService = __decorate([

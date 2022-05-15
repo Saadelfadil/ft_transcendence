@@ -17,6 +17,12 @@ export class Message {
 	@Column()
 	msg: string;
 
+	@Column()
+	isInvite: boolean;
+
+	@Column()
+	inviteStatus: number;
+
  	@Column('bigint')
 	created: number;
 
