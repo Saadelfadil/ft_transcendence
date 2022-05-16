@@ -1,6 +1,5 @@
 <template>
 <div>
-
 	<div v-if="isPopUp">
 		<div class="bg-slate-800 bg-opacity-50 flex z-[1000] justify-center absolute top-0 right-0 bottom-0 left-0">
 			<div class="flex flex-col justify-center">
@@ -136,6 +135,7 @@ export default  defineComponent({
    {
       return {
 		socket: io("http://localhost:8000"),
+		socket2 : io("http://localhost:8001"),
 		user_id: 0 as number,
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
@@ -187,6 +187,31 @@ export default  defineComponent({
 				method: 'GET',
 				url: `http://localhost:8080/ban/room/${this.roomId}/banned`,
 			});
+		},
+		NewhandleSubmitNewInvite(clickedUserId: number){
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 0,
+				from: this.user_id,
+				to: clickedUserId,
+				username: this.username,
+				avatar: this.avatar,
+				// roomName: this.getRoomName,
+				message: ''
+			};
+			this.socket2.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+						// this.newMessage(messageData);
+					}
+				}
+			)
 		},
 	   handleSubmitNewMessage(msg:string){
 		   	const messageData = {
@@ -342,6 +367,7 @@ export default  defineComponent({
 	  inviteClicked()
 	  {
 		  console.log(`from room invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
+		  this.NewhandleSubmitNewInvite(this.clickeduser_id);
 		  this.isPopUp = false;
 	  },
 

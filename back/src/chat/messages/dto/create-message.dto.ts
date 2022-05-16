@@ -19,3 +19,15 @@ export class CreateMessageDto {
 	@IsNumber()
 	created: number = Date.now();
 }
+
+
+
+// (isInvite == true &&  inviteStatus == 0 && to_id == myId ) ==> accept invite ===> inviteStatus (1)
+// (isInvite == true &&  inviteStatus == 1 && from_id == myId ) ==> your invite has been accepted 
+
+
+
+// inviteStatus == 0 ===> new invite
+// inviteStatus == 1 ===> accepted invite
+// inviteStatus == 2 ===> rejected invite
+// inviteStatus == 3 ===> invite creator clicked play

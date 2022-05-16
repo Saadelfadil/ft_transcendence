@@ -7,6 +7,7 @@ import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
 import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
+import { OnlineGateway } from './users.gateway';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { UserHistoryEntity } from './userHistory.entity';
 ],
   controllers: [AppController],
   exports: [AppService],
-  providers: [AppService],
+  providers: [AppService, OnlineGateway],
 })
 export class UserModule {}

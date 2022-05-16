@@ -482,7 +482,7 @@ export class AppController {
 		{
 			const { id, login, image_url} = await this.appService.getUserById(usersId[i]);
 			tmp =  await this.appService.getUserById(usersId[i + 1]);
-			users.push({left_player: {id, login, image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
+			users.push({left_player: {id:id, login:login, image_url:image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
 		}
 
 		return users;

@@ -17,10 +17,10 @@ export class Message {
 	@Column()
 	msg: string;
 
-	@Column()
+	@Column({default: false})
 	isInvite: boolean;
 
-	@Column()
+	@Column({default: 0})
 	inviteStatus: number;
 
  	@Column('bigint')

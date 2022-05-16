@@ -26,10 +26,29 @@ let MessageGateway = class MessageGateway {
             return { status: false };
         }
         else {
-            let messageDto = new create_message_dto_1.CreateMessageDto();
-            messageDto.to_id = +payload.data.to;
-            messageDto.msg = payload.data.message;
-            this.messagesService.create(sessionId, messageDto);
+            if (!payload.data.isInvite) {
+                let messageDto = new create_message_dto_1.CreateMessageDto();
+                messageDto.isInvite = payload.data.isInvite;
+                messageDto.to_id = +payload.data.to;
+                messageDto.msg = payload.data.message;
+                this.messagesService.create(sessionId, messageDto);
+            }
+            else if (payload.data.inviteStatus == 0) {
+                let messageDto = new create_message_dto_1.CreateMessageDto();
+                messageDto.isInvite = payload.data.isInvite;
+                messageDto.to_id = +payload.data.to;
+                messageDto.msg = payload.data.message;
+                this.messagesService.create(sessionId, messageDto);
+            }
+            else {
+                let messageDto = new create_message_dto_1.CreateMessageDto();
+                messageDto.inviteStatus = payload.data.inviteStatus;
+                messageDto.isInvite = payload.data.isInvite;
+                messageDto.to_id = +payload.data.to;
+                messageDto.msg = payload.data.message;
+                messageDto.created = payload.data.created;
+                this.messagesService.updateMessage(messageDto);
+            }
             client.broadcast.to(payload.data.roomName).emit("message", payload);
             return { status: true };
         }

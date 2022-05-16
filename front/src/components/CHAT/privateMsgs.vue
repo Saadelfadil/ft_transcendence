@@ -46,11 +46,30 @@
 				</div>
 
 
-				<div class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
-				<span class="block"> {{ msg.msg }} </span>
-				<span class="block text-xs text-right"> {{ timestampToDateTime(+msg.created) }} </span>
+				<div v-if="!msg.isInvite" class="bg-gray-100 rounded px-5 py-2 my-2 text-gray-700 relative" style="max-width: 300px;">
+					<span class="block"> {{ msg.msg }} </span>
+					<span class="block text-xs text-right"> {{ timestampToDateTime(+msg.created) }} </span>
 				</div>
 
+<!-- depending on some variable i will render diffrent sometimes msg sometimes buttons -->
+				<div v-else-if="msg.inviteStatus === 0" flex="w-full">
+					<div class="w-full p-2  flex justify-between bg-white rounded-lg">
+						<div class="bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="acceptInvite(msg)">
+							accept
+						</div>
+						<div class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600  cursor-pointer" @click="declineInvite(msg)">
+							decline
+						</div>
+					</div>
+				</div>
+
+				<div v-else-if="msg.inviteStatus === 1" flex="w-full">
+					<div class="w-full p-2  flex items-center bg-white rounded-lg">
+						<div class="bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="directPlay(msg)">
+							Play
+						</div>
+					</div>
+				</div>
 				
 	
 			</div>
@@ -83,6 +102,7 @@ import axios from 'axios';
 import router from '@/router';
 import { defineComponent } from 'vue';
 import io from 'socket.io-client';
+import { COMPLETIONSTATEMENT_TYPES } from '@babel/types';
 
 
 interface message{
@@ -140,6 +160,7 @@ export default  defineComponent({
 		},
 	},
    methods: {
+
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
@@ -160,7 +181,23 @@ export default  defineComponent({
 				`http://localhost:8080/messages/${this.uId}`,
 			);
             const data = resp.data;
-            store.commit('updatePublicRoomMsgs', data);
+			let newArray = [];
+			for (let i = 0; i < data.length; ++i) {
+				if( 
+					data[i].isInvite == false ||
+					(data[i].isInvite == true &&  data[i].inviteStatus == 0 && data[i].to_id == this.user_id ) ||
+					(data[i].isInvite == true &&  data[i].inviteStatus == 1 && data[i].from_id == this.user_id )
+				)                      
+				{
+					newArray.push(data[i]);
+				}
+				
+			}
+
+
+			console.log(newArray[newArray.length - 1]);
+			
+			store.commit('updatePublicRoomMsgs', newArray);
         },
 		joinedAndBlocked(){
 			axios({
@@ -187,14 +224,13 @@ export default  defineComponent({
 		else
 			return this.uId+"-"+this.user_id;
 	},
-	NewhandleSubmitNewMessage(message:string, isInvite = false){
+	NewhandleSubmitNewMessage(message:string){
 			const messageData = {
 				from: this.user_id,
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName,
-				isInvite: isInvite,
 				message: message
 			};
 			this.socket.emit(
@@ -212,9 +248,126 @@ export default  defineComponent({
 			)
 	},
 
+	NewhandleSubmitNewInvite(){
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 0,
+				from: this.user_id,
+				to: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: this.getRoomName,
+				message: ''
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+						// this.newMessage(messageData);
+					}
+				}
+			)
+	},
+	acceptInvite(msgObj:message){
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 1,
+				created: msgObj.created,
+				to: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: this.getRoomName,
+				message: ''
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					console.log(response);
+					if(response.status)
+					{
+						// TODO: redirect to play game room
+						// player who recieved invite has accepted
+						console.log("Go to play game");
+					}
+				}
+			)
+	   },
+		declineInvite(msgObj:message){
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 2,
+				created: msgObj.created,
+				to: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: this.getRoomName,
+				message: ''
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+					}
+				}
+			)
+
+		},
+		directPlay(msgObj:message)
+		{
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 3,
+				created: msgObj.created,
+				to: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: this.getRoomName,
+				message: ''
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+						// TODO: redirect to play game room
+						// player who send request has recieved message that says let's play
+						console.log("Go to play game");
+					}
+				}
+			)
+
+			// TODO: redirect to play game room
+			console.log("Go to play game");
+		},
+
 	acceptingMsg(){
 		this.socket.on("message", ({data}) => {
-			this.newMessage(data);
+			if( 
+				data.isInvite == false ||
+				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
+				(data.isInvite == true &&  data.inviteStatus == 1 && data.from_id == this.user_id )
+			)
+			{
+				this.newMessage(data);
+			}
 		});
 	},
 	  newMessage(data: any)
@@ -273,6 +426,9 @@ export default  defineComponent({
 		// user id is this.user_id
 		// clicked user id is this.clickeduser_id
 		  console.log(`private invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
+
+		  this.NewhandleSubmitNewInvite();
+
 
 		  this.isPopUp = false;
 	  },

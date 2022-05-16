@@ -26,6 +26,16 @@ let MessagesService = class MessagesService {
         newMessage.from_id = sessionId;
         return this.messageRepository.save(newMessage);
     }
+    findOneByCreatedDate(created) {
+        return this.messageRepository.findOne({
+            created: created
+        });
+    }
+    async updateMessage(createMessageDto) {
+        console.log("upate message called");
+        let msg = await this.findOneByCreatedDate(createMessageDto.created);
+        console.log(msg);
+    }
     async findOneMessage(id) {
         return this.messageRepository.findOne(id);
     }

@@ -15,7 +15,7 @@
         </div>
         <div class="w-full p-8 mx-2 flex justify-center">
         <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6">
-            {{msg_status}}
+            {{userStatus}}
         </div>
         <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="directMessage">
            message
@@ -58,6 +58,8 @@
 import { defineComponent } from 'vue'
 import router from '@/router';
 import axios from 'axios';
+import store from '@/store';
+
 
 interface FriendProfile{
     login:string;
@@ -75,6 +77,7 @@ export default defineComponent({
     {
         return {
             msg_status : "offline",
+            onlineUsers: [] as Array<number>,
             user_id: 0 as number,
             logged: false as boolean,
             user_info: {login:'', image_url:'', is_friend:false, wins:0, loses:0, is_blocked:false} as FriendProfile
@@ -86,6 +89,9 @@ export default defineComponent({
         },
         user_name() : string{
             return this.user_info.login;
+        },
+        userStatus() : string {
+            return store.getters.get_online_users.includes(Number(this.$route.query.friend_id)) ? 'Online' : 'Offline';
         }
     },
     methods: {
@@ -152,6 +158,7 @@ export default defineComponent({
     watch:{
         async user_id()
         {
+
             this.validFriend(Number(this.$route.query.friend_id));
             await Promise.all([this.getBlockedList(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
                 this.user_info.is_blocked = resps[0].data.includes(Number(this.$route.query.friend_id));

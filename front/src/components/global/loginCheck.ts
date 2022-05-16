@@ -4,7 +4,6 @@ import router from '@/router';
 import { numberLiteralTypeAnnotation } from '@babel/types';
 
 
-
 export default {
     data()
     {
