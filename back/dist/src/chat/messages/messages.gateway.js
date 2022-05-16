@@ -27,6 +27,7 @@ let MessageGateway = class MessageGateway {
         }
         else {
             if (!payload.data.isInvite) {
+                console.log(1111);
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.isInvite = payload.data.isInvite;
                 messageDto.to_id = +payload.data.to;
@@ -34,6 +35,7 @@ let MessageGateway = class MessageGateway {
                 this.messagesService.create(sessionId, messageDto);
             }
             else if (payload.data.inviteStatus == 0) {
+                console.log(22222);
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.isInvite = payload.data.isInvite;
                 messageDto.to_id = +payload.data.to;
@@ -41,6 +43,7 @@ let MessageGateway = class MessageGateway {
                 this.messagesService.create(sessionId, messageDto);
             }
             else {
+                console.log(3333333);
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.inviteStatus = payload.data.inviteStatus;
                 messageDto.isInvite = payload.data.isInvite;

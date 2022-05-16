@@ -31,24 +31,9 @@ export class MessagesService {
 	}
 
 	async updateMessage(createMessageDto: CreateMessageDto) {
-
-console.log("upate message called");
-
 		let msg = await this.findOneByCreatedDate(createMessageDto.created);
-
-
-console.log(msg);
-		/*
-
 		msg.inviteStatus = createMessageDto.inviteStatus;
-
-		// console.log('Invite = ', createMessageDto.inviteStatus)
-// console.log(msg);
-
-
 		return this.messageRepository.save(msg);
-
-		*/
 	}
 
 	async findOneMessage(id: number) {

@@ -43,6 +43,7 @@ export class MessageGateway {
 			}
 			else
 			{
+
 				let messageDto = new CreateMessageDto();
 				messageDto.inviteStatus = payload.data.inviteStatus;
 				messageDto.isInvite = payload.data.isInvite;
