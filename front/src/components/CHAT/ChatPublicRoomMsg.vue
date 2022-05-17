@@ -196,7 +196,7 @@ export default  defineComponent({
 				to: clickedUserId,
 				username: this.username,
 				avatar: this.avatar,
-				// roomName: this.getRoomName,
+				// roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket2.emit(

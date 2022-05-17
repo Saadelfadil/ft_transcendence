@@ -38,7 +38,7 @@
 	</div>
 	<div id="messages" v-godown  class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
 		
-		<div class="chat-message" v-for="msg in currentMsgs" :key="msg.id">
+		<div class="chat-message" v-for="(msg, index) in currentMsgs" :key="index">
 			<div class="flex items-start" >
 				<div class="px-5 my-2 text-gray-700 relative text-orange-500 cursor-pointer" @click="userIconClicked(msg)" style="max-width: 300px;">
 					<img class="hidden sm:block w-full h-auto rounded-full max-w-xs w-32 items-center border w-14" loading="lazy" :src="msg.image_url" style="margin: auto;">
@@ -213,24 +213,24 @@ export default  defineComponent({
          const tmp = this.curMsgData.trim();
          if (tmp.length !== 0)
          {
-			 console.log("trying to send");
 			this.NewhandleSubmitNewMessage(tmp);
 			this.curMsgData = '';
          }
       },
-	getRoomName(){
+	getRoomName(){+
 		if(this.user_id < this.uId)
 			return this.user_id+"-"+this.uId;
 		else
 			return this.uId+"-"+this.user_id;
 	},
 	NewhandleSubmitNewMessage(message:string){
+		console.log(`trying to send: ${message}`);
 			const messageData = {
 				from: this.user_id,
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: this.getRoomName,
+				roomName: this.getRoomName(),
 				message: message
 			};
 			this.socket.emit(
@@ -243,6 +243,8 @@ export default  defineComponent({
 					if(response.status)
 					{
 						this.newMessage(messageData);
+					}else{
+						console.log(`faild with ${response}`);
 					}
 				}
 			)
@@ -256,7 +258,7 @@ export default  defineComponent({
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: this.getRoomName,
+				roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket.emit(
@@ -281,7 +283,7 @@ export default  defineComponent({
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: this.getRoomName,
+				roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket.emit(
@@ -309,7 +311,7 @@ export default  defineComponent({
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: this.getRoomName,
+				roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket.emit(
@@ -335,7 +337,7 @@ export default  defineComponent({
 				to: this.uId,
 				username: this.username,
 				avatar: this.avatar,
-				roomName: this.getRoomName,
+				roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket.emit(
@@ -359,13 +361,16 @@ export default  defineComponent({
 		},
 
 	acceptingMsg(){
+		console.log(`ready to accept incoming msgs`);
 		this.socket.on("message", ({data}) => {
+			console.log('message reacheed');
 			if( 
 				data.isInvite == false ||
 				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
 				(data.isInvite == true &&  data.inviteStatus == 1 && data.from_id == this.user_id )
 			)
 			{
+				console.log(`valid message`);
 				this.newMessage(data);
 			}
 		});

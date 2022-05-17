@@ -17,7 +17,7 @@ export class MessagesService {
 	) {}
 		
 	create(sessionId: number, createMessageDto: CreateMessageDto) {
-
+		
 		let newMessage = this.messageRepository.create(createMessageDto);
 		newMessage.from_id = sessionId;
 

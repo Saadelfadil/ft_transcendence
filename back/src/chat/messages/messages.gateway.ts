@@ -24,7 +24,6 @@ export class MessageGateway {
 		}
 		else
 		{
-
 			if(!payload.data.isInvite)
 			{
 				let messageDto = new CreateMessageDto();
