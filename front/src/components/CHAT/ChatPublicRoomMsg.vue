@@ -192,7 +192,7 @@ export default  defineComponent({
 			const messageData = {
 				isInvite: true,
 				inviteStatus: 0,
-				from: this.user_id,
+				from_id: this.user_id,
 				to: clickedUserId,
 				username: this.username,
 				avatar: this.avatar,
@@ -215,8 +215,8 @@ export default  defineComponent({
 		},
 	   handleSubmitNewMessage(msg:string){
 		   	const messageData = {
-				   				isInvite: true,
-						from: this.user_id,
+				   		isInvite: true,
+						from_id: this.user_id,
 						username: this.username,
 						avatar: this.avatar,
 						roomName: this.roomId,
@@ -240,7 +240,7 @@ export default  defineComponent({
 			'join-room-m',
 			{ 
 				data: {
-					from: this.user_id,
+					from_id: this.user_id,
 					roomName: this.roomId,
 				}
 			}
@@ -295,7 +295,7 @@ export default  defineComponent({
 			  	const msgObj = {
                   	id: 0,
 					room_id: 0,
-					from_id: data.from,
+					from_id: data.from_id,
 					username: data.username,
 					image_url: data.avatar,
 					msg: data.message,
@@ -323,7 +323,7 @@ export default  defineComponent({
 		'leave-room',
 		{ 
 			data: {
-				from: this.user_id,
+				from_id: this.user_id,
 				roomName: this.roomId
 			}
 		},

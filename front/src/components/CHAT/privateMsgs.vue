@@ -70,7 +70,6 @@
 						</div>
 					</div>
 				</div>
-				
 	
 			</div>
 		</div>
@@ -97,17 +96,20 @@
 
 <script lang="ts">
 
+
+
 import store from '@/store';
 import axios from 'axios';
 import router from '@/router';
 import { defineComponent } from 'vue';
 import io from 'socket.io-client';
-import { COMPLETIONSTATEMENT_TYPES } from '@babel/types';
+
 
 
 interface message{
 	id: number;
 	room_id: number;
+	to_id:number;
 	from_id: number;
 	image_url: string;
 	username: string;
@@ -231,8 +233,8 @@ export default  defineComponent({
 		console.log(`trying to send: ${message}`);
 			const messageData = {
 				isInvite: false,
-				from: this.user_id,
-				to: this.uId,
+				from_id: this.user_id,
+				to_id: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
@@ -259,8 +261,9 @@ export default  defineComponent({
 			const messageData = {
 				isInvite: true,
 				inviteStatus: 0,
-				from: this.user_id,
-				to: this.uId,
+				created: Date.now(), // maybe wrong ---------------------->
+				from_id: this.user_id,
+				to_id: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
@@ -285,7 +288,7 @@ export default  defineComponent({
 				isInvite: true,
 				inviteStatus: 1,
 				created: msgObj.created,
-				to: this.uId,
+				to_id: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
@@ -313,7 +316,7 @@ export default  defineComponent({
 				isInvite: true,
 				inviteStatus: 2,
 				created: msgObj.created,
-				to: this.uId,
+				to_id: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
@@ -339,7 +342,7 @@ export default  defineComponent({
 				isInvite: true,
 				inviteStatus: 3,
 				created: msgObj.created,
-				to: this.uId,
+				to_id: this.uId,
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
@@ -368,7 +371,7 @@ export default  defineComponent({
 	acceptingMsg(){
 		console.log(`ready to accept incoming msgs`);
 		this.socket.on("message", ({data}) => {
-			console.log(`message reacheed ${JSON.stringify(data)}`);
+			console.log(`message reacheed ${JSON.stringify(data.inviteStatus)}`);
 			if( 
 				data.isInvite == false ||
 				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
@@ -381,12 +384,14 @@ export default  defineComponent({
 	},
 	  newMessage(data: any)
       {
-			if( !this.blockedList.includes(data.from) )
+			if( !this.blockedList.includes(data.from_id) )
 		  	{
 			  	const msgObj = {
+					isInvite:data.isInvite,
+					inviteStatus: data.inviteStatus,
                   	id: 0,
 					room_id: 0,
-					from_id: data.from,
+					from_id: data.from_id,
 					username: data.username,
 					image_url: data.avatar,
 					msg: data.message,

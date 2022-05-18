@@ -16,39 +16,44 @@ export class MessageGateway {
 	@SubscribeMessage('private-chat')
 	async handleMessage(client, payload: any ) {
 
-		const sessionId : number = +payload.data.from;
-		const userBlockedList: number[] = await this.blockService.blockedList(+payload.data.to);
+		const sessionId : number = +payload.data.from_id;
+		const userBlockedList: number[] = await this.blockService.blockedList(+payload.data.to_id);
 		if(userBlockedList.includes(sessionId))
 		{
 			return { status: false }
 		}
 		else
 		{
+			
 			if(!payload.data.isInvite)
 			{
+	
 				let messageDto = new CreateMessageDto();
 				messageDto.isInvite = payload.data.isInvite;
-				messageDto.to_id = +payload.data.to;
+				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
 				this.messagesService.create(sessionId, messageDto);
 			}
 			else if(payload.data.inviteStatus == 0)
 			{
+	
+
 				let messageDto = new CreateMessageDto();
 				messageDto.isInvite = payload.data.isInvite;
-				messageDto.to_id = +payload.data.to;
+				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
 				this.messagesService.create(sessionId, messageDto);
 			}
 			else
 			{
-
+				
 				let messageDto = new CreateMessageDto();
 				messageDto.inviteStatus = payload.data.inviteStatus;
 				messageDto.isInvite = payload.data.isInvite;
-				messageDto.to_id = +payload.data.to;
+				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
 				messageDto.created = payload.data.created;
+				console.log('reached');
 				this.messagesService.updateMessage(messageDto);
 			}
 

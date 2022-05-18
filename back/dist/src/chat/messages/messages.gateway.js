@@ -20,8 +20,8 @@ let MessageGateway = class MessageGateway {
         this.messagesService = messagesService;
     }
     async handleMessage(client, payload) {
-        const sessionId = +payload.data.from;
-        const userBlockedList = await this.blockService.blockedList(+payload.data.to);
+        const sessionId = +payload.data.from_id;
+        const userBlockedList = await this.blockService.blockedList(+payload.data.to_id);
         if (userBlockedList.includes(sessionId)) {
             return { status: false };
         }
@@ -29,14 +29,14 @@ let MessageGateway = class MessageGateway {
             if (!payload.data.isInvite) {
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.isInvite = payload.data.isInvite;
-                messageDto.to_id = +payload.data.to;
+                messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
                 this.messagesService.create(sessionId, messageDto);
             }
             else if (payload.data.inviteStatus == 0) {
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.isInvite = payload.data.isInvite;
-                messageDto.to_id = +payload.data.to;
+                messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
                 this.messagesService.create(sessionId, messageDto);
             }
@@ -44,9 +44,10 @@ let MessageGateway = class MessageGateway {
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.inviteStatus = payload.data.inviteStatus;
                 messageDto.isInvite = payload.data.isInvite;
-                messageDto.to_id = +payload.data.to;
+                messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
                 messageDto.created = payload.data.created;
+                console.log('reached');
                 this.messagesService.updateMessage(messageDto);
             }
             client.broadcast.to(payload.data.roomName).emit("message", payload);

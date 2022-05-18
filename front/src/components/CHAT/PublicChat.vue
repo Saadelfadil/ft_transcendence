@@ -147,7 +147,7 @@ export default defineComponent({
             'join-room',
             { 
                 data: {
-                    from: this.user_id,
+                    from_id: this.user_id,
                     roomName: roomId,
                     password: password
                 }

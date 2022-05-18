@@ -22,7 +22,7 @@ let ChatRoomGateway = class ChatRoomGateway {
         this.usersService = usersService;
     }
     async handleMessage(client, payload) {
-        const sessionId = +payload.data.from;
+        const sessionId = +payload.data.from_id;
         const roomBannedList = await this.banService.roomBannedList(+payload.data.roomName);
         if (roomBannedList.includes(sessionId)) {
             return { status: false };
@@ -39,7 +39,7 @@ let ChatRoomGateway = class ChatRoomGateway {
     async joinRoom(client, payload) {
         const authStatus = await this.roomService.checkAuth(+payload.data.roomName, payload.data.password);
         if (authStatus) {
-            const sessionId = +payload.data.from;
+            const sessionId = +payload.data.from_id;
             this.usersService.joinRoom(+sessionId, +payload.data.roomName);
             client.join(payload.data.roomName);
             return { status: true };
@@ -49,7 +49,7 @@ let ChatRoomGateway = class ChatRoomGateway {
         }
     }
     async leaveRoom(client, payload) {
-        const sessionId = +payload.data.from;
+        const sessionId = +payload.data.from_id;
         const leaveingStatus = this.usersService.leaveRoom(sessionId, +payload.data.roomName);
         if (leaveingStatus) {
             client.leave(payload.data.roomName);

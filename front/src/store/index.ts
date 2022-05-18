@@ -4,6 +4,7 @@ interface message{
 	id: number;
 	room_id: number;
 	from_id: number;
+  to_id: number;
 	username: string;
 	image_url: string;
 	msg: string;
