@@ -215,6 +215,7 @@ export default  defineComponent({
 		},
 	   handleSubmitNewMessage(msg:string){
 		   	const messageData = {
+				   				isInvite: true,
 						from: this.user_id,
 						username: this.username,
 						avatar: this.avatar,

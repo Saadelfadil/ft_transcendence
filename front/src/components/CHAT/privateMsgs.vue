@@ -156,11 +156,15 @@ export default  defineComponent({
 				}
 			);
 			await this.getUserMessages();
+			this.StartJoinRoom();
 			this.acceptingMsg();
 		},
 	},
    methods: {
 
+	   StartJoinRoom(){
+		this.socket.emit( 'join-user', { data: { roomName: this.getRoomName() }  } )
+	   },
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
@@ -217,7 +221,7 @@ export default  defineComponent({
 			this.curMsgData = '';
          }
       },
-	getRoomName(){+
+	getRoomName(){
 		if(this.user_id < this.uId)
 			return this.user_id+"-"+this.uId;
 		else
@@ -226,6 +230,7 @@ export default  defineComponent({
 	NewhandleSubmitNewMessage(message:string){
 		console.log(`trying to send: ${message}`);
 			const messageData = {
+				isInvite: false,
 				from: this.user_id,
 				to: this.uId,
 				username: this.username,
@@ -363,14 +368,13 @@ export default  defineComponent({
 	acceptingMsg(){
 		console.log(`ready to accept incoming msgs`);
 		this.socket.on("message", ({data}) => {
-			console.log('message reacheed');
+			console.log(`message reacheed ${JSON.stringify(data)}`);
 			if( 
 				data.isInvite == false ||
 				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
 				(data.isInvite == true &&  data.inviteStatus == 1 && data.from_id == this.user_id )
 			)
 			{
-				console.log(`valid message`);
 				this.newMessage(data);
 			}
 		});
