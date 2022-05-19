@@ -1,28 +1,58 @@
-import { SubscribeMessage, WebSocketGateway } from "@nestjs/websockets";
-import { BlockService } from "src/chat/block/block.service";
+
+import {
+	SubscribeMessage,
+	WebSocketGateway,
+	OnGatewayInit,
+	WebSocketServer,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+   } from '@nestjs/websockets';
+   import { Socket, Server } from 'socket.io';
+   
+   import { Logger } from '@nestjs/common';
+
+   @WebSocketGateway({
+	namespace: 'onlineUsers',
+	cors: {
+	  origin: '*',
+	}
+  })
+export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 
-@WebSocketGateway(8009, {cors: true })
-export class OnlineGateway {
 
     private  onlineUsers = {};
 	constructor(  
 	) {}
 
+    @WebSocketServer() server: Server;
+	private logger: Logger = new Logger('MessageGateway');
+   
+
     @SubscribeMessage('online')
     handleOnlineUsers(client, payload: any ): any {
         this.onlineUsers[client.id] = payload.data.userId;
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
+		this.server.emit('online-users', this.onlineUsers);
+
         return { onlineUsers: this.onlineUsers };
     }
       
-    handleDisconnect(client, ...args: any[]) {
-        delete this.onlineUsers[client.id];
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
+
+
+
+    afterInit(server: Server) {
+    }
+    
+    handleDisconnect(client: Socket) {
+
+      delete this.onlineUsers[client.id];
+
+		    this.server.emit('online-users', this.onlineUsers);
+    }
+    
+    handleConnection(client: Socket, ...args: any[]) {
+		  this.server.emit('online-users', this.onlineUsers);
     }
 
-    handleConnection(client, ...args: any[]) {
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
-
-    }
+       
 }

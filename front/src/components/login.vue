@@ -31,18 +31,12 @@ export default defineComponent({
     },
     methods: {
             async redirectIfLogged(){
-            console.log(`in redirect`);    
-            // try{
-                const resp = await axios({
-                    method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
-                    withCredentials: true,
-                });
-                this.is_logged = resp.data.status;
-            // }catch(e){
-                // console.log(`reached here`);
-                // this.is_logged = false;
-            // }
+            const resp = await axios({
+                method: 'get',
+                url: 'http://localhost:8080/api/islogin',
+                withCredentials: true,
+            });
+            this.is_logged = resp.data.status;
         }
     },
 

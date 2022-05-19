@@ -134,8 +134,8 @@ export default  defineComponent({
    data()
    {
       return {
-		socket: io("http://localhost:8000"),
-		socket2 : io("http://localhost:8001"),
+		socket: io("http://localhost:3000/publicChat"),
+		socket2 : io("http://localhost:3000/privateChat"),
 		user_id: 0 as number,
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
@@ -172,7 +172,7 @@ export default  defineComponent({
 	},
    methods: {
 	   chatStartUp(){
-		   this.socket.on("message", ({ data }) => {
+		   this.socket.on(this.roomId.toString(), ({ data }) => {
 			this.newMessage(data);
 		})
 	   },
@@ -193,7 +193,7 @@ export default  defineComponent({
 				isInvite: true,
 				inviteStatus: 0,
 				from_id: this.user_id,
-				to: clickedUserId,
+				to_id: clickedUserId,
 				username: this.username,
 				avatar: this.avatar,
 				// roomName: this.getRoomName(),
@@ -224,27 +224,25 @@ export default  defineComponent({
 					}
 
 			this.socket.emit(
-						'chat-room',
+						'public-chat',
 						{ 
 							data: messageData
 						},
 						// send message callback
 						(response: any) => {
-							if(response.status)
-								this.newMessage(messageData);
 						}
 					)
 	   },
 	   joinTheRoom(){
-		   this.socket.emit(
-			'join-room-m',
-			{ 
-				data: {
-					from_id: this.user_id,
-					roomName: this.roomId,
-				}
-			}
-	)
+	// 	   this.socket.emit(
+	// 		'join-room-m',
+	// 		{ 
+	// 			data: {
+	// 				from_id: this.user_id,
+	// 				roomName: this.roomId,
+	// 			}
+	// 		}
+	// )
 	   },
 	   acceptInvite(msgObj:message){
 

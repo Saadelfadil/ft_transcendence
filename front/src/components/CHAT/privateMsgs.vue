@@ -125,7 +125,7 @@ export default  defineComponent({
    data()
    {
       return {
-		socket : io("http://localhost:8001"),
+		socket : io("http://localhost:3000/privateChat"),
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
 		isOwner: false as boolean,
@@ -158,15 +158,11 @@ export default  defineComponent({
 				}
 			);
 			await this.getUserMessages();
-			this.StartJoinRoom();
 			this.acceptingMsg();
 		},
 	},
    methods: {
 
-	   StartJoinRoom(){
-		this.socket.emit( 'join-user', { data: { roomName: this.getRoomName() }  } )
-	   },
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
@@ -230,7 +226,6 @@ export default  defineComponent({
 			return this.uId+"-"+this.user_id;
 	},
 	NewhandleSubmitNewMessage(message:string){
-		console.log(`trying to send: ${message}`);
 			const messageData = {
 				isInvite: false,
 				from_id: this.user_id,
@@ -247,12 +242,6 @@ export default  defineComponent({
 				},
 				// send message callback
 				(response: any) => {
-					if(response.status)
-					{
-						this.newMessage(messageData);
-					}else{
-						console.log(`faild with ${response}`);
-					}
 				}
 			)
 	},
@@ -370,7 +359,7 @@ export default  defineComponent({
 
 	acceptingMsg(){
 		console.log(`ready to accept incoming msgs`);
-		this.socket.on("message", ({data}) => {
+		this.socket.on(this.getRoomName(), ({data}) => {
 			console.log(`message reacheed ${JSON.stringify(data.inviteStatus)}`);
 			if( 
 				data.isInvite == false ||

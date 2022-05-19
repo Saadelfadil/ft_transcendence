@@ -18,10 +18,6 @@ export declare class AppController {
     getRequests(body: any): Promise<any[]>;
     getFriends(body: any): Promise<any[]>;
     addFriend(body: any): Promise<boolean>;
-    FindUserByLogin(body: any): Promise<{
-        status: boolean;
-        id: number;
-    }>;
     removeFriend(body: any): Promise<void>;
     RequestToFriend(body: any): Promise<void>;
     googleAuthRedirect(req: any): {
@@ -97,6 +93,10 @@ export declare class AppController {
     }>;
     getUserJoindAndBlocked(body: any): Promise<{
         joinedRooms: number[];
+    }>;
+    FindUserByLogin(body: any): Promise<{
+        status: boolean;
+        id: number;
     }>;
     logout(response: Response): Promise<string>;
 }

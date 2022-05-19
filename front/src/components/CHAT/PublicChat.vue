@@ -98,7 +98,7 @@ import { defineComponent } from 'vue'
 import axios from 'axios';
 import store from '@/store';
 import router from '@/router';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 
 import RoomSettingBlock from './RoomSetting.vue';
 
@@ -111,7 +111,7 @@ export default defineComponent({
     {
         return {
             isPopUp: false as boolean,
-            socket: io("http://localhost:8000"),
+            // socket: io("http://localhost:8000"),
             invalid_pass: false as boolean,
             user_room_pass: '' as string,
             typing_room_id: -1 as number,    
@@ -143,28 +143,29 @@ export default defineComponent({
             });
         },
         joinTheRoom(roomId:number, password:string){
-            this.socket.emit(
-            'join-room',
-            { 
-                data: {
-                    from_id: this.user_id,
-                    roomName: roomId,
-                    password: password
-                }
-            },
-            (response: any) => {
-                // join-room callback
-                if(response.status)
-                {
-                    this.getRoomData(roomId);
-                }
-                else
-                {
-                    console.log("Error joining the room"); // ok
-                    this.passIsInvalid();
-                }
-            }
-        )
+            this.getRoomData(roomId);
+        //     this.socket.emit(
+        //     'join-room',
+        //     { 
+        //         data: {
+        //             from_id: this.user_id,
+        //             roomName: roomId,
+        //             password: password
+        //         }
+        //     },
+        //     (response: any) => {
+        //         // join-room callback
+        //         if(response.status)
+        //         {
+        //             this.getRoomData(roomId);
+        //         }
+        //         else
+        //         {
+        //             console.log("Error joining the room"); // ok
+        //             this.passIsInvalid();
+        //         }
+        //     }
+        // )
         },
 		getJoinedRooms(){
 			return axios({

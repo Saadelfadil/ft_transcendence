@@ -90,16 +90,6 @@ let AppController = class AppController {
             return false;
         }
     }
-    async FindUserByLogin(body) {
-        const { login } = body;
-        try {
-            const { id } = await this.appService.getUserByLogin(login);
-            return { status: true, id: id };
-        }
-        catch (e) {
-            return { status: false, id: -1 };
-        }
-    }
     async removeFriend(body) {
         const { user_id, friend_id } = body;
         try {
@@ -369,6 +359,16 @@ let AppController = class AppController {
         const { joinedRooms } = await this.appService.getUserById(id);
         return { joinedRooms: joinedRooms };
     }
+    async FindUserByLogin(body) {
+        const { login } = body;
+        try {
+            const { id } = await this.appService.getUserByLogin(login);
+            return { status: true, id: id };
+        }
+        catch (e) {
+            return { status: false, id: -1 };
+        }
+    }
     async logout(response) {
         response.clearCookie('jwt');
         return "Cookies Clean";
@@ -403,13 +403,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "addFriend", null);
-__decorate([
-    (0, common_1.Post)('userbylogin'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AppController.prototype, "FindUserByLogin", null);
 __decorate([
     (0, common_1.Post)('removefriend'),
     __param(0, (0, common_1.Body)()),
@@ -549,6 +542,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getUserJoindAndBlocked", null);
+__decorate([
+    (0, common_1.Post)('userbylogin'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "FindUserByLogin", null);
 __decorate([
     (0, common_1.Post)('logout'),
     __param(0, (0, common_1.Res)({ passthrough: true })),

@@ -23,7 +23,7 @@ export default defineComponent({
   data(){
     return {
       user_id: 0 as number,
-      socket : io("http://localhost:8009"),
+      socket : io("http://localhost:3000/onlineUsers"),
     }
   },
   methods:{
@@ -38,11 +38,10 @@ export default defineComponent({
             }
             store.commit('set_online_users', newArray);
       });
-      this.socket.on("onlineUsers", (data) => {
+      this.socket.on("online-users", (data) => {
             let newArray: Array<number> = [];
             for (let user in data) {
                 newArray.push(data[user]);
-                
             }
             store.commit('set_online_users', newArray);
       });

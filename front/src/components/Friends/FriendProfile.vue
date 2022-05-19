@@ -14,7 +14,7 @@
             <img class="rounded-full max-w-xs w-32 items-center border" :src="user_avatar">
         </div>
         <div class="w-full p-8 mx-2 flex justify-center">
-        <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6">
+        <div  class="w-28 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6" :class="status_color">
             {{userStatus}}
         </div>
         <div  class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="directMessage">
@@ -41,8 +41,6 @@
             Loses: {{user_info.wins}}
         </div>
         </div>
-       <!-- <p> Wins : {{user_info.wins}}</p>
-        <p> Loses : {{user_info.loses}}</p>-->
     </div>
     
 
@@ -76,7 +74,7 @@ export default defineComponent({
     data()
     {
         return {
-            msg_status : "offline",
+            status_color : 'bg-blue-500',
             onlineUsers: [] as Array<number>,
             user_id: 0 as number,
             logged: false as boolean,
@@ -91,7 +89,13 @@ export default defineComponent({
             return this.user_info.login;
         },
         userStatus() : string {
-            return store.getters.get_online_users.includes(Number(this.$route.query.friend_id)) ? 'Online' : 'Offline';
+            if (store.getters.get_online_users.includes(Number(this.$route.query.friend_id)))
+            {
+                this.status_color = 'bg-green-500';
+                return 'Online';
+            }
+            this.status_color = 'bg-blue-500';
+            return 'Offline';
         },
         UnblockedUser() : boolean {
             return !this.user_info.is_blocked;
@@ -113,6 +117,7 @@ export default defineComponent({
         },
     directMessage(){
         router.push({name: 'privatemsgs', query: {uId:this.$route.query.friend_id}});
+        // what is the deff between message with friend and not
     },
         getExactUserData(_id:number) {
             return axios({
@@ -146,7 +151,6 @@ export default defineComponent({
         validFriend(friend_id:number){
             if (this.user_id === friend_id)
             {
-                
                 router.replace({name: 'profile'});
                 return ;
             }
@@ -164,7 +168,7 @@ export default defineComponent({
             this.validFriend(Number(this.$route.query.friend_id));
             await Promise.all([this.isUserBlocked(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
                 this.user_info = resps[1].data;
-                this.user_info.is_blocked = resps[0].data.blocked; // it is important to stay here
+                this.user_info.is_blocked = resps[0].data.blocked; // do not move this linbe above
             });
         }
     }

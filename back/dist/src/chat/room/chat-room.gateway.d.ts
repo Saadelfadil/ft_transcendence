@@ -1,19 +1,22 @@
 import { BanService } from "src/chat/ban/ban.service";
 import { RoomService } from "./room.service";
 import { AppService } from "src/users/app.service";
-export declare class ChatRoomGateway {
+import { OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { Socket, Server } from 'socket.io';
+export declare class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private readonly banService;
     private readonly roomService;
     private readonly usersService;
     constructor(banService: BanService, roomService: RoomService, usersService: AppService);
-    handleMessage(client: any, payload: any): Promise<{
-        status: boolean;
-    }>;
-    joinRoom(client: any, payload: any): Promise<{
+    server: Server;
+    private logger;
+    handleMessage(client: Socket, payload: any): Promise<{
         status: boolean;
     }>;
     leaveRoom(client: any, payload: any): Promise<{
         status: boolean;
     }>;
-    joinRoomM(client: any, payload: any): Promise<void>;
+    afterInit(server: Server): void;
+    handleDisconnect(client: Socket): void;
+    handleConnection(client: Socket, ...args: any[]): void;
 }

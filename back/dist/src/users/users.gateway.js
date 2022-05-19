@@ -11,23 +11,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OnlineGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
+const socket_io_1 = require("socket.io");
+const common_1 = require("@nestjs/common");
 let OnlineGateway = class OnlineGateway {
     constructor() {
         this.onlineUsers = {};
+        this.logger = new common_1.Logger('MessageGateway');
     }
     handleOnlineUsers(client, payload) {
         this.onlineUsers[client.id] = payload.data.userId;
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
+        this.server.emit('online-users', this.onlineUsers);
         return { onlineUsers: this.onlineUsers };
     }
-    handleDisconnect(client, ...args) {
+    afterInit(server) {
+    }
+    handleDisconnect(client) {
         delete this.onlineUsers[client.id];
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
+        this.server.emit('online-users', this.onlineUsers);
     }
     handleConnection(client, ...args) {
-        client.broadcast.emit('onlineUsers', this.onlineUsers);
+        this.server.emit('online-users', this.onlineUsers);
     }
 };
+__decorate([
+    (0, websockets_1.WebSocketServer)(),
+    __metadata("design:type", socket_io_1.Server)
+], OnlineGateway.prototype, "server", void 0);
 __decorate([
     (0, websockets_1.SubscribeMessage)('online'),
     __metadata("design:type", Function),
@@ -35,7 +44,12 @@ __decorate([
     __metadata("design:returntype", Object)
 ], OnlineGateway.prototype, "handleOnlineUsers", null);
 OnlineGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)(8009, { cors: true }),
+    (0, websockets_1.WebSocketGateway)({
+        namespace: 'onlineUsers',
+        cors: {
+            origin: '*',
+        }
+    }),
     __metadata("design:paramtypes", [])
 ], OnlineGateway);
 exports.OnlineGateway = OnlineGateway;

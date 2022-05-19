@@ -1,12 +1,31 @@
-import { SubscribeMessage, WebSocketGateway } from "@nestjs/websockets";
+
 import { BanService } from "src/chat/ban/ban.service";
 import { AppModule } from "src/app.module";
 import { CreateRoomMessageDto } from "./dto/create-room-message.dto";
 import { RoomService } from "./room.service";
 import { AppService } from "src/users/app.service";
 
-@WebSocketGateway(8000, {cors: true })
-export class ChatRoomGateway {
+import {
+	SubscribeMessage,
+	WebSocketGateway,
+	OnGatewayInit,
+	WebSocketServer,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+   } from '@nestjs/websockets';
+   import { Logger } from '@nestjs/common';
+   import { Socket, Server } from 'socket.io';
+   
+
+   @WebSocketGateway({
+	namespace: 'publicChat',
+	cors: {
+	  origin: '*',
+	}
+  })
+
+
+   export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(
 		private readonly banService: BanService,
@@ -14,9 +33,13 @@ export class ChatRoomGateway {
 		private readonly usersService: AppService
 
 	) {}
+   
+	@WebSocketServer() server: Server;
+	private logger: Logger = new Logger('MessageGateway');
+   
+	@SubscribeMessage('public-chat')
+	async handleMessage(client: Socket, payload: any) {
 
-	@SubscribeMessage('chat-room')
-	async handleMessage(client, payload: any ) {
 
 		const sessionId : number = +payload.data.from_id;
 		// // banned list
@@ -31,45 +54,21 @@ export class ChatRoomGateway {
 			messageDto.room_id = +payload.data.roomName;
 			messageDto.msg = payload.data.message;
 			this.roomService.saveMessageToRoom(sessionId, messageDto);
-
-			// payload.data.from = sessionId;
-			client.broadcast.to(payload.data.roomName).emit("message", payload);
-			return { status: true }
-		}
-	}
-
-	@SubscribeMessage('join-room')
-	async joinRoom(client, payload: any) {
-		// TODO: join the room
-		// get room data (if it's private or public)
-		const authStatus = await this.roomService.checkAuth(+payload.data.roomName, payload.data.password);
-		if ( authStatus )
-		{
-			const sessionId : number = +payload.data.from_id;
-			this.usersService.joinRoom(+sessionId, +payload.data.roomName);
-			client.join(payload.data.roomName);
-			return { status: true }
-		}
-		else
-		{
-			return { status: false }
+			
+			this.server.emit(payload.data.roomName, payload);
+            
+            return { status: true }
 		}
 		
+
 	}
 
-
-	@SubscribeMessage('leave-room')
+    @SubscribeMessage('leave-room')
 	async leaveRoom(client, payload: any) {
-
-
-
-		
 		const sessionId : number = +payload.data.from_id;
-
 		const leaveingStatus = this.usersService.leaveRoom(sessionId, +payload.data.roomName);
 		if ( leaveingStatus )
 		{
-			client.leave(payload.data.roomName);
 			return { status: true }
 		}
 		else
@@ -78,14 +77,17 @@ export class ChatRoomGateway {
 		}
 		
 	}
-
-
-	@SubscribeMessage('join-room-m')
-	async joinRoomM(client, payload: any) {
-		client.join(payload.data.roomName);		
+   
+	afterInit(server: Server) {
+	 this.logger.log('Init');
 	}
-
-	
-	
+   
+	handleDisconnect(client: Socket) {
+	 this.logger.log(`Client disconnected: ${client.id}`);
+	}
+   
+	handleConnection(client: Socket, ...args: any[]) {
+	//  this.logger.log(`Client connected: ${client.id}`);
+	}
 
 }

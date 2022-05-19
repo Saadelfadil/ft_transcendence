@@ -19,7 +19,7 @@ export default {
         async checkLogin()
         {
             console.log("component name: ", (this as any).$options.name);
-            if ((this as any).$options.name === "RouterLink" || (this as any).$options.name === "MainAppBlock" ||
+            if ((this as any).$options.name === "RouterLink" ||
             (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === "LoginBlock") return 
             console.log(`global check`);
 

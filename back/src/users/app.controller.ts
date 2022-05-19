@@ -95,18 +95,6 @@ export class AppController {
 			return false;
 		}
 	}
-	@Post('userbylogin')
-	async FindUserByLogin(@Body() body){
-		const {login} = body;
-		try{
-			const { id } = await this.appService.getUserByLogin(login);
-			return {status: true, id:id};
-		}catch(e)
-		{
-			return {status: false, id:-1};
-		}
-	}
-
 	@Post('removefriend')
 	async removeFriend(@Body() body)
 	{
@@ -601,11 +589,25 @@ export class AppController {
 	}
 
 
+	@Post('userbylogin')
+	async FindUserByLogin(@Body() body){
+		const {login} = body;
+		try{
+			const { id } = await this.appService.getUserByLogin(login);
+			return {status: true, id:id};
+		}catch(e)
+		{
+			return {status: false, id:-1};
+		}
+	}
+
 	@Post('logout')
 	async logout(@Res({ passthrough: true }) response: Response) {
 		response.clearCookie('jwt');
 		return "Cookies Clean";
 	}
+
+
 
 
 }

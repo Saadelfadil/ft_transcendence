@@ -10,14 +10,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageGateway = void 0;
-const websockets_1 = require("@nestjs/websockets");
 const block_service_1 = require("../block/block.service");
 const create_message_dto_1 = require("./dto/create-message.dto");
 const messages_service_1 = require("./messages.service");
+const websockets_1 = require("@nestjs/websockets");
+const common_1 = require("@nestjs/common");
+const socket_io_1 = require("socket.io");
 let MessageGateway = class MessageGateway {
     constructor(blockService, messagesService) {
         this.blockService = blockService;
         this.messagesService = messagesService;
+        this.logger = new common_1.Logger('MessageGateway');
     }
     async handleMessage(client, payload) {
         const sessionId = +payload.data.from_id;
@@ -47,31 +50,38 @@ let MessageGateway = class MessageGateway {
                 messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
                 messageDto.created = payload.data.created;
-                console.log('reached');
                 this.messagesService.updateMessage(messageDto);
             }
-            client.broadcast.to(payload.data.roomName).emit("message", payload);
+            this.server.emit(payload.data.roomName, payload);
             return { status: true };
         }
     }
-    async joinRoom(client, payload) {
-        client.join(payload.data.roomName);
+    afterInit(server) {
+        this.logger.log('Init');
+    }
+    handleDisconnect(client) {
+        this.logger.log(`Client disconnected: ${client.id}`);
+    }
+    handleConnection(client, ...args) {
     }
 };
 __decorate([
+    (0, websockets_1.WebSocketServer)(),
+    __metadata("design:type", socket_io_1.Server)
+], MessageGateway.prototype, "server", void 0);
+__decorate([
     (0, websockets_1.SubscribeMessage)('private-chat'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], MessageGateway.prototype, "handleMessage", null);
-__decorate([
-    (0, websockets_1.SubscribeMessage)('join-user'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], MessageGateway.prototype, "joinRoom", null);
 MessageGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)(8001, { cors: true }),
+    (0, websockets_1.WebSocketGateway)({
+        namespace: 'privateChat',
+        cors: {
+            origin: '*',
+        }
+    }),
     __metadata("design:paramtypes", [block_service_1.BlockService,
         messages_service_1.MessagesService])
 ], MessageGateway);
