@@ -58,6 +58,7 @@ let RoomService = class RoomService {
             whereBlock = `AND public."users".id NOT IN ( ${excludeUsersList.join(",")} )`;
         else
             whereBlock = ``;
+        console.log(` sql injection ${whereBlock}`);
         const data = await (0, typeorm_2.getConnection)().query(`
 			SELECT *  FROM
 				public."room_message"

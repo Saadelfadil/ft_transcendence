@@ -31,7 +31,7 @@
             <div 
             class="text-md no-underline text-grey-darker hover:text-green-500 ml-2 px-1 cursor-pointer inline-block"
             >
-                Add Friends
+                Find Friends
             </div>
             </router-link> 
         </div>

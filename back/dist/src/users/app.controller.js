@@ -90,6 +90,16 @@ let AppController = class AppController {
             return false;
         }
     }
+    async FindUserByLogin(body) {
+        const { login } = body;
+        try {
+            const { id } = await this.appService.getUserByLogin(login);
+            return { status: true, id: id };
+        }
+        catch (e) {
+            return { status: false, id: -1 };
+        }
+    }
     async removeFriend(body) {
         const { user_id, friend_id } = body;
         try {
@@ -155,13 +165,14 @@ let AppController = class AppController {
     game() {
         return "Hello to game route";
     }
-    async loginOrNot(request, query) {
+    async loginOrNot(request) {
+        console.log('called is login');
         try {
             const user = await this.appService.getUserDataFromJwt(request);
-            return { is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login };
+            return { is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status: true };
         }
         catch (error) {
-            throw new common_1.ForbiddenException();
+            return { status: false };
         }
     }
     async updateU(request, body) {
@@ -394,6 +405,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "addFriend", null);
 __decorate([
+    (0, common_1.Post)('userbylogin'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "FindUserByLogin", null);
+__decorate([
     (0, common_1.Post)('removefriend'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -431,12 +449,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "game", null);
 __decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Get)('islogin'),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "loginOrNot", null);
 __decorate([

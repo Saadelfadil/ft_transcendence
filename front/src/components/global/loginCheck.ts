@@ -19,27 +19,27 @@ export default {
         async checkLogin()
         {
             console.log("component name: ", (this as any).$options.name);
-            if ((this as any).$options.name === "RouterLink" || 
+            if ((this as any).$options.name === "RouterLink" || (this as any).$options.name === "MainAppBlock" ||
             (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === "LoginBlock") return 
-            try{
+            console.log(`global check`);
+
                 const resp = await axios({
                     method: 'get',
                     url: 'http://localhost:8080/api/islogin',
                     withCredentials: true
                 });
-                (this as any).logged = true;
-                (this as any).auth_switch = resp.data.is_login_db;
-                (this as any).user_id = resp.data.id;
-                (this as any).avatar = resp.data.image_url;
-                (this as any).username = resp.data.login;
-                (this as any).joinedRooms = resp.data.joinedRooms;
-            }
-            catch(e)
-            {
-                (this as any).logged = false;
-                router.replace({name: 'login'});
-                return ;
-            }
+                if (resp.data.status){
+                    (this as any).logged = true;
+                    (this as any).auth_switch = resp.data.is_login_db;
+                    (this as any).user_id = resp.data.id;
+                    (this as any).avatar = resp.data.image_url;
+                    (this as any).username = resp.data.login;
+                    (this as any).joinedRooms = resp.data.joinedRooms;
+                } else {
+                    (this as any).logged = false;
+                    router.replace({name: 'login'});
+                    return ;
+                }
         }
     },
     async created(){

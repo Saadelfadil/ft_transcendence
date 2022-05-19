@@ -52,7 +52,6 @@
 
 
 <script lang="ts">
-import store from '@/store'
 import { defineComponent } from 'vue'
 import axios from 'axios';
 import router from '@/router';

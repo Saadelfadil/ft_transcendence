@@ -41,15 +41,20 @@ export default defineComponent({
                 // send username_ to Endpoint;
                 const resp = await axios({
                     method: 'post',
-                    data: {
-                        login: this.username_,
-                        user_id: this.user_id, 
-                    },
-                    url: 'http://localhost:8080/api/addfriend',
+                    data: { login: this.username_ },
+                    url: 'http://localhost:8080/api/userbylogin',
                     withCredentials: true
                 });
-                if (!resp.data){
+                if (!resp.data.status){
                     this.msg = "Please Enter a Valid Input!!";
+                } else {
+                    if (resp.data.id === this.user_id)
+                    {
+                        // means that you have searched for yourself
+                        router.push({name: 'profile'});
+                    } else {
+                        router.push({name : 'FriendProfile', query: {friend_id: resp.data.id}});
+                    }
                 }
             }
             else

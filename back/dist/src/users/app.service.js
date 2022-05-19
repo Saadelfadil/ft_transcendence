@@ -69,6 +69,7 @@ let AppService = class AppService {
         return user;
     }
     async getUserDataFromJwt(request) {
+        console.log('called');
         try {
             const cookie = request.cookies['jwt'];
             const data = await this.jwtService.verifyAsync(cookie);

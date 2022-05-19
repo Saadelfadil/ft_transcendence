@@ -95,6 +95,18 @@ export class AppController {
 			return false;
 		}
 	}
+	@Post('userbylogin')
+	async FindUserByLogin(@Body() body){
+		const {login} = body;
+		try{
+			const { id } = await this.appService.getUserByLogin(login);
+			return {status: true, id:id};
+		}catch(e)
+		{
+			return {status: false, id:-1};
+		}
+	}
+
 	@Post('removefriend')
 	async removeFriend(@Body() body)
 	{
@@ -273,14 +285,15 @@ export class AppController {
 		return "Hello to game route";
 	}
 
-	@UseGuards(AuthenticatedGuard)
+	// @UseGuards(AuthenticatedGuard)
 	@Get('islogin')
-	async loginOrNot(@Req() request: Request, @Query() query) {
+	async loginOrNot(@Req() request: Request) {
+		console.log('called is login');
 		try {
 			const user = await this.appService.getUserDataFromJwt(request);
-			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login};
+			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status:true};
 		} catch (error) {
-			throw new ForbiddenException();
+			return {status:false};
 		}
 	}
 

@@ -68,6 +68,8 @@ export class RoomService {
 		else
 			whereBlock = ``;
 
+		console.log(` sql injection ${whereBlock}`);
+
 		const data = await getConnection().query(`
 			SELECT *  FROM
 				public."room_message"

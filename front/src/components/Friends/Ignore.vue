@@ -1,5 +1,4 @@
-  
-<template>
+  <template>
   <div>
 
     <div class="grid grid-cols-1 min-w-full">

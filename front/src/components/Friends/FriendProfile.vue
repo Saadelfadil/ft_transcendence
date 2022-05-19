@@ -21,7 +21,7 @@
            message
         </div>
 
-        <div v-if="!user_info.is_blocked" class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="blockUser">
+        <div v-if="UnblockedUser" class="w-28 bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="blockUser">
            block
         </div>
         <div v-if="!user_info.is_friend" class="w-28  cursor-pointer bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6"  @click="addFriend">
@@ -92,6 +92,9 @@ export default defineComponent({
         },
         userStatus() : string {
             return store.getters.get_online_users.includes(Number(this.$route.query.friend_id)) ? 'Online' : 'Offline';
+        },
+        UnblockedUser() : boolean {
+            return !this.user_info.is_blocked;
         }
     },
     methods: {
@@ -110,7 +113,6 @@ export default defineComponent({
         },
     directMessage(){
         router.push({name: 'privatemsgs', query: {uId:this.$route.query.friend_id}});
-        // what is the deff between message with friend and not
     },
         getExactUserData(_id:number) {
             return axios({
@@ -144,25 +146,25 @@ export default defineComponent({
         validFriend(friend_id:number){
             if (this.user_id === friend_id)
             {
+                
                 router.replace({name: 'profile'});
                 return ;
             }
         },
-        getBlockedList(){
+        isUserBlocked(){
 			return axios({
 				method: 'GET',
-				url: 'http://localhost:8080/block/users'
+				url: `http://localhost:8080/block/${Number(this.$route.query.friend_id)}`
 			});
 		},
     },
     watch:{
         async user_id()
         {
-
             this.validFriend(Number(this.$route.query.friend_id));
-            await Promise.all([this.getBlockedList(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
-                this.user_info.is_blocked = resps[0].data.includes(Number(this.$route.query.friend_id));
+            await Promise.all([this.isUserBlocked(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
                 this.user_info = resps[1].data;
+                this.user_info.is_blocked = resps[0].data.blocked; // it is important to stay here
             });
         }
     }

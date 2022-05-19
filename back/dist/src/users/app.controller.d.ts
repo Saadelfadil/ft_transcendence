@@ -18,6 +18,10 @@ export declare class AppController {
     getRequests(body: any): Promise<any[]>;
     getFriends(body: any): Promise<any[]>;
     addFriend(body: any): Promise<boolean>;
+    FindUserByLogin(body: any): Promise<{
+        status: boolean;
+        id: number;
+    }>;
     removeFriend(body: any): Promise<void>;
     RequestToFriend(body: any): Promise<void>;
     googleAuthRedirect(req: any): {
@@ -25,11 +29,18 @@ export declare class AppController {
     };
     profile(request: Request): Promise<UserEntity>;
     game(): string;
-    loginOrNot(request: Request, query: any): Promise<{
+    loginOrNot(request: Request): Promise<{
         is_login_db: boolean;
         id: number;
         image_url: string;
         login: string;
+        status: boolean;
+    } | {
+        status: boolean;
+        is_login_db?: undefined;
+        id?: undefined;
+        image_url?: undefined;
+        login?: undefined;
     }>;
     updateU(request: Request, body: any): Promise<any>;
     verify(request: Request, body: any): Promise<void>;
