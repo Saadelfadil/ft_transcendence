@@ -72,7 +72,6 @@ export class AppService {
 
 		async getUserDataFromJwt(request: Request) : Promise<UserEntity>
 		{
-			console.log('called');
 			try {
 				const cookie = request.cookies['jwt'];
 				const data = await this.jwtService.verifyAsync(cookie);

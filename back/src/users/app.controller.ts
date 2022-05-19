@@ -288,7 +288,6 @@ export class AppController {
 	// @UseGuards(AuthenticatedGuard)
 	@Get('islogin')
 	async loginOrNot(@Req() request: Request) {
-		console.log('called is login');
 		try {
 			const user = await this.appService.getUserDataFromJwt(request);
 			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status:true};
