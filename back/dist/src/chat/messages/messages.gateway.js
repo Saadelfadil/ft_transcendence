@@ -23,6 +23,7 @@ let MessageGateway = class MessageGateway {
         this.logger = new common_1.Logger('MessageGateway');
     }
     async handleMessage(client, payload) {
+        console.log(`backend reached`);
         const sessionId = +payload.data.from_id;
         const userBlockedList = await this.blockService.blockedList(+payload.data.to_id);
         if (userBlockedList.includes(sessionId)) {

@@ -24,6 +24,7 @@ let MessagesService = class MessagesService {
     create(sessionId, createMessageDto) {
         let newMessage = this.messageRepository.create(createMessageDto);
         newMessage.from_id = sessionId;
+        console.log(`reached create ${JSON.stringify(newMessage)}`);
         return this.messageRepository.save(newMessage);
     }
     findOneByCreatedDate(created) {
@@ -34,8 +35,11 @@ let MessagesService = class MessagesService {
     async updateMessage(createMessageDto) {
         let msg = await this.findOneByCreatedDate(createMessageDto.created);
         console.log(`update message ${msg}, createDTO ${JSON.stringify(createMessageDto.created)}`);
-        msg.inviteStatus = createMessageDto.inviteStatus;
-        return this.messageRepository.save(msg);
+        if (msg) {
+            msg.inviteStatus = createMessageDto.inviteStatus;
+            return this.messageRepository.save(msg);
+        }
+        return;
     }
     async findOneMessage(id) {
         return this.messageRepository.findOne(id);

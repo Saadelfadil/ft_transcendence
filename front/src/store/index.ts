@@ -74,6 +74,9 @@ export default createStore({
     }
   },
   mutations: {
+    remove_at(state:any, index:number){
+      state.chatPublicMsgs.splice(index, 1);
+    },
     set_online_users(state:any, us:Array<number>){
       state.onlineUsers = us;
     },

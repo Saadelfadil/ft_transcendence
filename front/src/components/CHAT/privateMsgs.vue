@@ -57,7 +57,7 @@
 						<div class="bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="acceptInvite(msg)">
 							accept
 						</div>
-						<div class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600  cursor-pointer" @click="declineInvite(msg)">
+						<div class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600  cursor-pointer" @click="declineInvite(msg, index)">
 							decline
 						</div>
 					</div>
@@ -209,16 +209,16 @@ export default  defineComponent({
 				console.log(`tests ${data}`);
 			});
 		},
-      addMessage()
-      {
+    addMessage()
+    {
 
-         const tmp = this.curMsgData.trim();
-         if (tmp.length !== 0)
-         {
+        const tmp = this.curMsgData.trim();
+        if (tmp.length !== 0)
+        {
 			this.NewhandleSubmitNewMessage(tmp);
 			this.curMsgData = '';
-         }
-      },
+        }
+    },
 	getRoomName(){
 		if(this.user_id < this.uId)
 			return this.user_id+"-"+this.uId;
@@ -247,6 +247,7 @@ export default  defineComponent({
 	},
 
 	NewhandleSubmitNewInvite(){
+
 			const messageData = {
 				isInvite: true,
 				inviteStatus: 0,
@@ -256,7 +257,7 @@ export default  defineComponent({
 				username: this.username,
 				avatar: this.avatar,
 				roomName: this.getRoomName(),
-				message: ''
+				message: '',
 			};
 			this.socket.emit(
 				'private-chat',
@@ -268,42 +269,58 @@ export default  defineComponent({
 					if(response.status)
 					{
 						// this.newMessage(messageData);
+						//console.log('onevone');
+						let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
+						router.push({name : 'onevone', query: {room_name_1vs1: room, pos: 'left'}});
 					}
 				}
 			)
 	},
 	acceptInvite(msgObj:message){
-			const messageData = {
-				isInvite: true,
-				inviteStatus: 1,
-				created: msgObj.created,
-				to_id: this.uId,
-				username: this.username,
-				avatar: this.avatar,
-				roomName: this.getRoomName(),
-				message: ''
-			};
-			this.socket.emit(
-				'private-chat',
-				{ 
-					data: messageData
-				},
-				// send message callback
-				(response: any) => {
-					console.log(response);
-					if(response.status)
-					{
-						// TODO: redirect to play game room
-						// player who recieved invite has accepted
-						console.log("Go to play game");
-					}
-				}
-			)
-	   },
-		declineInvite(msgObj:message){
+
+		//console.log(`acceopt at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
+		let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
+		router.push({name : 'onevone', query: {room_name_1vs1: room, pos: 'right'}});
 			const messageData = {
 				isInvite: true,
 				inviteStatus: 2,
+				accepted:true,
+				created: msgObj.created,
+				to_id: this.uId,
+				username: this.username,
+				avatar: this.avatar,
+				roomName: this.getRoomName(),
+				message: ''
+			};
+			this.socket.emit(
+				'private-chat',
+				{ 
+					data: messageData
+				},
+				// send message callback
+				(response: any) => {
+					if(response.status)
+					{
+						//router.push({name : 'onevone', query: {room_name_1vs1: this.user_id.toString() + '_' + this.uId.toString(), pos: 'right'}});
+					}
+				}
+			)
+
+	},
+		declineInvite(msgObj:message, msg_index:number){
+
+			console.log(`decline at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
+			let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
+			let socket = io("http://localhost:3000/onevone");
+			socket.on('connect', () => {
+				socket.emit('decline', room);
+				socket.disconnect();
+			});
+
+			const messageData = {
+				isInvite: true,
+				inviteStatus: 2,
+				accepted:false,
 				created: msgObj.created,
 				to_id: this.uId,
 				username: this.username,
@@ -323,6 +340,9 @@ export default  defineComponent({
 					}
 				}
 			)
+
+			// i need to remove [[accept], [remove]] from render array
+			store.commit('remove_at', msg_index);
 
 		},
 		directPlay(msgObj:message)
@@ -360,7 +380,19 @@ export default  defineComponent({
 	acceptingMsg(){
 		console.log(`ready to accept incoming msgs`);
 		this.socket.on(this.getRoomName(), ({data}) => {
-			console.log(`message reacheed ${JSON.stringify(data.inviteStatus)}`);
+			console.log(`message reacheed ${JSON.stringify(data)}`);
+
+			if (data.to_id == this.user_id && data.isInvite &&  data.accepted)
+			{
+				// since data is begin emmited even to user who send at first place that's why this check data.to_id == this.user_id 
+				/* i 'm using the fact that in message table we do not store data.accepted  in database so even message 
+				is not removed from database data.accepted is undefined so we will not redirect him each time he's in this prive chat*/
+				console.log(`time to be redirected`);
+				this.startPlaying();
+				return ;
+			}
+
+
 			if( 
 				data.isInvite == false ||
 				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
@@ -370,6 +402,9 @@ export default  defineComponent({
 				this.newMessage(data);
 			}
 		});
+	},
+	startPlaying(){
+		//router.push({name: 'matchup', query : {data: this.uId.toString() + '_' + this.user_id.toString()  }});
 	},
 	  newMessage(data: any)
       {
@@ -451,8 +486,7 @@ export default  defineComponent({
 			this.isPopUp = false;
 		}
 
-	},
-
+	}
    },
 
    directives: {

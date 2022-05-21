@@ -120,6 +120,7 @@ let LevelUpGateway = class LevelUpGateway {
     clear(client) {
         if (client.data.type === 'stream') {
             client.leave(client.data.room);
+            this.server.to(client.data.room).emit('leaveRoom');
         }
         else {
             if (client.data.roomStatus === 'waiting') {

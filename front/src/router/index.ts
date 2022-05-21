@@ -20,6 +20,7 @@ import WarmUpBlock from '@/components/GAME/WarmUp.vue';
 import LevelUpBlock from '@/components/GAME/LevelUp.vue';
 import MatchUpBlock from '@/components/GAME/MatchUp.vue';
 import StreamBlock from '@/components/GAME/Stream.vue'
+import OneVOneBlock from '@/components/GAME/OneVone.vue'
 import Add from '@/components/Friends/Add.vue'
 import Ignore from '@/components/Friends/Ignore.vue'
 import Requests from '@/components/Friends/Requests.vue'
@@ -78,6 +79,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'stream',
         name: 'stream',
         component: StreamBlock
+      },
+      {
+        path: 'onevone',
+        name: 'onevone',
+        component: OneVOneBlock
       },
     ]
   },

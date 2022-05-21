@@ -21,6 +21,8 @@ const game_repository_1 = require("./game.repository");
 const user_entity_1 = require("../users/user.entity");
 const game_levelup_gateway_1 = require("./levelup/game.levelup.gateway");
 const game_levelup_logic_1 = require("./levelup/game.levelup.logic");
+const game_1v1_gateway_1 = require("./1v1/game.1v1.gateway");
+const game_1v1_logic_1 = require("./1v1/game.1v1.logic");
 let GameModule = class GameModule {
 };
 GameModule = __decorate([
@@ -37,7 +39,9 @@ GameModule = __decorate([
             game_warmup_logic_1.WarmUpLogic,
             game_warmup_gateway_1.WarmUpGateway,
             game_levelup_gateway_1.LevelUpGateway,
-            game_levelup_logic_1.LevelUpLogic
+            game_levelup_logic_1.LevelUpLogic,
+            game_1v1_gateway_1.oneVoneGateway,
+            game_1v1_logic_1.oneVoneLogic
         ]
     })
 ], GameModule);

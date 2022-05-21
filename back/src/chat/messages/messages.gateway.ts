@@ -43,7 +43,7 @@ import {
 
 
 		
-
+		console.log(`backend reached`);
 
 		const sessionId : number = +payload.data.from_id;
 		const userBlockedList: number[] = await this.blockService.blockedList(+payload.data.to_id);

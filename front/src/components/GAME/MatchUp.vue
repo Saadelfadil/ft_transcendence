@@ -225,6 +225,8 @@ export default defineComponent({
         },
         matchup(){
 
+            console.log(`room name passed vie query ${this.$route.query.room_name_1vs1}`);
+
             this.start = 1;
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);

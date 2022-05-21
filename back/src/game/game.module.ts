@@ -12,6 +12,8 @@ import { GameRepository, MatchRepository } from './game.repository';
 import { UserEntity } from 'src/users/user.entity';
 import { LevelUpGateway } from './levelup/game.levelup.gateway';
 import { LevelUpLogic } from './levelup/game.levelup.logic';
+import { oneVoneGateway } from './1v1/game.1v1.gateway';
+import { oneVoneLogic } from './1v1/game.1v1.logic';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GameRepository,
@@ -26,7 +28,9 @@ import { LevelUpLogic } from './levelup/game.levelup.logic';
               WarmUpLogic,
               WarmUpGateway,
               LevelUpGateway,
-              LevelUpLogic
+              LevelUpLogic,
+              oneVoneGateway,
+              oneVoneLogic
             ]
 })
 export class GameModule {}

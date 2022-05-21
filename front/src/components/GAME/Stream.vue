@@ -336,7 +336,8 @@ export default defineComponent({
                 this.renderGame();
             });
             this.socket.on("leaveRoom", () => {
-                this.$router.push('/game/stream');
+                console.log('leve stream');
+                this.$router.push('/profile');
             });
         }
     },

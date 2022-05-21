@@ -161,7 +161,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   clear(client: any){
     if (client.data.type === 'stream'){
       client.leave(client.data.room);
-      //client.emit('leaveRoom');
+      this.server.to(client.data.room).emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
         client.leave(client.data.room);
