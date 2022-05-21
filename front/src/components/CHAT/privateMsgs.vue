@@ -1,7 +1,6 @@
 <template>
 <div>
-	<div v-if="isNormalMsgs">
-		<button @click="acceptedWhenFriendIsInvalid">tests alert</button>
+
 		<div v-if="isPopUp">
 			<div class="bg-slate-800 bg-opacity-50 flex z-[1000] justify-center absolute top-0 right-0 bottom-0 left-0">
 				<div class="flex flex-col justify-center">
@@ -86,8 +85,6 @@
 			</div>
 		</div>
 		</div>
-	</div>
-	<alert-message-comp v-else />
 </div>
 
 </template>
@@ -101,7 +98,6 @@ import axios from 'axios';
 import router from '@/router';
 import { defineComponent } from 'vue';
 import io from 'socket.io-client';
-import ChatAlertMessageBlock from './alertMessage.vue';
 
 
 
@@ -121,9 +117,6 @@ interface message{
 
 export default  defineComponent({
    name: 'PrivateMsgsBlock',
-   components:{
-	   'alert-message-comp': ChatAlertMessageBlock
-   },
    data()
    {
       return {
@@ -145,7 +138,6 @@ export default  defineComponent({
 		blockedList: [] as Array<number>,
 		roomInfo: null as any,
 		invalidTime: false as boolean,
-		isNormalMsgs: true as boolean,
       }
    },
 
@@ -165,13 +157,6 @@ export default  defineComponent({
 		},
 	},
    methods: {
-	   	acceptedWhenFriendIsInvalid(msg_index:number){
-			   this.isNormalMsgs = false;
-			   store.commit('remove_at', msg_index);
-			   setTimeout(() => {
-				   this.isNormalMsgs = true;
-			   }, 2000);
-		},
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
@@ -256,6 +241,9 @@ export default  defineComponent({
 			)
 	},
 
+	getRoomQuery(){
+		return (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
+	},
 	NewhandleSubmitNewInvite(){
 
 			const messageData = {
@@ -281,8 +269,7 @@ export default  defineComponent({
 					{
 						// this.newMessage(messageData);
 						//// console.log('onevone');
-						let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
-						router.push({name : 'onevone', query: {room_name_1vs1: room, pos: 'left'}});
+						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'left'}});
 					}
 				}
 			)
@@ -311,8 +298,7 @@ export default  defineComponent({
 					if(response.status)
 					{
 						//router.push({name : 'onevone', query: {room_name_1vs1: this.user_id.toString() + '_' + this.uId.toString(), pos: 'right'}});
-						let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
-						router.push({name : 'onevone', query: {room_name_1vs1: room, pos: 'right'}});
+						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'right'}});
 					}
 				}
 			)
@@ -321,10 +307,9 @@ export default  defineComponent({
 		declineInvite(msgObj:message, msg_index:number){
 
 			// console.log(`decline at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
-			let room = (this.user_id > this.uId) ? this.user_id.toString() + this.uId.toString() : this.uId.toString() + this.user_id.toString();
 			let socket = io("http://localhost:3000/onevone");
 			socket.on('connect', () => {
-				socket.emit('decline', room);
+				socket.emit('decline', this.getRoomQuery());
 				socket.disconnect();
 			});
 
@@ -391,21 +376,7 @@ export default  defineComponent({
 		},
 
 	acceptingMsg(){
-		// console.log(`ready to accept incoming msgs`);
 		this.socket.on(this.getRoomName(), ({data}) => {
-			// console.log(`message reacheed ${JSON.stringify(data)}`);
-
-			if (data.to_id == this.user_id && data.isInvite &&  data.accepted)
-			{
-				// since data is begin emmited even to user who send at first place that's why this check data.to_id == this.user_id 
-				/* i 'm using the fact that in message table we do not store data.accepted  in database so even message 
-				is not removed from database data.accepted is undefined so we will not redirect him each time he's in this prive chat*/
-				// console.log(`time to be redirected`);
-				this.startPlaying();
-				return ;
-			}
-
-
 			if( 
 				data.isInvite == false ||
 				(data.isInvite == true &&  data.inviteStatus == 0 && data.to_id == this.user_id ) ||
@@ -416,30 +387,24 @@ export default  defineComponent({
 			}
 		});
 	},
-	startPlaying(){
-		//router.push({name: 'matchup', query : {data: this.uId.toString() + '_' + this.user_id.toString()  }});
-	},
-	  newMessage(data: any)
-      {
-			if( !this.blockedList.includes(data.from_id) )
-		  	{
-			  	const msgObj = {
-					isInvite:data.isInvite,
-					inviteStatus: data.inviteStatus,
-                  	id: data.id,
-					room_id: data.room_id,
-					from_id: data.from_id,
-					username: data.username,
-					image_url: data.avatar,
-					msg: data.message,
-					created: Date.now(),
-				};
-				console.log('----------------------');
-				console.log(data);
-				console.log('----------------------');
-				this.curMsgData = '';
-				store.commit('addMessageToRoomMsgs', msgObj);
-			}
+	newMessage(data: any)
+    {
+		if( !this.blockedList.includes(data.from_id) )
+		{
+			const msgObj = {
+				isInvite:data.isInvite,
+				inviteStatus: data.inviteStatus,
+				id: data.id,
+				room_id: data.room_id,
+				from_id: data.from_id,
+				username: data.username,
+				image_url: data.avatar,
+				msg: data.message,
+				created: Date.now(),
+			};
+			this.curMsgData = '';
+			store.commit('addMessageToRoomMsgs', msgObj);
+		}
 	  },
 	  timestampToDateTime(unix_timestamp: number)
 	  {

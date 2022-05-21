@@ -37,14 +37,16 @@ export class MessagesService {
 		// console.log(`update message ${msg}, createDTO ${JSON.stringify(createMessageDto.created)}`);
 		//changed by hamza
 
-		msg.inviteStatus = 2;
+		if (msg){
+			msg.inviteStatus = 2;
+			return this.messageRepository.save(msg);
+		}
 
 
 		// console.log("msg")
 		// console.log(msg)
-		return this.messageRepository.save(msg);
 
-
+		return ;
 	}
 
 	async findOneMessage(id: number) {

@@ -56,14 +56,14 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   clear(client: Socket){
-    //if(client.data.pos === 'left'){
+    if(client.data.pos === 'left'){
       this.oneVoneLogic.rooms.remove(Number(client.data.room));
-
-    //}
+      clearInterval(client.data.roomNode.gameLoop);
+      clearInterval(client.data.roomNode.gameTimer);
+    }
     client.leave(client.data.room);
     this.server.to(client.data.room).emit('leaveRoom');
-    clearInterval(client.data.roomNode.gameLoop);
-    clearInterval(client.data.roomNode.gameTimer);
+    
   }
 
   initData(client:Socket){

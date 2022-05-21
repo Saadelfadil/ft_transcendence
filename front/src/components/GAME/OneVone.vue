@@ -1,9 +1,7 @@
 <template>
     <div class="container mx-auto">
 
-    <div>
-
-
+    <div v-if="isNormalMsgs">
         <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
             
             <div class="flex justify-around bg-blue w-3/12">
@@ -42,6 +40,7 @@
         </div>
 
     </div>
+    <alert-message-comp v-else />
 
     </div>
 </template>
@@ -52,6 +51,7 @@ import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
 import { io } from "socket.io-client";
+import ChatAlertMessageBlock from './alertMessage.vue';
 
 interface Player {
     x: number;
@@ -74,8 +74,12 @@ interface Ball {
 
 export default defineComponent({
     name: 'OneVOneBlock',
+    components:{
+	   'alert-message-comp': ChatAlertMessageBlock
+    },
     data(){
         return{
+		    isNormalMsgs: true as boolean,
             socket : null as any,
             canvas: 0 as any,
             game_state: 0 as number,
@@ -134,6 +138,13 @@ export default defineComponent({
         }
     },
     methods: {
+        acceptedWhenFriendIsInvalid(){
+			   this.isNormalMsgs = false;
+			   setTimeout(() => {
+				   this.isNormalMsgs = true;
+                   router.go(-1);
+			   }, 2000);
+		},
         async leftLogin(){
             try{
                 const resp = await axios({
@@ -256,12 +267,14 @@ export default defineComponent({
                                                 id: this.user_id});
                 this.socket.on('noRoom', () => {
                     console.log('there is no room, player or game: khroj fhalek mn lakher');
+                    this.acceptedWhenFriendIsInvalid();
                 });
 
                 this.socket.on('leaveRoom', () => {
                     
                     this.$router.push('/profile');
                 });
+
                 // this.socket.on('waitingForRoom', (pos: string) => {
                 //     this.playerPos = pos;
                 //     console.log(pos);
