@@ -191,7 +191,7 @@ export default  defineComponent({
 			}
 
 
-			// console.log(newArray[newArray.length - 1]);
+			console.log(newArray , " room id: ", this.uId);
 			
 			store.commit('updatePublicRoomMsgs', newArray);
         },
@@ -250,7 +250,6 @@ export default  defineComponent({
 				id: 0,
 				isInvite: true,
 				inviteStatus: 0,
-				created: Date.now(), // maybe wrong ---------------------->
 				from_id: this.user_id,
 				to_id: this.uId,
 				username: this.username,

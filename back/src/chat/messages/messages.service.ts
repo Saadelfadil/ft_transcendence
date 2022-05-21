@@ -34,19 +34,9 @@ export class MessagesService {
 
 		console.log('id : ', id)
 		let msg = await this.findOneByCreatedDate(id);
-		// console.log(`update message ${msg}, createDTO ${JSON.stringify(createMessageDto.created)}`);
-		//changed by hamza
 
-		if (msg){
-			msg.inviteStatus = 2;
-			return this.messageRepository.save(msg);
-		}
-
-
-		// console.log("msg")
-		// console.log(msg)
-
-		return ;
+		msg.inviteStatus = 2;
+		return this.messageRepository.save(msg);
 	}
 
 	async findOneMessage(id: number) {
@@ -55,8 +45,8 @@ export class MessagesService {
 
 	async findOne(sessionId: number, userId: number) {
 
-		return getConnection().query(`
-			SELECT public."message".*, public."users".username, public."users".id, public."users".image_url  FROM
+		return  getConnection().query(`
+			SELECT public."message".*, public."users".username, public."message".id, public."users".image_url  FROM
 				public."message"
 				INNER JOIN
 					public."users"
@@ -66,7 +56,6 @@ export class MessagesService {
 				ORDER BY
 					created ASC
 				`);
-
 				/*
 				
 				

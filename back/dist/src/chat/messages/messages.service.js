@@ -35,18 +35,15 @@ let MessagesService = class MessagesService {
     async updateMessage(id) {
         console.log('id : ', id);
         let msg = await this.findOneByCreatedDate(id);
-        if (msg) {
-            msg.inviteStatus = 2;
-            return this.messageRepository.save(msg);
-        }
-        return;
+        msg.inviteStatus = 2;
+        return this.messageRepository.save(msg);
     }
     async findOneMessage(id) {
         return this.messageRepository.findOne(id);
     }
     async findOne(sessionId, userId) {
         return (0, typeorm_2.getConnection)().query(`
-			SELECT public."message".*, public."users".username, public."users".id, public."users".image_url  FROM
+			SELECT public."message".*, public."users".username, public."message".id, public."users".image_url  FROM
 				public."message"
 				INNER JOIN
 					public."users"

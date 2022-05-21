@@ -62,9 +62,6 @@ import {
 				const res = await this.messagesService.create(sessionId, messageDto);
 				payload.data.id = res.id;
 				payload.data.created = res.created;
-
-
-				// console.log("mp1 : ",payload)
 			}
 			else if(payload.data.inviteStatus == 0)
 			{
@@ -86,21 +83,11 @@ import {
 				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
 				messageDto.created = payload.data.created;
-				// console.log("mp3--------------- : ")
-				// console.log(payload.data.created)
-				// console.log(payload.data.isInvite)
-				// console.log("mp3---------END------ : ",payload.data.id)
-
 				this.messagesService.updateMessage(payload.data.id);
-
 			}
 			this.server.emit(payload.data.roomName, payload);
 			return { status: true }
 		}
-
-	
-		
-
 	}
    
 	afterInit(server: Server) {

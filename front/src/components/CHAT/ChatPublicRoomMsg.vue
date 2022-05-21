@@ -188,6 +188,15 @@ export default  defineComponent({
 				url: `http://localhost:8080/ban/room/${this.roomId}/banned`,
 			});
 		},
+		getRoomName(){
+			if(this.user_id < this.clickeduser_id)
+				return this.user_id+"-"+this.clickeduser_id;
+			else
+				return this.clickeduser_id+"-"+this.user_id;
+		},
+		getRoomQuery(){
+			return (this.user_id > this.clickeduser_id) ? this.user_id.toString() + this.clickeduser_id.toString() : this.clickeduser_id.toString() + this.user_id.toString();
+		},
 		NewhandleSubmitNewInvite(clickedUserId: number){
 			const messageData = {
 				isInvite: true,
@@ -196,7 +205,7 @@ export default  defineComponent({
 				to_id: clickedUserId,
 				username: this.username,
 				avatar: this.avatar,
-				// roomName: this.getRoomName(),
+				roomName: this.getRoomName(),
 				message: ''
 			};
 			this.socket2.emit(
@@ -209,6 +218,7 @@ export default  defineComponent({
 					if(response.status)
 					{
 						// this.newMessage(messageData);
+						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'left'}});
 					}
 				}
 			)
@@ -365,7 +375,6 @@ export default  defineComponent({
 	  },
 	  inviteClicked()
 	  {
-		  console.log(`from room invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
 		  this.NewhandleSubmitNewInvite(this.clickeduser_id);
 		  this.isPopUp = false;
 	  },
