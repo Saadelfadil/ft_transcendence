@@ -4,9 +4,9 @@
         <ul class="overflow-auto hideScrollBar" style="height: 90vh;">
             <li>
                 <div class="px-6"
-                v-for="leader in leaders" :key="leader.id"
+                v-for="(leader,index) in leaders" :key="leader.id" 
                 >
-                    <div class="flex justify-between items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
+                    <div v-if="index >= prev && index < limit" class="flex justify-between items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                         <div class="ml-2">
                             <router-link :to="{ name : 'FriendProfile', query: {friend_id: leader.id}}">
                                 <img :src="leader.image_url"   class="rounded-full max-w-xs w-16 items-center border" />
@@ -33,6 +33,25 @@
             </li>
         </ul>
     </div>
+     <div class="grid place-items-center">
+
+                <ul class="flex"> 
+                
+                <li @click="previous()" class="mx-1 px-3 py-2 bg-gray-200 text-gray-500  hover:bg-gray-700 hover:text-gray-200 rounded-lg">
+                    <a class="flex items-center font-bold" href="#">
+                        <span class="mx-1">previous</span>
+                    </a>
+                </li>
+                <li class="mx-1 px-3 py-2 bg-gray-200 text-gray-700  rounded-lg">
+                    <a class="font-bold" href="#">{{page}}</a>
+                </li>
+                <li @click="next()" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 hover:bg-gray-700 hover:text-gray-200 rounded-lg">
+                    <a class="flex items-center font-bold" href="#">
+                               <span class="mx-1">Next</span>
+                   </a>
+                </li>
+            </ul> 
+    </div>
     <!-- </div> -->
 </template>
 
@@ -57,7 +76,12 @@ export default defineComponent({
         return {
             user_id: '' as string,
             logged: false as boolean,
-            all_leaders: [] as Array<Leader>
+            all_leaders: [] as Array<Leader>,
+
+            page : 1 as number,
+            prev: 0 as number,
+            factor : 5 as number,
+            limit :5 as number,
         }
     },
     async created()
@@ -76,7 +100,27 @@ export default defineComponent({
             }catch(e){
                 console.log(e);
             }
-        }
+        },
+        previous() {
+            if (this.page > 1)
+            {
+               this.page -= 1;
+               this.limit -= this.factor;
+               this.prev -= this.factor;
+               console.log('previous');
+            }
+        },  
+        next() {
+            if(this.limit < this.all_leaders.length)
+            {
+                    this.page += 1;
+                    this.limit += this.factor;
+                    this.prev += this.factor;
+                    console.log('next');
+            }
+
+
+        },
     },
     computed: {
         leaders() : Array<Leader> {
