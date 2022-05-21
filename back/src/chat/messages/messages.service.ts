@@ -24,22 +24,27 @@ export class MessagesService {
 		return this.messageRepository.save(newMessage);
 	}
 
-	findOneByCreatedDate(created: number) {
+	findOneByCreatedDate(msg_id: number) {
 		return this.messageRepository.findOne({
-			created: created
+			id: msg_id
 		});
 	}
 
-	async updateMessage(createMessageDto: CreateMessageDto) {
-		let msg = await this.findOneByCreatedDate(createMessageDto.created);
-		console.log(`update message ${msg}, createDTO ${JSON.stringify(createMessageDto.created)}`);
+	async updateMessage(id: number) {
+
+		console.log('id : ', id)
+		let msg = await this.findOneByCreatedDate(id);
+		// console.log(`update message ${msg}, createDTO ${JSON.stringify(createMessageDto.created)}`);
 		//changed by hamza
-		
-		if(msg){
-			msg.inviteStatus = createMessageDto.inviteStatus;
-			return this.messageRepository.save(msg);
-		}
-		return;
+
+		msg.inviteStatus = 2;
+
+
+		// console.log("msg")
+		// console.log(msg)
+		return this.messageRepository.save(msg);
+
+
 	}
 
 	async findOneMessage(id: number) {

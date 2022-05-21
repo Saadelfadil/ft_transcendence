@@ -5,8 +5,8 @@ export declare class MessagesService {
     private messageRepository;
     constructor(messageRepository: Repository<Message>);
     create(sessionId: number, createMessageDto: CreateMessageDto): Promise<Message>;
-    findOneByCreatedDate(created: number): Promise<Message>;
-    updateMessage(createMessageDto: CreateMessageDto): Promise<Message>;
+    findOneByCreatedDate(msg_id: number): Promise<Message>;
+    updateMessage(id: number): Promise<Message>;
     findOneMessage(id: number): Promise<Message>;
     findOne(sessionId: number, userId: number): Promise<any>;
     getChatList(sessionId: number): Promise<any>;

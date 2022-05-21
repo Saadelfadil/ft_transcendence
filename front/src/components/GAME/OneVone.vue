@@ -1,7 +1,7 @@
 <template>
     <div class="container mx-auto">
 
-    <div v-if="start == 1">
+    <div>
 
 
         <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
@@ -42,7 +42,7 @@
         </div>
 
     </div>
-    <StartPlayingComp v-else @startPlaying="onevone"/>
+
     </div>
 </template>
 
@@ -52,7 +52,7 @@ import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
 import { io } from "socket.io-client";
-import StartPlayingComp from './StartPlaying.vue';
+
 interface Player {
     x: number;
     y: number;
@@ -74,12 +74,8 @@ interface Ball {
 
 export default defineComponent({
     name: 'OneVOneBlock',
-        components:{
-        StartPlayingComp
-    },
     data(){
         return{
-            start: 0  as number,
             socket : null as any,
             canvas: 0 as any,
             game_state: 0 as number,
@@ -132,6 +128,9 @@ export default defineComponent({
         },
         prName() {
             this.rightLogin();
+        },
+        user_id(){
+            this.onevone();
         }
     },
     methods: {
@@ -244,7 +243,6 @@ export default defineComponent({
             });
         },
         onevone(){
-            this.start = 1;
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);
             console.log(this.$route.query.room_name_1vs1, this.$route.query.pos);
@@ -358,11 +356,9 @@ export default defineComponent({
         },
     },
     beforeUnmount(){
-        if (this.start === 1) // which means event was added before
-        {
-            window.removeEventListener('beforeunload', this.tabClosed);
-            document.removeEventListener('visibilitychange', this.tabChanged);
-        }
+
+        window.removeEventListener('beforeunload', this.tabClosed);
+        document.removeEventListener('visibilitychange', this.tabChanged);
     },
     unmounted(){
         console.log('onevone unmounted');

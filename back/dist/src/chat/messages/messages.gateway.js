@@ -23,7 +23,6 @@ let MessageGateway = class MessageGateway {
         this.logger = new common_1.Logger('MessageGateway');
     }
     async handleMessage(client, payload) {
-        console.log(`backend reached`);
         const sessionId = +payload.data.from_id;
         const userBlockedList = await this.blockService.blockedList(+payload.data.to_id);
         if (userBlockedList.includes(sessionId)) {
@@ -35,14 +34,19 @@ let MessageGateway = class MessageGateway {
                 messageDto.isInvite = payload.data.isInvite;
                 messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
-                this.messagesService.create(sessionId, messageDto);
+                const res = await this.messagesService.create(sessionId, messageDto);
+                payload.data.id = res.id;
+                payload.data.created = res.created;
             }
             else if (payload.data.inviteStatus == 0) {
                 let messageDto = new create_message_dto_1.CreateMessageDto();
                 messageDto.isInvite = payload.data.isInvite;
                 messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
-                this.messagesService.create(sessionId, messageDto);
+                const res = await this.messagesService.create(sessionId, messageDto);
+                payload.data.id = res.id;
+                payload.data.created = res.created;
+                console.log("mp2 : ", payload);
             }
             else {
                 let messageDto = new create_message_dto_1.CreateMessageDto();
@@ -51,7 +55,7 @@ let MessageGateway = class MessageGateway {
                 messageDto.to_id = +payload.data.to_id;
                 messageDto.msg = payload.data.message;
                 messageDto.created = payload.data.created;
-                this.messagesService.updateMessage(messageDto);
+                this.messagesService.updateMessage(payload.data.id);
             }
             this.server.emit(payload.data.roomName, payload);
             return { status: true };

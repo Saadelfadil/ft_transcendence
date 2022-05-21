@@ -20,6 +20,13 @@ export class MessagesController {
 	// Save message
 		- from_id, to_id, msg
 	*/
+
+
+	@Get('/ffff/:id')
+	async finfffdOne(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
+		return this.messagesService.updateMessage(+id);
+	}
+	
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
 	async create(@Body() createMessageDto: CreateMessageDto,  @Req() req: Request) {

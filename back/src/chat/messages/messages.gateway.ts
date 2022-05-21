@@ -43,7 +43,6 @@ import {
 
 
 		
-		console.log(`backend reached`);
 
 		const sessionId : number = +payload.data.from_id;
 		const userBlockedList: number[] = await this.blockService.blockedList(+payload.data.to_id);
@@ -60,7 +59,12 @@ import {
 				messageDto.isInvite = payload.data.isInvite;
 				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
-				this.messagesService.create(sessionId, messageDto);
+				const res = await this.messagesService.create(sessionId, messageDto);
+				payload.data.id = res.id;
+				payload.data.created = res.created;
+
+
+				// console.log("mp1 : ",payload)
 			}
 			else if(payload.data.inviteStatus == 0)
 			{
@@ -68,7 +72,11 @@ import {
 				messageDto.isInvite = payload.data.isInvite;
 				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
-				this.messagesService.create(sessionId, messageDto);
+				const res = await this.messagesService.create(sessionId, messageDto);
+				payload.data.id = res.id;
+				payload.data.created = res.created;
+				console.log("mp2 : ",payload)
+
 			}
 			else
 			{
@@ -78,7 +86,13 @@ import {
 				messageDto.to_id = +payload.data.to_id;
 				messageDto.msg = payload.data.message;
 				messageDto.created = payload.data.created;
-				this.messagesService.updateMessage(messageDto);
+				// console.log("mp3--------------- : ")
+				// console.log(payload.data.created)
+				// console.log(payload.data.isInvite)
+				// console.log("mp3---------END------ : ",payload.data.id)
+
+				this.messagesService.updateMessage(payload.data.id);
+
 			}
 			this.server.emit(payload.data.roomName, payload);
 			return { status: true }
