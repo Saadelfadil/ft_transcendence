@@ -52,7 +52,7 @@
                         <div class="px-6"
                         v-for="(oneroom, index) in room_display" :key="rooms_info[index].id"
                         >
-                        <div class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
+                        <div  v-if="index >= prev && index < limit" class="flex justify-around items-center h-30 p-4 my-6  rounded-lg border border-gray-100 shadow-md">
                             <div class="flex items-center">
                                 <div class="ml-2">
                                     <div  @click="redirect_left_player(oneroom.left_player.id)"
@@ -83,6 +83,23 @@
                     </li>
                 </ul>
             </div>
+             <div class="grid place-items-center">
+                <ul class="flex">
+                <li @click="previous()" class="mx-1 px-3 py-2 bg-gray-200 text-gray-500  hover:bg-gray-700 hover:text-gray-200 rounded-lg">
+                    <a class="flex items-center font-bold" href="#">
+                        <span class="mx-1">previous</span>
+                    </a>
+                </li>
+                <li class="mx-1 px-3 py-2 bg-gray-200 text-gray-700  rounded-lg">
+                    <a class="font-bold" href="#">{{page}}</a>
+                </li>
+                <li @click="next()" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 hover:bg-gray-700 hover:text-gray-200 rounded-lg">
+                    <a class="flex items-center font-bold" href="#">
+                               <span class="mx-1">Next</span>
+                   </a>
+                </li>
+            </ul>
+    </div>
     </div>
 
   </div>
@@ -187,7 +204,13 @@ export default defineComponent({
                 color: '' as string,
             } as Ball,
 
-            gameRooms: [] as any
+            gameRooms: [] as any,
+            
+            
+            page : 1 as number,
+            prev: 0 as number,
+            pfactor : 5 as number,
+            limit :5 as number,
         }
     },
     async created(){
@@ -259,7 +282,7 @@ export default defineComponent({
             this.sch = sch;
             //this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
             this.canvas.width = this.canvas.offsetWidth ;
-            this.factor = this.canvas.width / scw;
+            this.pfactor = this.canvas.width / scw;
 
             window.addEventListener('resize', () => {
                 this.canvas.width = this.canvas.offsetWidth ;
@@ -339,7 +362,27 @@ export default defineComponent({
                 console.log('leve stream');
                 this.$router.push('/profile');
             });
-        }
+        },
+        previous() {
+            if (this.page > 1)
+            {
+               this.page -= 1;
+              this.limit -= this.pfactor;
+              this.prev -= this.pfactor;
+               console.log('previous');
+            }
+        },  
+        next() {
+            if(this.limit < this.room_display.length)
+            {
+                    this.page += 1;
+                    this.limit += this.pfactor;
+                    this.prev += this.pfactor;
+                    console.log('next');
+            }
+
+
+        },
     },
     watch:{
         user_id(){
