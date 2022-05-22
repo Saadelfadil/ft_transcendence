@@ -128,6 +128,7 @@ export default defineComponent({
             await Promise.all([this.newGetRooms(), this.getJoinedRooms()]).then((output:Array<any>) => {
                 store.commit('updateRooms', output[0].data);
                 this.joinedRooms = output[1].data.joinedRooms;
+                console.log('joined rooms: ', this.joinedRooms);
             });
         }
     },

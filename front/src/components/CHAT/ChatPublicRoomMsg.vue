@@ -70,17 +70,7 @@
 					<span class="block"> {{ msg.msg }} </span>
 					<span class="block text-xs text-right"> {{ timestampToDateTime(+msg.created) }} </span>
 				</div>
-<!-- depending on some variable i will render diffrent sometimes msg sometimes buttons -->
-				<!-- <div flex="w-full">
-					<div class="w-full p-2  flex justify-between bg-white rounded-lg">
-						<div class="bg-blue-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer" @click="acceptInvite(msg)">
-							accept
-						</div>
-						<div class="bg-red-500 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600  cursor-pointer" @click="declineInvite(msg)">
-							decline
-						</div>
-					</div>
-				</div> -->
+
 				
 	
 			</div>
@@ -167,12 +157,13 @@ export default  defineComponent({
 				this.blockedList = resps[2].data;
 				this.bannedUsers = resps[3].data;
 			});
-			this.joinTheRoom();
 		}
 	},
    methods: {
 	   chatStartUp(){
+		   console.log(this.roomId.toString(), "befor");
 		   this.socket.on(this.roomId.toString(), ({ data }) => {
+			   console.log('message recieved; ', JSON.stringify(data));
 			this.newMessage(data);
 		})
 	   },
@@ -229,7 +220,7 @@ export default  defineComponent({
 						from_id: this.user_id,
 						username: this.username,
 						avatar: this.avatar,
-						roomName: this.roomId,
+						roomName: this.roomId.toString(),
 						message: msg
 					}
 
@@ -243,23 +234,6 @@ export default  defineComponent({
 						}
 					)
 	   },
-	   joinTheRoom(){
-	// 	   this.socket.emit(
-	// 		'join-room-m',
-	// 		{ 
-	// 			data: {
-	// 				from_id: this.user_id,
-	// 				roomName: this.roomId,
-	// 			}
-	// 		}
-	// )
-	   },
-	   acceptInvite(msgObj:message){
-
-	   },
-		declineInvite(msgObj:message){
-
-		},
 	   getRoomsInfo()
         {
             // const resp = await axios.get(
@@ -301,8 +275,8 @@ export default  defineComponent({
 			if( !this.blockedList.includes(data.from) )
 		  	{
 			  	const msgObj = {
-                  	id: 0,
-					room_id: 0,
+                  	id: data.id,
+					room_id: this.roomId,
 					from_id: data.from_id,
 					username: data.username,
 					image_url: data.avatar,
@@ -470,6 +444,9 @@ export default  defineComponent({
 
 	}
    },
+	unmounted(){
+		this.socket.disconnect();
+	},
 
    directives: {
       godown(box:any)

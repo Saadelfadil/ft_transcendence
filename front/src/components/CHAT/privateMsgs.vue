@@ -468,6 +468,9 @@ export default  defineComponent({
 
 	}
    },
+   unmounted(){
+	   this.socket.disconnect();
+   },
 
    directives: {
       godown(box:any)
@@ -479,12 +482,12 @@ export default  defineComponent({
             el.focus();
         },
     }
-   },
-   computed: {
-      currentMsgs() : Array<message>
-      {
-         return store.getters.getMsgs;
-      }
+	},
+	computed: {
+    currentMsgs() : Array<message>
+    {
+        return store.getters.getMsgs;
+    }
    }
 
 })

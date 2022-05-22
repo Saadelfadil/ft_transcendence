@@ -120,7 +120,7 @@ let LevelUpGateway = class LevelUpGateway {
     clear(client) {
         if (client.data.type === 'stream') {
             client.leave(client.data.room);
-            this.server.to(client.data.room).emit('leaveRoom');
+            client.emit('leaveRoom');
         }
         else {
             if (client.data.roomStatus === 'waiting') {
@@ -195,6 +195,8 @@ let LevelUpGateway = class LevelUpGateway {
                 client.data.node.playerRight.h -= 2.5;
             }
             this.server.to(client.data.room).emit("updateTime", client.data.node.time);
+            if (timer === 30)
+                this.server.to(client.data.room).emit('leaveRoom');
             console.log(timer);
         }, 1000);
     }

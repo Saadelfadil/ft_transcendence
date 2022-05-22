@@ -22,7 +22,7 @@ let BanService = class BanService {
         this.bansRepository = bansRepository;
     }
     async create(sessionId, roomData, createBanDto) {
-        if (roomData.admins.includes(sessionId))
+        if (!roomData.admins.includes(sessionId))
             throw new common_1.HttpException({ message: 'You\'re not an admin of this room!' }, common_1.HttpStatus.UNAUTHORIZED);
         if (createBanDto.user_id == roomData.owner_id)
             throw new common_1.HttpException({ message: 'You can\'t ban the room crater!' }, common_1.HttpStatus.UNAUTHORIZED);

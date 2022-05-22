@@ -53,9 +53,13 @@ import {
 			let messageDto = new CreateRoomMessageDto();
 			messageDto.room_id = +payload.data.roomName;
 			messageDto.msg = payload.data.message;
-			this.roomService.saveMessageToRoom(sessionId, messageDto);
+			this.roomService.saveMessageToRoom(sessionId, messageDto).then((saved_msg:any)=>{
+				payload.data.id = saved_msg.id;
+				this.server.emit(payload.data.roomName, payload);
+			});
 			
-			this.server.emit(payload.data.roomName, payload);
+
+
             
             return { status: true }
 		}

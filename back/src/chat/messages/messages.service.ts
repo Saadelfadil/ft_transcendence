@@ -122,7 +122,7 @@ export class MessagesService {
 						ORDER BY
 							created DESC
 				`);
-
+ 
 	}
 
 	// async remove(sessionId: number, userId: number) {

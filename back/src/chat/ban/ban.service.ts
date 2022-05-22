@@ -19,7 +19,8 @@ export class BanService {
 	async create(sessionId: number, roomData: Rooms, createBanDto: CreateBanDto) {
 
 		// Get room owner ==> user_id != owner_id (you can't ban room's owner)
-		if(roomData.admins.includes(sessionId))
+
+		if(!roomData.admins.includes(sessionId))
 			throw new HttpException({ message: 'You\'re not an admin of this room!' }, HttpStatus.UNAUTHORIZED);
 
 		if(createBanDto.user_id == roomData.owner_id)

@@ -130,8 +130,9 @@ export default defineComponent({
                     method: 'get',
                     url: 'http://localhost:3000/game/matchs/' + (this.$route.query.history_id ? this.$route.query.history_id : '')
                 });
-                this.matchs_info = resp.data;
+                this.matchs_info = resp.data.reverse();
                 this.users_ids = []; // do not remove this line
+
                 this.matchs_info.map((inp:Match) => {
                     this.users_ids.push(+inp.data[0].id);
                     this.users_ids.push(+inp.data[1].id);
@@ -192,7 +193,7 @@ export default defineComponent({
     computed: {
         historyDisplay() : Array<OneHistory>
         {
-            return this.match_display.reverse();
+            return this.match_display;
         }
     }
 })

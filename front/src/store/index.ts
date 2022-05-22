@@ -131,6 +131,11 @@ export default createStore({
     },
     addMessageToRoomMsgs(state: any, msg:message)
     {
+      for (let i = 0; i < state.chatPublicMsgs.length; ++i)
+      {
+        if (state.chatPublicMsgs[i].id === +msg.id)
+        return ;
+      }
       state.chatPublicMsgs.push(msg);
     },
   }

@@ -41,16 +41,58 @@ let oneVoneGateway = class oneVoneGateway {
         console.log('-----disconnect socket (onevone)------');
         console.log(`disconnect: ${client.id}`);
         this.clear(client);
+        console.log(this.oneVoneLogic.rooms.size);
         console.log('-----end of disconnect socket ------\n');
     }
     clear(client) {
-        if (client.data.pos === 'left') {
-            this.oneVoneLogic.rooms.remove(Number(client.data.room));
-            clearInterval(client.data.roomNode.gameLoop);
-            clearInterval(client.data.roomNode.gameTimer);
+        if (client.data.type === 'stream') {
+            client.leave(client.data.room);
+            client.emit('leaveRoom');
         }
-        client.leave(client.data.room);
-        this.server.to(client.data.room).emit('leaveRoom');
+        else {
+            client.leave(client.data.room);
+            this.server.to(client.data.room).emit('leaveRoom');
+            if (client.data.roomNode) {
+                clearInterval(client.data.roomNode.gameLoop);
+                clearInterval(client.data.roomNode.gameTimer);
+            }
+            if (client.data.pos === 'right') {
+                console.log('add data', client.data.roomNode);
+                this.matchRepository.addMatchData(client.data.roomNode, 'onevone');
+                if (client.data.roomNode.playerLeft.score > client.data.roomNode.playerRight.score) {
+                    this.userRepository.createQueryBuilder()
+                        .update(user_entity_1.UserEntity).set({
+                        points: () => "points + 3",
+                        wins: () => "wins + 1"
+                    }).where("id = :id", { id: client.data.roomNode.players[0] }).execute();
+                    this.userRepository.createQueryBuilder()
+                        .update(user_entity_1.UserEntity).set({
+                        loss: () => "loss + 1"
+                    }).where("id = :id", { id: client.data.roomNode.players[1] }).execute();
+                }
+                else if (client.data.roomNode.playerLeft.score < client.data.roomNode.playerRight.score) {
+                    this.userRepository.createQueryBuilder()
+                        .update(user_entity_1.UserEntity).set({
+                        points: () => "points + 3",
+                        wins: () => "wins + 1"
+                    }).where("id = :id", { id: client.data.roomNode.players[1] }).execute();
+                    this.userRepository.createQueryBuilder()
+                        .update(user_entity_1.UserEntity).set({
+                        loss: () => "loss + 1"
+                    }).where("id = :id", { id: client.data.roomNode.players[0] }).execute();
+                }
+                else {
+                    this.userRepository.createQueryBuilder()
+                        .update(user_entity_1.UserEntity).set({
+                        points: () => "points + 1"
+                    }).where("id = :id0 AND id = :id1", { id0: client.data.roomNode.players[0], id1: client.data.roomNode.players[1] }).execute();
+                }
+                this.userRepository.update(Number(client.data.roomNode.players[0]), { in_game: false });
+                this.userRepository.update(Number(client.data.roomNode.players[1]), { in_game: false });
+            }
+            this.gameRepository.deleteRoom(client.data.room);
+            this.oneVoneLogic.rooms.remove(Number(client.data.room));
+        }
     }
     initData(client) {
         client.emit('initData', {
@@ -87,10 +129,26 @@ let oneVoneGateway = class oneVoneGateway {
                 console.log(`${client.id}: ${client.data.pos} join the room: ${client.data.room}.`);
                 console.log(client.data.roomNode);
                 this.startGame(client);
+                let newDbRoom = {};
+                newDbRoom.name = client.data.roomNode.id;
+                newDbRoom.players = client.data.roomNode.players;
+                newDbRoom.namespace = 'onevone';
+                this.gameRepository.addRoom(newDbRoom);
+                this.userRepository.update(Number(client.data.roomNode.players[0]), { in_game: true });
+                this.userRepository.update(Number(client.data.roomNode.players[1]), { in_game: true });
             }
             else {
+                client.data.pos = '';
                 client.emit('noRoom');
             }
+        }
+    }
+    clientType(client, data) {
+        client.data.type = data.type;
+        client.data.room = data.room;
+        if (data.type === 'stream') {
+            client.join(data.room);
+            client.emit('canvasWH', { scw: this.oneVoneLogic.canvasW, sch: this.oneVoneLogic.canvasH });
         }
     }
     startGame(client) {
@@ -112,7 +170,7 @@ let oneVoneGateway = class oneVoneGateway {
         }
     }
     decline(client, room) {
-        client.data.pos = 'right';
+        client.data.pos = '';
         client.data.room = room;
         if (this.oneVoneLogic.rooms.find(Number(client.data.room))) {
             this.server.to(client.data.room).emit('leaveRoom');
@@ -130,6 +188,12 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", void 0)
 ], oneVoneGateway.prototype, "setRoom", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('clientType'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], oneVoneGateway.prototype, "clientType", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('updatePos'),
     __metadata("design:type", Function),

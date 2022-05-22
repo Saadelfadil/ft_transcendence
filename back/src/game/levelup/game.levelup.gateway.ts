@@ -9,6 +9,7 @@ import { OnGatewayConnection,
 import { Server, Socket } from 'socket.io';
 import { UserEntity } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
+import { threadId } from 'worker_threads';
 import { Match, matchPlayerData } from '../game.entities';
 import { roomDb, roomNode } from '../game.interface';
 import { GameRepository, MatchRepository } from '../game.repository';
@@ -44,9 +45,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
     console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
     console.log('-----end of disconnect socket ------\n');
-    //this.levelUpLogic.wclients.find(client.id)
-    //this.levelUpLogic.rmClient(client.id);
-    //this.logger.log(`client disconnected ${client}`);
   }
 
   checkRoomconnection(client: Socket){
@@ -161,7 +159,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   clear(client: any){
     if (client.data.type === 'stream'){
       client.leave(client.data.room);
-      this.server.to(client.data.room).emit('leaveRoom');
+      client.emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
         client.leave(client.data.room);
@@ -236,6 +234,8 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           client.data.node.playerRight.h -= 2.5;
         }
         this.server.to(client.data.room).emit("updateTime", client.data.node.time);
+        if (timer === 30)
+          this.server.to(client.data.room).emit('leaveRoom');
         console.log(timer);
     }, 1000);
   }
