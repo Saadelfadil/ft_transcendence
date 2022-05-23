@@ -46,7 +46,7 @@ import {
 		const roomBannedList: number[] = await this.banService.roomBannedList(+payload.data.roomName);
 		if(roomBannedList.includes(sessionId))
 		{
-			return { status: false } // console.log("blocked");
+			return { status: false }
 		}
 		else
 		{
@@ -63,8 +63,12 @@ import {
             
             return { status: true }
 		}
-		
-
+	}
+	   
+	@SubscribeMessage('admins-changed')
+	async AdminsChanged(client: Socket, payload: any) {
+		console.log(`backend reahced with ${JSON.stringify(payload)}`);
+		this.server.emit(payload.room_name, {data: {admin_id: payload.admin_id, add: payload.add}});
 	}
 
     @SubscribeMessage('leave-room')

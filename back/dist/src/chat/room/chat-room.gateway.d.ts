@@ -13,6 +13,7 @@ export declare class ChatRoomGateway implements OnGatewayInit, OnGatewayConnecti
     handleMessage(client: Socket, payload: any): Promise<{
         status: boolean;
     }>;
+    AdminsChanged(client: Socket, payload: any): Promise<void>;
     leaveRoom(client: any, payload: any): Promise<{
         status: boolean;
     }>;

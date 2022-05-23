@@ -98,11 +98,7 @@ export class RoomController {
 		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-
-		// my blocked list
-		const myBlockedList: number[] = await this.blockService.blockedList(sessionId);
-
-		return this.roomService.findRoomMessages(sessionId, myBlockedList, +roomId);
+		return this.roomService.findRoomMessages(sessionId, [], +roomId);
 	}
 
 	// Save msg to room

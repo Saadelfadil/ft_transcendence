@@ -151,7 +151,6 @@ export default defineComponent({
         {
             if (this.user_info.avatar_file_obj === null)
                 return ;
-            console.log("Iam here :");
             await axios({
                 method: 'post',
                 url: 'http://localhost:8080/api/update',
@@ -162,11 +161,9 @@ export default defineComponent({
                 },
                 withCredentials: true
             }).then((response) => {
-                console.log(response);
-                this.user_info.avatar_file_name = response.data.image_url;
+                if (response.data.status)
+                    this.user_info.avatar_file_name = response.data.image_url;
                 this.user_info.avatar_file_obj = null;
-            }, (error) => {
-                console.log(error);
             });
         },
         promptChoosFile ()
@@ -356,3 +353,4 @@ function sleep(ms:number) {
   color: blue;
 }
 </style>
+

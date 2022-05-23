@@ -69,8 +69,7 @@ let RoomController = class RoomController {
     async findRoomMessages(roomId, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        const myBlockedList = await this.blockService.blockedList(sessionId);
-        return this.roomService.findRoomMessages(sessionId, myBlockedList, +roomId);
+        return this.roomService.findRoomMessages(sessionId, [], +roomId);
     }
     async saveMessageToRoom(roomId, createRoomMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);

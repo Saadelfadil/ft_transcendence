@@ -57,6 +57,7 @@ export class AppController {
 	@Post('addfriend')
 	async addFriend(@Body() body, @Req() request: Request)
 	{
+		console.log('addfriend used');
 		const { login } = body;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)

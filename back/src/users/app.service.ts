@@ -122,10 +122,10 @@ export class AppService {
 						upload_preset: 'ft_transcendence'
 					})
 					await this.userRepository.update(user.id, {image_url: uploadedResponse.secure_url});
-					return {image_url: uploadedResponse.secure_url};
+					return {status: true, image_url: uploadedResponse.secure_url};
 					
 				} catch (error) {
-					console.error(error);
+					return {status: false};
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 <template>
     <div>
-
+ttttttttt
 <div class="h-full mt-5">
  
   <div class="border-b-2 block md:flex">
@@ -132,6 +132,7 @@ export default defineComponent({
         },
         async addFriend()
         {
+            console.log('adding');
             try{
                 const resp = await axios({
                     method: 'post',

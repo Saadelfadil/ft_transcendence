@@ -9,10 +9,10 @@ export declare class BanController {
     private readonly userService;
     private roomService;
     constructor(banService: BanService, userService: AppService, roomService: RoomService);
-    create(createBanDto: CreateBanDto, req: Request): Promise<import("./entities/ban.entity").Ban>;
-    findAll(): Promise<import("./entities/ban.entity").Ban[]>;
-    update(updateBanDto: UpdateBanDto, req: Request): Promise<import("./entities/ban.entity").Ban>;
-    roomBannedList(roomId: string): Promise<number[]>;
-    findUserInRoom(roomId: string, userId: string): Promise<import("./entities/ban.entity").Ban>;
-    unbanUserFromRoom(roomId: string, userId: string, req: Request): Promise<import("./entities/ban.entity").Ban>;
+    create(createBanDto: CreateBanDto, req: Request): unknown;
+    findAll(): any;
+    update(updateBanDto: UpdateBanDto, req: Request): unknown;
+    roomBannedList(roomId: string): unknown;
+    findUserInRoom(roomId: string, userId: string): unknown;
+    unbanUserFromRoom(roomId: string, userId: string, req: Request): unknown;
 }
