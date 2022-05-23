@@ -41,6 +41,8 @@ let BlockController = class BlockController {
     async isBlocked(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (id == undefined)
+            return;
         return this.blockService.isBlocked(sessionId, +id);
     }
 };

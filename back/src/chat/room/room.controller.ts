@@ -45,27 +45,38 @@ export class RoomController {
 	async IsRoomPassValid(@Body() body, @Req() req: Request){
 		const user = await this.userService.getUserDataFromJwt(req);
 		let status:boolean = true;
+		
+		// added by saad for protection of Body undefined
+		if (body.room_pass == undefined || body.room_id == undefined)
+			return;
+
 		if (body.room_pass !== '')
 			status = await this.roomService.checkAuth(body.room_id, body.room_pass);
 		if (status){
 			// here i will add to joinedrooms id of the joined room
 			this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
 		}
-		return {status: status};
+		return { status: status };
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post('leaveroom')
 	async LeaveRoom(@Body() body, @Req() req:Request){
 		const user = await this.userService.getUserDataFromJwt(req);
+		// added by saad for protection of Body undefined
+		if (body.room_id == undefined)
+			return;
 		await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
-		return {status:true};
+		return { status:true };
 	}
 
 
 	// TODO: should be protected : only edit only from room owner
 	@Get(':id')
 	findOne(@Param('id', ParseIntPipe) id: string) {
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.roomService.findOne(+id);
 	}
 
@@ -75,6 +86,10 @@ export class RoomController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId: number = 1;
+
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.roomService.update(sessionId, +id, changePasswordDto);
 
 	}
@@ -87,6 +102,10 @@ export class RoomController {
 		// const sessionId: number = 1;
 		await this.roomService.remove(sessionId, +id);
 		// added by mohamed
+
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		this.userService.removeFromJoinedRooms(+id);
 	}
 
@@ -98,6 +117,10 @@ export class RoomController {
 		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+
+		// added by saad for protection of Body undefined
+		if (roomId == undefined)
+			return;
 		return this.roomService.findRoomMessages(sessionId, [], +roomId);
 	}
 
@@ -109,6 +132,9 @@ export class RoomController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (roomId == undefined)
+			return;
 		const roomBannedList: number[] = await this.banService.roomBannedList(+roomId);
 		if(roomBannedList.includes(sessionId))
 			throw new HttpException({ message: 'You can\'t participate in this room' }, HttpStatus.UNAUTHORIZED);
@@ -122,6 +148,9 @@ export class RoomController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (roomId == undefined)
+			return;
 		const roomData =  await this.roomService.findOne(+roomId);
 		if( sessionId == roomData.owner_id || roomData.admins.includes(sessionId) )
 		{
@@ -130,7 +159,6 @@ export class RoomController {
 		else
 			throw new HttpException({ message: 'Unauthorized operation' }, HttpStatus.UNAUTHORIZED);
 
-
 	}
 	@Post(':roomId/remove-admin')
 	async removeRoomAdmin(@Param('roomId', ParseIntPipe) roomId: string, @Body() data: string, @Req() req: Request) {
@@ -138,6 +166,9 @@ export class RoomController {
 		const sessionId: number = user.id;
 		// const sessionId: number = 1;
 
+		// added by saad for protection of Body undefined
+		if (roomId == undefined)
+			return;
 		const roomData =  await this.roomService.findOne(+roomId);
 		if( sessionId == roomData.owner_id || roomData.admins.includes(sessionId) )
 		{

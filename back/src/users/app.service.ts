@@ -107,12 +107,14 @@ export class AppService {
 
 		async updateUser(request: Request, body: any) : Promise<any>
 		{
+			if (body.login == undefined)
+				return;
 			const user = await this.getUserDataFromJwt(request);
 			const userDb = await this.getUserByLogin(body.login);
 			if (userDb)
 				throw new UnauthorizedException();
 			if ((body.login) != null){
-				await this.userRepository.update(user.id, {login: body.login, username: body.login});
+				await this.userRepository.update(user.id, { login: body.login, username: body.login });
 			}
 			if (body.image_url != null)
 			{

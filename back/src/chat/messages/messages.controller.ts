@@ -24,6 +24,9 @@ export class MessagesController {
 
 	@Get('/ffff/:id')
 	async finfffdOne(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.messagesService.updateMessage(+id);
 	}
 	
@@ -33,6 +36,11 @@ export class MessagesController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId : number = 1;
+
+		// added by saad for protection of Body undefined
+		if (createMessageDto.to_id == undefined)
+			return;
+			
 		const userBlockedList: number[] = await this.blockService.blockedList(createMessageDto.to_id);
 		if(userBlockedList.includes(sessionId))
 			throw new HttpException({ message: 'You can\'t send message to this user!' }, HttpStatus.UNAUTHORIZED);
@@ -59,6 +67,9 @@ export class MessagesController {
 		// const sessionId : number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.messagesService.findOne(sessionId, +id);
 	}
 
@@ -80,6 +91,9 @@ export class MessagesController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.messagesService.removeMessage(sessionId, +id);
 	}
 }

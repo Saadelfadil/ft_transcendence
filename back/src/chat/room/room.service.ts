@@ -29,6 +29,10 @@ export class RoomService {
 
 
 	async create(sessionId: number, createRoomDto: CreateRoomDto) {
+		// added by saad for protection of Body undefined
+		if (createRoomDto.name == undefined || createRoomDto.admins == undefined)
+			return;
+			
 		let test = await this.roomsRepository.findOne({name: createRoomDto.name});
 		if (test !== undefined)
 		{
@@ -115,6 +119,8 @@ export class RoomService {
 		if(sessionId != room.owner_id)
 			throw new HttpException({ message: 'You can\'t edit this room!' }, HttpStatus.UNAUTHORIZED);
 
+		if (changePasswordDto.password == undefined)
+			return;
 		room.password = changePasswordDto.password;
 
 		if( changePasswordDto.password != "" )

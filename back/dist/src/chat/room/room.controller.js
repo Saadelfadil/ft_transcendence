@@ -40,6 +40,8 @@ let RoomController = class RoomController {
     async IsRoomPassValid(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         let status = true;
+        if (body.room_pass == undefined || body.room_id == undefined)
+            return;
         if (body.room_pass !== '')
             status = await this.roomService.checkAuth(body.room_id, body.room_pass);
         if (status) {
@@ -49,31 +51,43 @@ let RoomController = class RoomController {
     }
     async LeaveRoom(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
+        if (body.room_id == undefined)
+            return;
         await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
         return { status: true };
     }
     findOne(id) {
+        if (id == undefined)
+            return;
         return this.roomService.findOne(+id);
     }
     async update(id, changePasswordDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (id == undefined)
+            return;
         return this.roomService.update(sessionId, +id, changePasswordDto);
     }
     async remove(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
         await this.roomService.remove(sessionId, +id);
+        if (id == undefined)
+            return;
         this.userService.removeFromJoinedRooms(+id);
     }
     async findRoomMessages(roomId, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (roomId == undefined)
+            return;
         return this.roomService.findRoomMessages(sessionId, [], +roomId);
     }
     async saveMessageToRoom(roomId, createRoomMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (roomId == undefined)
+            return;
         const roomBannedList = await this.banService.roomBannedList(+roomId);
         if (roomBannedList.includes(sessionId))
             throw new common_1.HttpException({ message: 'You can\'t participate in this room' }, common_1.HttpStatus.UNAUTHORIZED);
@@ -82,6 +96,8 @@ let RoomController = class RoomController {
     async addRoomAdmin(roomId, data, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (roomId == undefined)
+            return;
         const roomData = await this.roomService.findOne(+roomId);
         if (sessionId == roomData.owner_id || roomData.admins.includes(sessionId)) {
             return this.roomService.addRoomAdmin(+roomId, +data['user_id']);
@@ -92,6 +108,8 @@ let RoomController = class RoomController {
     async removeRoomAdmin(roomId, data, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (roomId == undefined)
+            return;
         const roomData = await this.roomService.findOne(+roomId);
         if (sessionId == roomData.owner_id || roomData.admins.includes(sessionId)) {
             const saved = await this.roomService.removeRoomAdmin(+roomId, +data['user_id']);

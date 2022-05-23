@@ -34,7 +34,7 @@ let AppController = class AppController {
         this.userGameEntity = userGameEntity;
         this.userHistoryEntity = userHistoryEntity;
     }
-    async getRequests(body, request) {
+    async getRequests(request) {
         let reqs = [];
         const userJwt = await this.appService.getUserDataFromJwt(request);
         if (userJwt.id == undefined)
@@ -46,7 +46,7 @@ let AppController = class AppController {
         }));
         return reqs;
     }
-    async getFriends(body, request) {
+    async getFriends(request) {
         let reqs = [];
         const userJwt = await this.appService.getUserDataFromJwt(request);
         if (userJwt.id == undefined)
@@ -124,7 +124,7 @@ let AppController = class AppController {
     async RequestToFriend(body, request) {
         const { is_accept, request_user_id } = body;
         const userJwt = await this.appService.getUserDataFromJwt(request);
-        if (userJwt.id == undefined)
+        if (userJwt.id == undefined || is_accept == undefined || request_user_id == undefined)
             return;
         if (is_accept) {
             const userFriendRequest = await this.appService.getUserByIdFriend(request_user_id);
@@ -160,6 +160,8 @@ let AppController = class AppController {
     async loginOrNot(request) {
         try {
             const user = await this.appService.getUserDataFromJwt(request);
+            if (user == undefined)
+                return;
             return { is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status: true };
         }
         catch (error) {
@@ -168,14 +170,16 @@ let AppController = class AppController {
     }
     async updateU(request, body) {
         try {
-            return this.appService.updateUser(request, body);
+            const user = await this.appService.updateUser(request, body);
+            return user;
         }
         catch (error) {
-            throw new common_1.NotFoundException();
         }
     }
     async amIJoinedToThisRoom(request, body) {
         const user = await this.appService.getUserDataFromJwt(request);
+        if (user == undefined)
+            return;
         const { joinedRooms } = await this.appService.getUserById(user.id);
         let status = joinedRooms.includes(body.room_id);
         return { status: status };
@@ -183,6 +187,8 @@ let AppController = class AppController {
     async verify(request, body) {
         try {
             const { token } = request.body;
+            if (token == undefined)
+                return;
             const cookie = request.cookies['jwt'];
             const data = await this.jwtService.verifyAsync(cookie);
             if (!data)
@@ -201,6 +207,8 @@ let AppController = class AppController {
     async validate(request) {
         try {
             const { twof_qrcode, change, twof } = request.body;
+            if (twof_qrcode == undefined || change == undefined || twof == undefined)
+                return;
             const cookie = request.cookies['jwt'];
             const data = await this.jwtService.verifyAsync(cookie);
             if (!data)
@@ -239,7 +247,7 @@ let AppController = class AppController {
             throw new common_1.UnauthorizedException();
         }
     }
-    async getgamestate(body, request) {
+    async getgamestate(request) {
         const userJwt = await this.appService.getUserDataFromJwt(request);
         if (userJwt.id == undefined)
             return;
@@ -251,6 +259,8 @@ let AppController = class AppController {
         const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
         const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
         const REDIRECT_URI = "http://localhost:8080/login";
+        if (code == undefined)
+            return;
         var appp = new _42_authentication_1.default(UID, SECRET, REDIRECT_URI);
         var token = await appp.get_Access_token(code);
         if (token == undefined)
@@ -319,6 +329,8 @@ let AppController = class AppController {
         let match;
         let users = [];
         const { usersId } = body;
+        if (usersId == undefined)
+            return;
         let tmp;
         const length = usersId.length;
         for (let i = 0; i < length; i += 2) {
@@ -337,6 +349,8 @@ let AppController = class AppController {
         let SingleUser;
         let users = [];
         const { usersId } = body;
+        if (usersId == undefined)
+            return;
         await Promise.all(usersId.map(async (user_id) => {
             const { login, id } = await this.appService.getUserById(user_id);
             users.push({ login: login, id: id });
@@ -353,7 +367,8 @@ let AppController = class AppController {
         let tmp = false;
         const { friend_id } = body;
         const userJwt = await this.appService.getUserDataFromJwt(request);
-        if (userJwt.id == undefined)
+        console.log(friend_id);
+        if (userJwt.id == undefined || friend_id == undefined)
             return;
         const { login, image_url, wins, loss } = await this.appService.getUserById(friend_id);
         const { user_friends } = await this.appService.getUserByIdFriend(userJwt.id);
@@ -376,16 +391,22 @@ let AppController = class AppController {
     }
     async getloginbyid(body) {
         const { id } = body;
+        if (id == undefined)
+            return;
         const { login, image_url } = await this.appService.getUserById(id);
         return { login: login, image_url: image_url };
     }
     async getUserJoindAndBlocked(body) {
         const { id } = body;
+        if (id == undefined)
+            return;
         const { joinedRooms } = await this.appService.getUserById(id);
         return { joinedRooms: joinedRooms };
     }
     async FindUserByLogin(body) {
         const { login } = body;
+        if (login == undefined)
+            return;
         try {
             const { id } = await this.appService.getUserByLogin(login);
             return { status: true, id: id };
@@ -401,18 +422,16 @@ let AppController = class AppController {
 };
 __decorate([
     (0, common_1.Post)('getrequests'),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getRequests", null);
 __decorate([
     (0, common_1.Post)('getfriends'),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getFriends", null);
 __decorate([
@@ -483,10 +502,9 @@ __decorate([
 ], AppController.prototype, "validate", null);
 __decorate([
     (0, common_1.Post)('getgamestatus'),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getgamestate", null);
 __decorate([

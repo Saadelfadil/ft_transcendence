@@ -30,6 +30,9 @@ export class BlockService {
 		const userData = await this.findUser(sessionId);
 		if( userData )
 		{
+			// added by saad for protection of Body undefined
+			if (createBlockDto.blocked == undefined)
+				return;
 			if( !userData.blocked.includes(createBlockDto.blocked) )
 				userData.blocked.push(createBlockDto.blocked);
 		
@@ -47,6 +50,9 @@ export class BlockService {
 
 	async unBlockUser(sessionId: number, createBlockDto: CreateBlockDto) {
 		const userData = await this.findUser(sessionId);
+		// added by saad for protection of Body undefined
+		if (createBlockDto.blocked == undefined)
+			return;
 		if( userData )
 			userData.blocked = this.arrayRemove(userData.blocked, createBlockDto.blocked);
 	

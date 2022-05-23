@@ -26,11 +26,15 @@ let MessagesController = class MessagesController {
         this.userService = userService;
     }
     async finfffdOne(id, req) {
+        if (id == undefined)
+            return;
         return this.messagesService.updateMessage(+id);
     }
     async create(createMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (createMessageDto.to_id == undefined)
+            return;
         const userBlockedList = await this.blockService.blockedList(createMessageDto.to_id);
         if (userBlockedList.includes(sessionId))
             throw new common_1.HttpException({ message: 'You can\'t send message to this user!' }, common_1.HttpStatus.UNAUTHORIZED);
@@ -45,11 +49,15 @@ let MessagesController = class MessagesController {
     async findOne(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (id == undefined)
+            return;
         return this.messagesService.findOne(sessionId, +id);
     }
     async remove(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (id == undefined)
+            return;
         return this.messagesService.removeMessage(sessionId, +id);
     }
 };

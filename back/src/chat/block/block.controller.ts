@@ -48,6 +48,9 @@ export class BlockController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// TODO: get it from jwt
+		// added by saad for protection of Body undefined
+		if (id == undefined)
+			return;
 		return this.blockService.isBlocked(sessionId, +id);
 	}
 }

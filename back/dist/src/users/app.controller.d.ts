@@ -14,8 +14,8 @@ export declare class AppController {
     private readonly userGameEntity;
     private readonly userHistoryEntity;
     constructor(appService: AppService, jwtService: JwtService, userRepository: Repository<UserEntity>, userFriendsEntity: Repository<UserFriendsEntity>, userGameEntity: Repository<UserGameEntity>, userHistoryEntity: Repository<UserHistoryEntity>);
-    getRequests(body: any, request: Request): Promise<any[]>;
-    getFriends(body: any, request: Request): Promise<any[]>;
+    getRequests(request: Request): Promise<any[]>;
+    getFriends(request: Request): Promise<any[]>;
     addFriend(body: any, request: Request): Promise<boolean>;
     removeFriend(body: any, request: Request): Promise<void>;
     RequestToFriend(body: any, request: Request): Promise<void>;
@@ -53,7 +53,7 @@ export declare class AppController {
         twof_qrcode?: undefined;
         twof_secret?: undefined;
     }>;
-    getgamestate(body: any, request: Request): Promise<{
+    getgamestate(request: Request): Promise<{
         in_game: boolean;
     }>;
     getData(code: string, response: Response): Promise<string>;

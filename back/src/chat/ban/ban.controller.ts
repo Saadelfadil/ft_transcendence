@@ -24,6 +24,9 @@ export class BanController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (createBanDto.created == undefined || createBanDto.room_id == undefined)
+			return;
 		createBanDto.created =  Date.now();
 		
 		const roomData = await this.roomService.findOne(createBanDto.room_id);
@@ -41,6 +44,9 @@ export class BanController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (updateBanDto.room_id == undefined)
+			return;
 		const roomData = await this.roomService.findOne(updateBanDto.room_id);
 		return this.banService.update(sessionId, roomData, updateBanDto);
 	}
@@ -48,11 +54,17 @@ export class BanController {
 	
 	@Get('room/:roomId/banned')
 	roomBannedList(@Param('roomId', ParseIntPipe) roomId: string) {
+		// added by saad for protection of Body undefined
+		if (roomId == undefined)
+			return;
 		return this.banService.roomBannedList(+roomId);
 	}
 
 	@Get('room/:roomId/user/:userId')
 	findUserInRoom(@Param('roomId', ParseIntPipe) roomId: string, @Param('userId', ParseIntPipe) userId: string) {
+		// added by saad for protection of Body undefined
+		if (roomId == undefined || userId == undefined)
+			return;
 		return this.banService.findUserInRoom(+roomId, +userId);
 	}
 
@@ -60,6 +72,9 @@ export class BanController {
 	async unbanUserFromRoom(@Param('roomId', ParseIntPipe) roomId: string, @Param('userId', ParseIntPipe) userId: string, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+		// added by saad for protection of Body undefined
+		if (roomId == undefined || userId == undefined)
+			return;
 
 		const roomData = await this.roomService.findOne(+roomId);
 		return this.banService.unbanUserFromRoom(sessionId, roomData, +roomId, +userId);

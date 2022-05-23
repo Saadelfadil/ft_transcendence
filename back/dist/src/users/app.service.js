@@ -97,6 +97,8 @@ let AppService = class AppService {
         return uploadedResponse.secure_url;
     }
     async updateUser(request, body) {
+        if (body.login == undefined)
+            return;
         const user = await this.getUserDataFromJwt(request);
         const userDb = await this.getUserByLogin(body.login);
         if (userDb)

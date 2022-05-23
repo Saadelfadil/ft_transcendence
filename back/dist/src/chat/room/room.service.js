@@ -30,6 +30,8 @@ let RoomService = class RoomService {
         });
     }
     async create(sessionId, createRoomDto) {
+        if (createRoomDto.name == undefined || createRoomDto.admins == undefined)
+            return;
         let test = await this.roomsRepository.findOne({ name: createRoomDto.name });
         if (test !== undefined) {
             return { status: false, error: 'there exists room with this name!' };
@@ -98,6 +100,8 @@ let RoomService = class RoomService {
         const room = await this.findOne(id);
         if (sessionId != room.owner_id)
             throw new common_1.HttpException({ message: 'You can\'t edit this room!' }, common_1.HttpStatus.UNAUTHORIZED);
+        if (changePasswordDto.password == undefined)
+            return;
         room.password = changePasswordDto.password;
         if (changePasswordDto.password != "") {
             room.locked = true;

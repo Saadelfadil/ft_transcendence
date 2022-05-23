@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BanController = void 0;
 const common_1 = require("@nestjs/common");
@@ -21,7 +20,6 @@ const ban_service_1 = require("./ban.service");
 const create_ban_dto_1 = require("./dto/create-ban.dto");
 const update_ban_dto_1 = require("./dto/update-ban.dto");
 const common_2 = require("@nestjs/common");
-const express_1 = require("express");
 const app_service_1 = require("../../users/app.service");
 let BanController = class BanController {
     constructor(banService, userService, roomService) {
@@ -32,6 +30,8 @@ let BanController = class BanController {
     async create(createBanDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (createBanDto.created == undefined || createBanDto.room_id == undefined)
+            return;
         createBanDto.created = Date.now();
         const roomData = await this.roomService.findOne(createBanDto.room_id);
         return this.banService.create(sessionId, roomData, createBanDto);
@@ -42,18 +42,26 @@ let BanController = class BanController {
     async update(updateBanDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (updateBanDto.room_id == undefined)
+            return;
         const roomData = await this.roomService.findOne(updateBanDto.room_id);
         return this.banService.update(sessionId, roomData, updateBanDto);
     }
     roomBannedList(roomId) {
+        if (roomId == undefined)
+            return;
         return this.banService.roomBannedList(+roomId);
     }
     findUserInRoom(roomId, userId) {
+        if (roomId == undefined || userId == undefined)
+            return;
         return this.banService.findUserInRoom(+roomId, +userId);
     }
     async unbanUserFromRoom(roomId, userId, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (roomId == undefined || userId == undefined)
+            return;
         const roomData = await this.roomService.findOne(+roomId);
         return this.banService.unbanUserFromRoom(sessionId, roomData, +roomId, +userId);
     }
@@ -63,7 +71,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_2.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_ban_dto_1.CreateBanDto, typeof (_a = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _a : Object]),
+    __metadata("design:paramtypes", [create_ban_dto_1.CreateBanDto, Object]),
     __metadata("design:returntype", Promise)
 ], BanController.prototype, "create", null);
 __decorate([
@@ -77,7 +85,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_2.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_ban_dto_1.UpdateBanDto, typeof (_b = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [update_ban_dto_1.UpdateBanDto, Object]),
     __metadata("design:returntype", Promise)
 ], BanController.prototype, "update", null);
 __decorate([
@@ -101,7 +109,7 @@ __decorate([
     __param(1, (0, common_1.Param)('userId', common_1.ParseIntPipe)),
     __param(2, (0, common_2.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, typeof (_c = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], BanController.prototype, "unbanUserFromRoom", null);
 BanController = __decorate([
