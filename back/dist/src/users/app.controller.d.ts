@@ -14,17 +14,11 @@ export declare class AppController {
     private readonly userGameEntity;
     private readonly userHistoryEntity;
     constructor(appService: AppService, jwtService: JwtService, userRepository: Repository<UserEntity>, userFriendsEntity: Repository<UserFriendsEntity>, userGameEntity: Repository<UserGameEntity>, userHistoryEntity: Repository<UserHistoryEntity>);
-    googleAuth(req: any): Promise<void>;
-    getRequests(body: any): Promise<any[]>;
-    getFriends(body: any): Promise<any[]>;
-    addFriend(body: any): Promise<boolean>;
-    removeFriend(body: any): Promise<void>;
-    RequestToFriend(body: any): Promise<void>;
-    googleAuthRedirect(req: any): {
-        user: any;
-    };
-    profile(request: Request): Promise<UserEntity>;
-    game(): string;
+    getRequests(body: any, request: Request): Promise<any[]>;
+    getFriends(body: any, request: Request): Promise<any[]>;
+    addFriend(body: any, request: Request): Promise<boolean>;
+    removeFriend(body: any, request: Request): Promise<void>;
+    RequestToFriend(body: any, request: Request): Promise<void>;
     loginOrNot(request: Request): Promise<{
         is_login_db: boolean;
         id: number;
@@ -39,6 +33,9 @@ export declare class AppController {
         login?: undefined;
     }>;
     updateU(request: Request, body: any): Promise<any>;
+    amIJoinedToThisRoom(request: Request, body: any): Promise<{
+        status: boolean;
+    }>;
     verify(request: Request, body: any): Promise<void>;
     validate(request: Request): Promise<{
         success: boolean;
@@ -56,7 +53,7 @@ export declare class AppController {
         twof_qrcode?: undefined;
         twof_secret?: undefined;
     }>;
-    getgamestate(body: any): Promise<{
+    getgamestate(body: any, request: Request): Promise<{
         in_game: boolean;
     }>;
     getData(code: string, response: Response): Promise<string>;
@@ -80,7 +77,7 @@ export declare class AppController {
         }[];
     }>;
     users(): Promise<UserEntity[]>;
-    getExactUser(body: any): Promise<{
+    getExactUser(body: any, request: Request): Promise<{
         login: string;
         image_url: string;
         is_friend: boolean;

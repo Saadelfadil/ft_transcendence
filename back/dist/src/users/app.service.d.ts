@@ -25,6 +25,9 @@ export declare class AppService {
     generateQR(text: string): Promise<any>;
     uploadImage(twof_qrcode: string): Promise<any>;
     updateUser(request: Request, body: any): Promise<any>;
+    addRoomIdToJoinedRooms(user_id: number, room_id: number): Promise<void>;
+    removeRoomIdFromJoinedRooms(user_id: number, room_id: number): Promise<void>;
+    removeFromJoinedRooms(room_id: number): Promise<void>;
     arrayRemove(joinedRooms: number[], roomId: number): number[];
     findOne(id: number): Promise<UserEntity>;
     joinRoom(id: number, roomId: number): Promise<boolean>;

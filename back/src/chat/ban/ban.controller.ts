@@ -58,7 +58,6 @@ export class BanController {
 
 	@Delete('room/:roomId/user/:userId')
 	async unbanUserFromRoom(@Param('roomId', ParseIntPipe) roomId: string, @Param('userId', ParseIntPipe) userId: string, @Req() req: Request) {
-		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 

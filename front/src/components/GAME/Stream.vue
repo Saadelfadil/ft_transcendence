@@ -63,7 +63,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center cursor-pointer" @click="roomClicked(rooms_info[index].namespace, rooms_info[index].name, oneroom)">
+                            <div class="flex items-center cursor-pointer" @click="roomClicked(rooms_info[index].namespace, rooms_info[index].name, oneroom, index)">
                                     {{ rooms_info[index].namespace }}
                             </div>
 
@@ -135,7 +135,7 @@ interface Ball {
     speed: number,
     velocityX: number,
     velocityY: number,
-    color: string,
+    color: string, 
 }
 
 interface streamRoom{
@@ -325,7 +325,7 @@ export default defineComponent({
             console.log(resp.data);
         },
 
-        roomClicked(namespace:string, name:string, oneroom: OneRoom)
+        roomClicked(namespace:string, name:string, oneroom: OneRoom, room_index:number)
         {
             this.left_player_avatar = oneroom.left_player.image_url;
             this.left_player_login = oneroom.left_player.login;
@@ -341,6 +341,10 @@ export default defineComponent({
             this.socket = io(`http://localhost:3000/${namespace}`);
 
             this.socket.on('connect', () => {
+                this.socket.on('noRoom', ()=>{
+                    console.log( `room ${this.socket}`);
+                    this.room_display.splice(room_index, 1);
+                });
                 this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('canvasWH', (canvas: any) => {
                     console.log('roomwh', canvas.scw, canvas.sch);

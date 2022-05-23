@@ -37,6 +37,21 @@ let RoomController = class RoomController {
     findAll() {
         return this.roomService.findAll();
     }
+    async IsRoomPassValid(body, req) {
+        const user = await this.userService.getUserDataFromJwt(req);
+        let status = true;
+        if (body.room_pass !== '')
+            status = await this.roomService.checkAuth(body.room_id, body.room_pass);
+        if (status) {
+            this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+        }
+        return { status: status };
+    }
+    async LeaveRoom(body, req) {
+        const user = await this.userService.getUserDataFromJwt(req);
+        await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
+        return { status: true };
+    }
     findOne(id) {
         return this.roomService.findOne(+id);
     }
@@ -48,13 +63,13 @@ let RoomController = class RoomController {
     async remove(id, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        return this.roomService.remove(sessionId, +id);
+        await this.roomService.remove(sessionId, +id);
+        this.userService.removeFromJoinedRooms(+id);
     }
     async findRoomMessages(roomId, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        const myBlockedList = await this.blockService.blockedList(sessionId);
-        return this.roomService.findRoomMessages(sessionId, myBlockedList, +roomId);
+        return this.roomService.findRoomMessages(sessionId, [], +roomId);
     }
     async saveMessageToRoom(roomId, createRoomMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
@@ -105,6 +120,24 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], RoomController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
+    (0, common_1.Post)('checkroompass'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], RoomController.prototype, "IsRoomPassValid", null);
+__decorate([
+    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
+    (0, common_1.Post)('leaveroom'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], RoomController.prototype, "LeaveRoom", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

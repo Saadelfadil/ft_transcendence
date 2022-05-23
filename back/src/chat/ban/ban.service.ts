@@ -118,7 +118,7 @@ export class BanService {
 
 	async unbanUserFromRoom(sessionId: number, roomData: Rooms , roomId: number, userId: number) {
 		
-		if(roomData.admins.includes(sessionId))
+		if(!roomData.admins.includes(sessionId))
 			throw new HttpException({ message: 'You\'re not an admin of this room!' }, HttpStatus.UNAUTHORIZED);
 
 		const unBannedUser = await this.findUserInRoom(roomId, userId);

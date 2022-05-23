@@ -122,13 +122,61 @@ export class AppService {
 						upload_preset: 'ft_transcendence'
 					})
 					await this.userRepository.update(user.id, {image_url: uploadedResponse.secure_url});
-					return {image_url: uploadedResponse.secure_url};
+					return {status: true, image_url: uploadedResponse.secure_url};
 					
 				} catch (error) {
-					console.error(error);
+					return {status: false};
 				}
 			}
 		}
+
+		// mohamed
+		async addRoomIdToJoinedRooms(user_id:number, room_id:number){
+			const {joinedRooms} = await  this.userRepository.findOne(user_id);
+			joinedRooms.push(room_id);
+			this.userRepository.update(user_id, {joinedRooms: joinedRooms});
+		}
+		// mohamed
+		async removeRoomIdFromJoinedRooms(user_id:number, room_id:number){
+			const {joinedRooms} = await  this.userRepository.findOne(user_id);
+			joinedRooms.map((r_id:number, index:number) => {
+				if (room_id === r_id)
+				{
+					joinedRooms.splice(index, 1);
+					return ;
+				}
+			});
+			this.userRepository.update(user_id, {joinedRooms: joinedRooms});
+		}
+
+		// mohamed
+		async removeFromJoinedRooms(room_id:number)
+		{
+			const users_table = this.userRepository.createQueryBuilder('users');
+			const users = await users_table.getMany();
+			// now i will get joined rooms of each and remove it
+			let joinedRooms:Array<number>;
+			let changed:boolean;
+
+			// be carfull maybe neet some promise.all
+			users.map((one_user) => {
+				joinedRooms = one_user.joinedRooms;
+				changed = false;
+				
+				joinedRooms.map((r_id:number, index:number) => {
+					if (r_id === room_id)
+					{
+						changed = true;
+						joinedRooms.splice(index, 1);
+						return ;
+					}
+				});
+				if (changed){
+					this.userRepository.update(one_user.id, {joinedRooms: joinedRooms});
+				}
+			});
+		}
+
 
 		// Laarbi Functions
 

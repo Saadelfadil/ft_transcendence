@@ -18,8 +18,7 @@
                 <div v-if="game_state == 0"> waiting... </div>
                 <div v-else-if="game_state == 1"> {{timer}} </div>
                 <div v-else>
-                    <div class="mt-2.5">VS</div>
-                    <div class="mt-2.5">{{gameCounter}}</div>
+                    <div class="mt-2.5"> {{time_min}} : {{time_sec}} </div>
                 </div>
             </div>
 
@@ -120,11 +119,35 @@ export default defineComponent({
                 color: '' as string,
             } as Ball,
             timer: 0 as number,
-            gameCounter: '' as string,
+            gameCounter: 0 as number,
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
             timerInterval: null as any,
+            tmp_number_min: 0 as number,
+            tmp_number_sec: 0 as number,
+        }
+    },
+    computed: {
+        time_min(): string {
+            // return '00';
+            this.tmp_number_min = Math.floor(this.gameCounter / 60);
+            if (this.tmp_number_min === 0)
+            {
+                return '00';
+            }
+            else if (this.tmp_number_min < 10)
+                return '0' + this.tmp_number_min.toString();
+            return  this.tmp_number_min.toString();
+        },
+        time_sec(): string {
+            // return '11';
+            this.tmp_number_sec = this.gameCounter % 60;
+            if (this.tmp_number_sec === 0)
+                return '00';
+            else if (this.tmp_number_sec < 10)
+                return '0' + this.tmp_number_sec.toString();
+            return this.tmp_number_sec.toString();
         }
     },
     watch: {
@@ -303,7 +326,7 @@ export default defineComponent({
                     });
 
                     this.socket.on('updateTime', (time: number) => {
-                        this.gameCounter = time.toString();
+                        this.gameCounter = time;
                     })
 
                 });

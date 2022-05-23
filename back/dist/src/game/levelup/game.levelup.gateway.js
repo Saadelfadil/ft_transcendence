@@ -115,6 +115,10 @@ let LevelUpGateway = class LevelUpGateway {
         else if (data.type === 'stream') {
             console.log(data.room, 'stream');
             client.data.room = data.room;
+            if (!this.levelUpLogic.rooms.find(Number(data.room))) {
+                client.emit('noRoom');
+                return;
+            }
             client.join(data.room);
             client.emit('canvasWH', { scw: this.levelUpLogic.canvasW, sch: this.levelUpLogic.canvasH });
         }

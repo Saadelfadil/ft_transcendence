@@ -29,9 +29,15 @@ export class RoomService {
 
 
 	async create(sessionId: number, createRoomDto: CreateRoomDto) {
+		let test = await this.roomsRepository.findOne({name: createRoomDto.name});
+		if (test !== undefined)
+		{
+			// means that already room with this name
+			return { status: false, error: 'there exists room with this name!' };
+		}
+		createRoomDto.admins = [];
+		createRoomDto.admins.push(sessionId);
 		const newRoom = this.roomsRepository.create(createRoomDto);
-
-
 		if( newRoom.locked )
 		{
 			const saltOrRounds = 10;
@@ -54,7 +60,7 @@ export class RoomService {
 		}
 		else
 		{
-			return { status: false };
+			return { status: false, error: 'backend failure' };
 		}
 	}
 

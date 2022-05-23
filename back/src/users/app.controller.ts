@@ -24,20 +24,14 @@ export class AppController {
 		@InjectRepository(UserGameEntity) private readonly userGameEntity: Repository<UserGameEntity>,
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>) { }
 
-
-	@Get('google')
-	@UseGuards(AuthGuard('google'))
-	async googleAuth(@Req() req)
-	{
-
-	}
-
 	@Post('getrequests')
-	async getRequests(@Body() body)
+	async getRequests(@Body() body, @Req() request: Request)
 	{
 		let reqs : Array<any> = [];
-		const { id } = body;
-		const user = await this.appService.getUserByIdFriend(id);
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
+		const user = await this.appService.getUserByIdFriend(userJwt.id);
 		await Promise.all(user.user_requested.map(async (index) => {
 			const { login } = await this.appService.getUserById(index);
 			reqs.push({ id: index, login: login });
@@ -46,11 +40,13 @@ export class AppController {
 	}
 
 	@Post('getfriends')
-	async getFriends(@Body() body)
+	async getFriends(@Body() body, @Req() request: Request)
 	{
 		let reqs : Array<any> = [];
-		const { id } = body;
-		const user = await  this.appService.getUserByIdFriend(id);
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
+		const user = await  this.appService.getUserByIdFriend(userJwt.id);
 		await Promise.all(user.user_friends.map(async (index) => {
 			const { login } = await this.appService.getUserById(index);
 			reqs.push({ id: index, login: login });
@@ -59,18 +55,21 @@ export class AppController {
 	}
 
 	@Post('addfriend')
-	async addFriend(@Body() body)
+	async addFriend(@Body() body, @Req() request: Request)
 	{
-		console.log('addfriend');
-		const { login, user_id } = body;
+		console.log('addfriend used');
+		const { login } = body;
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
 		let tmp : boolean = false;
 		try {
 			const { id } = await this.appService.getUserByLogin(login);
 			const { user_requested, user_friends } = await this.appService.getUserByIdFriend(id);
-			if (id === user_id)
+			if (id === userJwt.id)
 				return false;
 			user_friends.map((curId: number) => {
-				if (curId === user_id)
+				if (curId === userJwt.id)
 				{
 					tmp = true;
 					return;
@@ -80,7 +79,7 @@ export class AppController {
 				return true;
 			tmp = false;
 			user_requested.map((curId: number) => {
-				if (curId === user_id)
+				if (curId === userJwt.id)
 				{
 					tmp = true;
 					return;
@@ -88,7 +87,7 @@ export class AppController {
 			});
 			if (!tmp)
 			{
-				user_requested.push(user_id);
+				user_requested.push(userJwt.id);
 				await this.userFriendsEntity.update(id, {user_requested: user_requested});
 			}
 			return true;
@@ -96,12 +95,16 @@ export class AppController {
 			return false;
 		}
 	}
+
 	@Post('removefriend')
-	async removeFriend(@Body() body)
+	async removeFriend(@Body() body, @Req() request: Request)
 	{
-		const { user_id, friend_id } = body;
+		const { friend_id } = body;
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
 		try {
-			const userFriend = await this.appService.getUserByIdFriend(user_id);
+			const userFriend = await this.appService.getUserByIdFriend(userJwt.id);
 			const { user_friends } = await this.appService.getUserByIdFriend(friend_id);
 			userFriend.user_friends.map((curId: number, index) => {
 				if (curId === friend_id)
@@ -111,55 +114,32 @@ export class AppController {
 				}
 			});
 			user_friends.map((curId: number, index) => {
-				if (curId === user_id)
+				if (curId === userJwt.id)
 				{
 					user_friends.splice(index, 1);
 					return;
 				}
 			});
-			await this.userFriendsEntity.update(user_id, {user_friends: userFriend.user_friends});
+			await this.userFriendsEntity.update(userJwt.id, {user_friends: userFriend.user_friends});
 			await this.userFriendsEntity.update(friend_id, {user_friends: user_friends});
 		} catch (error) {
 		} 
 	}
 	
-
-	// @Post('getfrienddata')
-	// async getFriendData(@Body() body)
-	// {
-	// 	const { id, user_id} = body;
-	// 	let profileData : any;
-	// 	let isFriend = false;
-	// 	let frontId = 0;
-	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
-	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
-	// 	const { login, image_url} = await this.appService.getUserById(user_id);
-	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
-	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
-
-	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
-	// 		const userOpponent = await this.appService.getUserById(oppenentId);
-	// 		histObj.id = frontId;
-	// 		frontId++;
-			
-	// 	}));
-	// 	isFriend = user_friends.includes(id);
-
-	// 	return profileData;
-	// }
-	
 	@Post('requesttofriend')
-	async RequestToFriend(@Body() body)
+	async RequestToFriend(@Body() body, @Req() request: Request)
 	{
-		const { is_accept, user_id, request_user_id } : {is_accept: boolean, user_id: number, request_user_id: number} = body;
-
+		const { is_accept, request_user_id } : {is_accept: boolean, user_id: number, request_user_id: number} = body;
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
 		if (is_accept)
 		{
 			const userFriendRequest = await this.appService.getUserByIdFriend(request_user_id);
-			const { user_friends, user_requested } = await this.appService.getUserByIdFriend(user_id);
+			const { user_friends, user_requested } = await this.appService.getUserByIdFriend(userJwt.id);
 
 			user_friends.push(request_user_id);
-			userFriendRequest.user_friends.push(user_id);
+			userFriendRequest.user_friends.push(userJwt.id);
 			user_requested.map((id: number, index) => {
 				if (id === request_user_id)
 				{
@@ -168,18 +148,18 @@ export class AppController {
 				}
 			});
 			userFriendRequest.user_requested.map((id: number, index) => {
-				if (id === user_id)
+				if (id === userJwt.id)
 				{
 					userFriendRequest.user_requested.splice(index, 1);
 					return;
 				}
 			});
-			await this.userFriendsEntity.update(user_id, {user_friends: user_friends, user_requested: user_requested});		
+			await this.userFriendsEntity.update(userJwt.id, {user_friends: user_friends, user_requested: user_requested});		
 			await this.userFriendsEntity.update(request_user_id, {user_friends: userFriendRequest.user_friends, user_requested: userFriendRequest.user_requested});		
 		}
 		else
 		{
-			const { user_requested } = await this.appService.getUserByIdFriend(user_id);
+			const { user_requested } = await this.appService.getUserByIdFriend(userJwt.id);
 			user_requested.map((id: number, index) => {
 				if (id === request_user_id)
 				{
@@ -187,92 +167,10 @@ export class AppController {
 					return;
 				}
 			});
-			await this.userFriendsEntity.update(user_id, {user_requested: user_requested});
+			await this.userFriendsEntity.update(userJwt.id, {user_requested: user_requested});
 		}
 	}
 
-	// Two Routes for User Friends
-	// @Post('array')
-	// async insertArray()
-	// {
-	// 	const userFriend = {
-	// 		"id": 62603,
-	// 		"user_friends": [],
-	// 		"user_blocked": [],
-	// 		"user_requested": [],
-	// 	}
-	// 	await this.userFriendsEntity.save(userFriend);
-	// }
-	
-	// Two Routes for User Friends
-	// @Post('array1')
-	// async insertArray1(@Body() body)
-	// {
-	// 	const { id, login } = body;
-	// 	// const userFriend = {
-	// 	// 	"id": 1337,
-	// 	// 	"email": "melghoud@1337.ma",
-	// 	// 	"login": "melghoud",
-	// 	// 	"image_url": "DSfsdfsfsdf",
-	// 	// }
-	// 	await this.userRepository.save({id: id, login: login});
-	// }
-
-	// @Post('arrayupdate')
-	// async updateArray()
-	// {
-	// 	const user = await  this.appService.getUserByIdFriend(100);
-	// 	const userFriends  = user.user_friends;
-	// 	userFriends.push(78880);
-	// 	await this.userFriendsEntity.update(100, {user_friends: userFriends});
-	// }
-
-	// Two Routes for User Game
-	// @Post('updategame')
-	// async updateGame(@Body() body)
-	// {
-	// 	let {winOrlost, score, id} = body;
-	// 	console.log(winOrlost);
-	// 	console.log(score);
-	// 	console.log(id);
-	// 	const user = await  this.appService.getUserByIdGame(id);
-	// 	score += +user.score;
-	// 	if (winOrlost)
-	// 		await this.userGameEntity.update(id, {wins: +user.wins + 1, score: score});
-	// 	await this.userGameEntity.update(id, {loses: +user.loses + 1, score: score});
-	// }
-
-	// Two Routes for User History
-	// @Post('array')
-	// async insertArray()
-	// {
-	// 	const userHistory = {
-	// 		"id": 100,
-	// 		"opponent": 99,
-	// 		"user_score": 75,
-	// 		"opponent_score": 50
-	// 	}
-	// 	await this.userHistoryEntity.save(userHistory);
-	// }
-
-	@Get('auth/google/callback')
-	@UseGuards(AuthGuard('google'))
-	googleAuthRedirect(@Req() req)
-	{
-		return this.appService.googleLogin(req);
-	}
-
-	@UseGuards(AuthenticatedGuard)
-	@Get('profile')
-	profile(@Req() request: Request) {
-		return this.appService.getUserDataFromJwt(request);
-	}
-
-	@UseGuards(AuthenticatedGuard)
-	@Get('game')
-	game() {
-		return "Hello to game route";
-	}
 
 	// @UseGuards(AuthenticatedGuard)
 	@Get('islogin')
@@ -296,6 +194,16 @@ export class AppController {
 		}
 	}
 
+	@UseGuards(AuthenticatedGuard)
+	@Post('amijoinedtoroom')
+	async amIJoinedToThisRoom(@Req() request: Request, @Body() body)
+	{
+		const user = await this.appService.getUserDataFromJwt(request);
+		const {joinedRooms} = await this.appService.getUserById(user.id);
+		let status:boolean = joinedRooms.includes(body.room_id);
+		return {status:status};
+	}
+	
 	@UseGuards(AuthenticatedGuard)
 	@Post('verify')
 	async verify(@Req() request: Request, @Body() body) {
@@ -371,10 +279,13 @@ export class AppController {
 	}
 
 	@Post('getgamestatus')
-	async getgamestate(@Body() body){
-		const {user_id} = body;
-		const {in_game} = await this.appService.getUserById(user_id);
-		return {in_game : in_game};
+	async getgamestate(@Body() body, @Req() request: Request){
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
+		const gameStatus = await this.appService.getUserById(userJwt.id);
+		const { in_game } = gameStatus;
+		return { in_game : in_game };
 		// await this.userRepository.update(user_id, {in_game: state});
 	}
 
@@ -389,9 +300,11 @@ export class AppController {
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
 
 		var token = await appp.get_Access_token(code);
-
+		if (token == undefined)
+			return;
 		const userData = await appp.get_user_data(token.access_token);
-
+		if (userData == undefined)
+				return;
 		const { id, email, login, image_url } = userData;
 		const userDb = await this.appService.getUserById(id);
 		if (!userDb) {
@@ -446,7 +359,8 @@ export class AppController {
 			if (!data)
 				throw new UnauthorizedException();
 			const user :any = await this.appService.getUserById(data['id']);
-		
+			if (user == undefined)
+				return;
 			user.wins = user.wins;
 			user.loses = user.loss;
 			return user;
@@ -478,11 +392,15 @@ export class AppController {
 		let tmp:any;
 		const length = usersId.length;
 
-
 		for (let i = 0; i < length; i +=  2)
 		{
-			const { id, login, image_url} = await this.appService.getUserById(usersId[i]);
+			const user = await this.appService.getUserById(usersId[i]);
+			if (user == undefined)
+				return;
+			const { id, login, image_url } = user;
 			tmp =  await this.appService.getUserById(usersId[i + 1]);
+			if (tmp == undefined)
+				return;
 			users.push({left_player: {id:id, login:login, image_url:image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
 		}
 
@@ -508,30 +426,6 @@ export class AppController {
 		return {users:users};
 	}
 
-		// @Post('getfrienddata')
-	// async getFriendData(@Body() body)
-	// {
-	// 	const { id, user_id} = body;
-	// 	let profileData : any;
-	// 	let isFriend = false;
-	// 	let frontId = 0;
-	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
-	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
-	// 	const { login, image_url} = await this.appService.getUserById(user_id);
-	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
-	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
-
-	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
-	// 		const userOpponent = await this.appService.getUserById(oppenentId);
-	// 		histObj.id = frontId;
-	// 		frontId++;
-			
-	// 	}));
-	// 	isFriend = user_friends.includes(id);
-
-	// 	return profileData;
-	// }
-
 	@Get('users')
 	async users(){
 		const query = this.userRepository.createQueryBuilder('UserEntity');
@@ -542,17 +436,19 @@ export class AppController {
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('exactuser')
-	async getExactUser(@Body() body){
+	async getExactUser(@Body() body, @Req() request: Request){
 
 		let tmp = false;
-		const {friend_id, user_id} = body;
-
+		const {friend_id} = body;
+		const userJwt = await this.appService.getUserDataFromJwt(request);
+		if (userJwt.id == undefined)
+			return;
 		const {login, image_url,  wins, loss} = await this.appService.getUserById(friend_id);
 		
 		// const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
 
 
-		const { user_friends} = await this.appService.getUserByIdFriend(user_id);
+		const { user_friends} = await this.appService.getUserByIdFriend(userJwt.id);
 		
 		user_friends.map((fr_id) => {
 			if (fr_id === friend_id)
@@ -564,7 +460,7 @@ export class AppController {
 		if (!tmp){
 			const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
 			user_requested.map((fr_id) => {
-				if (fr_id === user_id)
+				if (fr_id === userJwt.id)
 				{
 					tmp = true;
 					return ;
@@ -581,6 +477,7 @@ export class AppController {
 		const {login, image_url} = await this.appService.getUserById(id);
 		return {login: login, image_url: image_url};
 	}
+	
 	@UseGuards(AuthenticatedGuard)
 	@Post('joinedRooms')
 	async getUserJoindAndBlocked(@Body() body){
@@ -588,7 +485,6 @@ export class AppController {
 		const {joinedRooms} = await this.appService.getUserById(id);
 		return {joinedRooms: joinedRooms}; // i will add here blocked rooms too
 	}
-
 
 	@Post('userbylogin')
 	async FindUserByLogin(@Body() body){
@@ -607,8 +503,4 @@ export class AppController {
 		response.clearCookie('jwt');
 		return "Cookies Clean";
 	}
-
-
-
-
 }

@@ -13,7 +13,7 @@
 							</div>
 						</div>
 
-					<button @click="profileClicked" class="mb-2 bg-indigo-500 px-4 py-2 rounded-md text-md text-white">Profile</button>
+					<button @click="profileClicked" class="mb-2 bg-sky-500 px-4 py-2 rounded-md text-md text-white">{{clicked_user_name}}</button>
 
 
 					<div v-if="clickeduser_id != user_id" class="w-full">
@@ -137,42 +137,70 @@ export default  defineComponent({
         roomId: Number(this.$route.query.roomId),
 		username: '' as string,
 		avatar: '' as string,
-		blockedList: [] as number[],
 		roomInfo: null as any,
 		invalidTime: false as boolean,
 		bannedUsers: [] as Array<number>,
+		clicked_user_name: '' as string,
       }
    },
 	watch:{
 		async user_id(){
 			console.log("current id: ", this.user_id);
 			this.chatStartUp();
-			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBlockedList(), this.getBannedUsers()]).then((resps:Array<any>) =>{
-				console.log(resps[0].data);
+			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBannedUsers(), this.amIJoinedToThisRoom()]).then((resps:Array<any>) =>{
+				if (!resps[3].data.status)
+				{
+					// means that you are in place that should not be
+					router.replace({name: 'chatpublic'});
+					return ;
+				}
+				resps[0].data.map((msg:any) => {
+					console.log(`all messages ${JSON.stringify(msg.msg)}`);
+				});
 				store.commit('updatePublicRoomMsgs', resps[0].data);
 				this.roomInfo = resps[1].data;
 				this.isAdmin = this.roomInfo.admins.includes(this.user_id);
 				this.isOwner = this.user_id == this.roomInfo.owner_id;
 				this.ownerId = this.roomInfo.owner_id;
-				this.blockedList = resps[2].data;
-				this.bannedUsers = resps[3].data;
+				this.bannedUsers = resps[2].data;
 			});
 		}
 	},
    methods: {
+	   amIJoinedToThisRoom(){
+		   return axios({
+			   method: 'POST',
+			   url: `http://localhost:8080/api/amijoinedtoroom`,
+			   data: {room_id: this.roomId}
+		   });
+	   },
 	   chatStartUp(){
-		   console.log(this.roomId.toString(), "befor");
+		   console.log(this.roomId.toString(), "before");
 		   this.socket.on(this.roomId.toString(), ({ data }) => {
 			   console.log('message recieved; ', JSON.stringify(data));
-			this.newMessage(data);
+			   if (data.admin_id !== undefined)
+			   {
+				   console.log(`data is ${JSON.stringify(data)}`);
+				   if (data.add){
+					   console.log(`add value: ${data.admin_id} type: ${typeof data.admin_id}`);
+					   this.roomInfo.admins.push(data.admin_id); // just for front end so no need to refresh
+				   }
+					else{
+						this.roomInfo.admins.map((cur_id:number, index:number) => {
+							if (cur_id === data.admin_id)
+							{
+					   			console.log(`remove value: ${data.admin_id} type: ${typeof data.admin_id}`);
+								this.roomInfo.admins.splice(index, 1);
+								return ;
+							}
+						});
+					}
+					this.isAdmin = this.roomInfo.admins.includes(this.user_id);
+			   }else{
+				   this.newMessage(data);
+			   }
 		})
 	   },
-	    getBlockedList(){
-			return axios({
-				method: 'GET',
-				url: 'http://localhost:8080/block/users'
-			});
-		},
 		getBannedUsers(){
 			return axios({
 				method: 'GET',
@@ -215,6 +243,7 @@ export default  defineComponent({
 			)
 		},
 	   handleSubmitNewMessage(msg:string){
+		   console.log(`called now handel`);
 		   	const messageData = {
 				   		isInvite: true,
 						from_id: this.user_id,
@@ -236,13 +265,6 @@ export default  defineComponent({
 	   },
 	   getRoomsInfo()
         {
-            // const resp = await axios.get(
-			// 	`http://localhost:8080/room/${this.roomId}`,
-			// );
-            // this.roomInfo = resp.data;
-			// this.isAdmin = this.roomInfo.admins.includes(this.user_id);
-			// this.isOwner = this.user_id == this.roomInfo.owner_id;
-			// this.ownerId = this.roomInfo.owner_id;
 			return axios({
 				method: 'GET',
 				url: `http://localhost:8080/room/${this.roomId}`,
@@ -250,11 +272,6 @@ export default  defineComponent({
         },
 		getRoomsMessages()
         {
-            // const resp = await axios.get(
-			// 	`http://localhost:8080/room/${this.roomId}/messages`,
-			// );
-            // const data = resp.data;
-            // store.commit('updatePublicRoomMsgs', data);
 			return axios({
 				method: 'GET',
 				url: `http://localhost:8080/room/${this.roomId}/messages`,
@@ -272,20 +289,18 @@ export default  defineComponent({
 
 	  newMessage(data: any)
       {
-			if( !this.blockedList.includes(data.from) )
-		  	{
-			  	const msgObj = {
-                  	id: data.id,
-					room_id: this.roomId,
-					from_id: data.from_id,
-					username: data.username,
-					image_url: data.avatar,
-					msg: data.message,
-					created: Date.now(),
-				};
-				this.curMsgData = '';
-				store.commit('addMessageToRoomMsgs', msgObj);
-			}
+		console.log('called now');
+		const msgObj = {
+			id: data.id,
+			room_id: this.roomId,
+			from_id: data.from_id,
+			username: data.username,
+			image_url: data.avatar,
+			msg: data.message,
+			created: Date.now(),
+		};
+		this.curMsgData = '';
+		store.commit('addMessageToRoomMsgs', msgObj);
 	  },
 	  timestampToDateTime(unix_timestamp: number)
 	  {
@@ -301,26 +316,16 @@ export default  defineComponent({
 	  },
 	  leaveRoom()
 	  {
-		this.socket.emit(
-		'leave-room',
-		{ 
-			data: {
-				from_id: this.user_id,
-				roomName: this.roomId
-			}
-		},
-		(response: any) => {
-			// join-room callback
-			if(response.status)
-			{
-				this.goBackToRoomsList();
-			}
-			else
-			{
-				console.log("Error joining the room"); // ok
-			}
-		}
-		)
+		  axios({
+			  method: 'POST',
+			  url: `http://localhost:8080/room/leaveroom`,
+			  data:{room_id: this.roomId}
+		  }).then(({data}) =>{
+			  if (data.status)
+			  {
+				  this.goBackToRoomsList();
+			  }
+		  });
 	  },
 	  goBackToRoomsList()
 	  {
@@ -330,6 +335,7 @@ export default  defineComponent({
 	  {
 		  	this.isPopUp = true;
 			this.clickeduser_id = msg.from_id;
+			this.clicked_user_name = msg.username;
 		  	console.log(`message clicked`);
 	  },
 	  disablePopUp()
@@ -408,6 +414,7 @@ export default  defineComponent({
 			}
 		})
 	  },
+	
 	async addAdmin()
 	{
 		const resp = await axios.post(
@@ -419,8 +426,14 @@ export default  defineComponent({
 		if(resp.data.status)
 		{
 			this.roomInfo.admins.push(this.clickeduser_id); // just for front end so no need to refresh
+			this.isAdmin = true;
 			this.isPopUp = false;
 		}
+		this.socket.emit(
+					'admins-changed',{
+						room_name: this.roomId.toString(), admin_id: this.clickeduser_id, add: true
+					}
+				)
 
 	},
 	async removeAdmin()
@@ -437,10 +450,17 @@ export default  defineComponent({
 			this.roomInfo.admins.map((val:number, index:number) => {
 				if (val === this.clickeduser_id){
 					this.roomInfo.admins.splice(index, 1);
+					this.isAdmin = false;
+					return ;
 				}
 			});
 			this.isPopUp = false;
 		}
+				this.socket.emit(
+					'admins-changed',{
+						room_name: this.roomId.toString(), admin_id: this.clickeduser_id, add: false
+					}
+				)
 
 	}
    },

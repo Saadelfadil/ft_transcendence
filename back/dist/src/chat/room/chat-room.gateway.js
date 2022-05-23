@@ -41,6 +41,10 @@ let ChatRoomGateway = class ChatRoomGateway {
             return { status: true };
         }
     }
+    async AdminsChanged(client, payload) {
+        console.log(`backend reahced with ${JSON.stringify(payload)}`);
+        this.server.emit(payload.room_name, { data: { admin_id: payload.admin_id, add: payload.add } });
+    }
     async leaveRoom(client, payload) {
         const sessionId = +payload.data.from_id;
         const leaveingStatus = this.usersService.leaveRoom(sessionId, +payload.data.roomName);
@@ -70,6 +74,12 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], ChatRoomGateway.prototype, "handleMessage", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('admins-changed'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatRoomGateway.prototype, "AdminsChanged", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('leave-room'),
     __metadata("design:type", Function),

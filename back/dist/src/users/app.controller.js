@@ -18,7 +18,6 @@ const jwt_1 = require("@nestjs/jwt");
 const app_service_1 = require("./app.service");
 const _42_authentication_1 = require("./42-authentication");
 const auth_guard_1 = require("./auth.guard");
-const passport_1 = require("@nestjs/passport");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
 const user_entity_1 = require("./user.entity");
@@ -35,39 +34,44 @@ let AppController = class AppController {
         this.userGameEntity = userGameEntity;
         this.userHistoryEntity = userHistoryEntity;
     }
-    async googleAuth(req) {
-    }
-    async getRequests(body) {
+    async getRequests(body, request) {
         let reqs = [];
-        const { id } = body;
-        const user = await this.appService.getUserByIdFriend(id);
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
+        const user = await this.appService.getUserByIdFriend(userJwt.id);
         await Promise.all(user.user_requested.map(async (index) => {
             const { login } = await this.appService.getUserById(index);
             reqs.push({ id: index, login: login });
         }));
         return reqs;
     }
-    async getFriends(body) {
+    async getFriends(body, request) {
         let reqs = [];
-        const { id } = body;
-        const user = await this.appService.getUserByIdFriend(id);
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
+        const user = await this.appService.getUserByIdFriend(userJwt.id);
         await Promise.all(user.user_friends.map(async (index) => {
             const { login } = await this.appService.getUserById(index);
             reqs.push({ id: index, login: login });
         }));
         return reqs;
     }
-    async addFriend(body) {
-        console.log('addfriend');
-        const { login, user_id } = body;
+    async addFriend(body, request) {
+        console.log('addfriend used');
+        const { login } = body;
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
         let tmp = false;
         try {
             const { id } = await this.appService.getUserByLogin(login);
             const { user_requested, user_friends } = await this.appService.getUserByIdFriend(id);
-            if (id === user_id)
+            if (id === userJwt.id)
                 return false;
             user_friends.map((curId) => {
-                if (curId === user_id) {
+                if (curId === userJwt.id) {
                     tmp = true;
                     return;
                 }
@@ -76,13 +80,13 @@ let AppController = class AppController {
                 return true;
             tmp = false;
             user_requested.map((curId) => {
-                if (curId === user_id) {
+                if (curId === userJwt.id) {
                     tmp = true;
                     return;
                 }
             });
             if (!tmp) {
-                user_requested.push(user_id);
+                user_requested.push(userJwt.id);
                 await this.userFriendsEntity.update(id, { user_requested: user_requested });
             }
             return true;
@@ -91,10 +95,13 @@ let AppController = class AppController {
             return false;
         }
     }
-    async removeFriend(body) {
-        const { user_id, friend_id } = body;
+    async removeFriend(body, request) {
+        const { friend_id } = body;
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
         try {
-            const userFriend = await this.appService.getUserByIdFriend(user_id);
+            const userFriend = await this.appService.getUserByIdFriend(userJwt.id);
             const { user_friends } = await this.appService.getUserByIdFriend(friend_id);
             userFriend.user_friends.map((curId, index) => {
                 if (curId === friend_id) {
@@ -103,24 +110,27 @@ let AppController = class AppController {
                 }
             });
             user_friends.map((curId, index) => {
-                if (curId === user_id) {
+                if (curId === userJwt.id) {
                     user_friends.splice(index, 1);
                     return;
                 }
             });
-            await this.userFriendsEntity.update(user_id, { user_friends: userFriend.user_friends });
+            await this.userFriendsEntity.update(userJwt.id, { user_friends: userFriend.user_friends });
             await this.userFriendsEntity.update(friend_id, { user_friends: user_friends });
         }
         catch (error) {
         }
     }
-    async RequestToFriend(body) {
-        const { is_accept, user_id, request_user_id } = body;
+    async RequestToFriend(body, request) {
+        const { is_accept, request_user_id } = body;
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
         if (is_accept) {
             const userFriendRequest = await this.appService.getUserByIdFriend(request_user_id);
-            const { user_friends, user_requested } = await this.appService.getUserByIdFriend(user_id);
+            const { user_friends, user_requested } = await this.appService.getUserByIdFriend(userJwt.id);
             user_friends.push(request_user_id);
-            userFriendRequest.user_friends.push(user_id);
+            userFriendRequest.user_friends.push(userJwt.id);
             user_requested.map((id, index) => {
                 if (id === request_user_id) {
                     user_requested.splice(index, 1);
@@ -128,33 +138,24 @@ let AppController = class AppController {
                 }
             });
             userFriendRequest.user_requested.map((id, index) => {
-                if (id === user_id) {
+                if (id === userJwt.id) {
                     userFriendRequest.user_requested.splice(index, 1);
                     return;
                 }
             });
-            await this.userFriendsEntity.update(user_id, { user_friends: user_friends, user_requested: user_requested });
+            await this.userFriendsEntity.update(userJwt.id, { user_friends: user_friends, user_requested: user_requested });
             await this.userFriendsEntity.update(request_user_id, { user_friends: userFriendRequest.user_friends, user_requested: userFriendRequest.user_requested });
         }
         else {
-            const { user_requested } = await this.appService.getUserByIdFriend(user_id);
+            const { user_requested } = await this.appService.getUserByIdFriend(userJwt.id);
             user_requested.map((id, index) => {
                 if (id === request_user_id) {
                     user_requested.splice(index, 1);
                     return;
                 }
             });
-            await this.userFriendsEntity.update(user_id, { user_requested: user_requested });
+            await this.userFriendsEntity.update(userJwt.id, { user_requested: user_requested });
         }
-    }
-    googleAuthRedirect(req) {
-        return this.appService.googleLogin(req);
-    }
-    profile(request) {
-        return this.appService.getUserDataFromJwt(request);
-    }
-    game() {
-        return "Hello to game route";
     }
     async loginOrNot(request) {
         try {
@@ -172,6 +173,12 @@ let AppController = class AppController {
         catch (error) {
             throw new common_1.NotFoundException();
         }
+    }
+    async amIJoinedToThisRoom(request, body) {
+        const user = await this.appService.getUserDataFromJwt(request);
+        const { joinedRooms } = await this.appService.getUserById(user.id);
+        let status = joinedRooms.includes(body.room_id);
+        return { status: status };
     }
     async verify(request, body) {
         try {
@@ -232,9 +239,12 @@ let AppController = class AppController {
             throw new common_1.UnauthorizedException();
         }
     }
-    async getgamestate(body) {
-        const { user_id } = body;
-        const { in_game } = await this.appService.getUserById(user_id);
+    async getgamestate(body, request) {
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
+        const gameStatus = await this.appService.getUserById(userJwt.id);
+        const { in_game } = gameStatus;
         return { in_game: in_game };
     }
     async getData(code, response) {
@@ -243,7 +253,11 @@ let AppController = class AppController {
         const REDIRECT_URI = "http://localhost:8080/login";
         var appp = new _42_authentication_1.default(UID, SECRET, REDIRECT_URI);
         var token = await appp.get_Access_token(code);
+        if (token == undefined)
+            return;
         const userData = await appp.get_user_data(token.access_token);
+        if (userData == undefined)
+            return;
         const { id, email, login, image_url } = userData;
         const userDb = await this.appService.getUserById(id);
         if (!userDb) {
@@ -291,6 +305,8 @@ let AppController = class AppController {
             if (!data)
                 throw new common_1.UnauthorizedException();
             const user = await this.appService.getUserById(data['id']);
+            if (user == undefined)
+                return;
             user.wins = user.wins;
             user.loses = user.loss;
             return user;
@@ -306,8 +322,13 @@ let AppController = class AppController {
         let tmp;
         const length = usersId.length;
         for (let i = 0; i < length; i += 2) {
-            const { id, login, image_url } = await this.appService.getUserById(usersId[i]);
+            const user = await this.appService.getUserById(usersId[i]);
+            if (user == undefined)
+                return;
+            const { id, login, image_url } = user;
             tmp = await this.appService.getUserById(usersId[i + 1]);
+            if (tmp == undefined)
+                return;
             users.push({ left_player: { id: id, login: login, image_url: image_url }, right_player: { id: tmp.id, login: tmp.login, image_url: tmp.image_url } });
         }
         return users;
@@ -328,11 +349,14 @@ let AppController = class AppController {
         console.log(matchs);
         return matchs;
     }
-    async getExactUser(body) {
+    async getExactUser(body, request) {
         let tmp = false;
-        const { friend_id, user_id } = body;
+        const { friend_id } = body;
+        const userJwt = await this.appService.getUserDataFromJwt(request);
+        if (userJwt.id == undefined)
+            return;
         const { login, image_url, wins, loss } = await this.appService.getUserById(friend_id);
-        const { user_friends } = await this.appService.getUserByIdFriend(user_id);
+        const { user_friends } = await this.appService.getUserByIdFriend(userJwt.id);
         user_friends.map((fr_id) => {
             if (fr_id === friend_id) {
                 tmp = true;
@@ -342,7 +366,7 @@ let AppController = class AppController {
         if (!tmp) {
             const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
             user_requested.map((fr_id) => {
-                if (fr_id === user_id) {
+                if (fr_id === userJwt.id) {
                     tmp = true;
                     return;
                 }
@@ -376,71 +400,45 @@ let AppController = class AppController {
     }
 };
 __decorate([
-    (0, common_1.Get)('google'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AppController.prototype, "googleAuth", null);
-__decorate([
     (0, common_1.Post)('getrequests'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getRequests", null);
 __decorate([
     (0, common_1.Post)('getfriends'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getFriends", null);
 __decorate([
     (0, common_1.Post)('addfriend'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "addFriend", null);
 __decorate([
     (0, common_1.Post)('removefriend'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "removeFriend", null);
 __decorate([
     (0, common_1.Post)('requesttofriend'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "RequestToFriend", null);
-__decorate([
-    (0, common_1.Get)('auth/google/callback'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "googleAuthRedirect", null);
-__decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
-    (0, common_1.Get)('profile'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "profile", null);
-__decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
-    (0, common_1.Get)('game'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "game", null);
 __decorate([
     (0, common_1.Get)('islogin'),
     __param(0, (0, common_1.Req)()),
@@ -457,6 +455,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "updateU", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
+    (0, common_1.Post)('amijoinedtoroom'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "amIJoinedToThisRoom", null);
 __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Post)('verify'),
@@ -477,8 +484,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('getgamestatus'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getgamestate", null);
 __decorate([
@@ -523,8 +531,9 @@ __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Post)('exactuser'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getExactUser", null);
 __decorate([
