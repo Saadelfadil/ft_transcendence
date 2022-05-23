@@ -39,7 +39,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleDisconnect(client: Socket) {
-    console.log('-----disconnect socket ------');
+    console.log('-----disconnect socket (levelup)------');
     console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
     this.clear(client);
     console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
@@ -53,15 +53,11 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       //client.data.room = room;
       //console.log(client.data.node);
       let timer: number = 5;
+      //client.data.roomStatus = 'play';
+      console.log()
       this.server.to(room.id).emit('connectedToRoom', timer, room.players);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
-        let newDbRoom = {} as roomDb;
-        newDbRoom.name = room.id;
-        newDbRoom.players = room.players;
-        newDbRoom.namespace = 'levelup';
-        this.gameRepository.addRoom(newDbRoom);
-        //this.gameRepository.getAllRooms();
       }, timer * 1000);
     } else {
       client.emit('waitingForRoom', client.data.pos);
@@ -69,26 +65,19 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    //this.gameService.rooms.push(client.id);
     console.log('-----connect socket (levelup)------');
     console.log(`connect: ${client.id}`);
     console.log('-----end of connect socket ------\n');
-    //client.data = this.levelUpLogic.addClient(client.id); --> warmup logic
   }
 
   @SubscribeMessage('initGame')
   initGame(client: any): void {
-    //let initData : {};
-    //console.log(`init: ${canvas.canvasW}, ${canvas.canvasH}`);
-    //client.data.playerLeft = this.gameLogic.
+  
     this.levelUpLogic.initGmae();
     client.data.node.playerLeft = this.levelUpLogic.playerLeft;
     client.data.node.playerRight = this.levelUpLogic.playerRight;
     client.data.node.ball = this.levelUpLogic.ball;
-    // client.data.node.playerLeft = data.playerLeft;
-    // client.data.node.playerRight = data.playerRight;
-    // client.data.node.ball = data.ball;
-    //client.data.node.canvasW = data.canvasW;
+  
     console.log(client.data.node);
     client.emit("initData", {
       pl: client.data.node.playerLeft,
@@ -121,8 +110,14 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       console.log(client.data.node);
       client.emit('startMouseEvent');
       console.log('mouse event sended');
-      if (client.data.pos === 'left')
+      if (client.data.pos === 'left'){
+        let newDbRoom = {} as roomDb;
+        newDbRoom.name = client.data.node.id;
+        newDbRoom.players = client.data.node.players;
+        newDbRoom.namespace = 'levelup';
+        this.gameRepository.addRoom(newDbRoom);
         this.startGame(client);
+      }
     }
   }
 
@@ -162,10 +157,12 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       client.emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
-        client.leave(client.data.room);
+        this.server.to(client.data.room).emit('leaveRoom');
         this.userRepository.update(client.data.userId, {in_game: false});
         this.levelUpLogic.wRooms.remove(Number(client.data.room));
+        //this.gameRepository.deleteRoom(client.data.room);
       } else if (client.data.roomStatus === 'play'){
+        console.log('clear ***');
         client.leave(client.data.room);
         this.server.to(client.data.room).emit('leaveRoom');
         clearInterval(client.data.node.gameLoop);
@@ -203,6 +200,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         }
         //console.log(client.data.node);
         this.levelUpLogic.rooms.remove(Number(client.data.room));
+        //console.log('delet room');
         this.gameRepository.deleteRoom(client.data.room);
       }
     }

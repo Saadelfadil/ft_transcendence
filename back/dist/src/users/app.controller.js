@@ -58,6 +58,7 @@ let AppController = class AppController {
         return reqs;
     }
     async addFriend(body) {
+        console.log('addfriend');
         const { login, user_id } = body;
         let tmp = false;
         try {

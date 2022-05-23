@@ -38,32 +38,19 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleDisconnect(client: Socket) {
-    console.log('-----disconnect socket ------');
+    console.log('-----disconnect socket (matchup)------');
     console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
     this.clear(client);
-    console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);
-    console.log(`Rooms: ${this.matchUpLogic.rooms.size}`);
     console.log('-----end of disconnect socket ------\n');
-    //this.matchUpLogic.wclients.find(client.id)
-    //this.matchUpLogic.rmClient(client.id);
-    //this.logger.log(`client disconnected ${client}`);
   }
 
   checkRoomconnection(client: Socket){
     let room = this.matchUpLogic.joinRoom(client);
     if (room){
-      //client.data.room = room;
-      //console.log(client.data.node);
       let timer: number = 5;
       this.server.to(room.id).emit('connectedToRoom', timer, room.players);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
-        let newDbRoom = {} as roomDb;
-        newDbRoom.name = room.id;
-        newDbRoom.players = room.players;
-        newDbRoom.namespace = 'matchup';
-        this.gameRepository.addRoom(newDbRoom);
-        //this.gameRepository.getAllRooms();
       }, timer * 1000);
     } else {
       client.emit('waitingForRoom', client.data.pos);
@@ -71,27 +58,17 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    //this.gameService.rooms.push(client.id);
     console.log('-----connect socket (matchup)------');
     console.log(`connect: ${client.id}`);
     console.log('-----end of connect socket ------\n');
-    //client.data = this.matchUpLogic.addClient(client.id); --> warmup logic
   }
 
   @SubscribeMessage('initGame')
   initGame(client: any): void {
-    //let initData : {};
-    //console.log(`init: ${canvas.canvasW}, ${canvas.canvasH}`);
-    //client.data.playerLeft = this.gameLogic.
     this.matchUpLogic.initGmae();
     client.data.node.playerLeft = this.matchUpLogic.playerLeft;
     client.data.node.playerRight = this.matchUpLogic.playerRight;
     client.data.node.ball = this.matchUpLogic.ball;
-    // client.data.node.playerLeft = data.playerLeft;
-    // client.data.node.playerRight = data.playerRight;
-    // client.data.node.ball = data.ball;
-    //client.data.node.canvasW = data.canvasW;
-    console.log(client.data.node);
     client.emit("initData", {
       pl: client.data.node.playerLeft,
       pr: client.data.node.playerRight,
@@ -99,9 +76,6 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       scw: this.matchUpLogic.canvasW,
       sch: this.matchUpLogic.canvasH,
     });
-    //if (client.data.pos === 'left')
-      //this.startGame(client);
-    //console.log('here');
   }
 
   @SubscribeMessage('updatePos')
@@ -123,8 +97,14 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       console.log(client.data.node);
       client.emit('startMouseEvent');
       console.log('mouse event sended');
-      if (client.data.pos === 'left')
+      if (client.data.pos === 'left'){
+        let newDbRoom = {} as roomDb;
+        newDbRoom.name = client.data.node.id;
+        newDbRoom.players = client.data.node.players;
+        newDbRoom.namespace = 'matchup';
+        this.gameRepository.addRoom(newDbRoom);
         this.startGame(client);
+      }
     }
   }
 
@@ -164,7 +144,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       //client.emit('leaveRoom');
     } else {
       if (client.data.roomStatus === 'waiting'){
-        client.leave(client.data.room);
+        this.server.to(client.data.room).emit('leaveRoom');
         this.userRepository.update(client.data.userId, {in_game: false});
         this.matchUpLogic.wRooms.remove(Number(client.data.room));
       } else if (client.data.roomStatus === 'play'){

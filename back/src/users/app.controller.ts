@@ -61,6 +61,7 @@ export class AppController {
 	@Post('addfriend')
 	async addFriend(@Body() body)
 	{
+		console.log('addfriend');
 		const { login, user_id } = body;
 		let tmp : boolean = false;
 		try {

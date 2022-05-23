@@ -124,6 +124,7 @@ export default defineComponent({
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
+            timerInterval: null as any,
         }
     },
     watch: {
@@ -268,9 +269,9 @@ export default defineComponent({
                     this.timer = timer;
                     this.plName = players[0];
                     this.prName = players[1];
-                    const timerInterval = setInterval(() => {
+                    this.timerInterval = setInterval(() => {
                         if (this.timer <= 0){
-                            clearInterval(timerInterval);
+                            clearInterval(this.timerInterval);
                         }
                         else{
                             this.timer--;
@@ -357,6 +358,8 @@ export default defineComponent({
     unmounted(){
         console.log('levelup unmounted');
         //this.socket.emit("stopTime");
+        if (this.timerInterval)
+            clearInterval(this.timerInterval);
         if (this.socket)
             this.socket.disconnect();
     },

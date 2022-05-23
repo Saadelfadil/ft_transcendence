@@ -278,20 +278,14 @@ export default defineComponent({
             console.log(`stream id ${stream_id}`);
         },
         initGame(scw: number, sch: number){
+            
             this.scw = scw;
             this.sch = sch;
             //this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
             this.canvas.width = this.canvas.offsetWidth ;
             this.pfactor = this.canvas.width / scw;
 
-            window.addEventListener('resize', () => {
-                this.canvas.width = this.canvas.offsetWidth ;
-                this.factor = this.canvas.width / this.scw;
-                this.canvas.height = this.sch * this.factor;
-            });
-
             this.canvas.height = sch * this.factor;
-
             this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
             this.canvasGrd = this.context.createRadialGradient(
                 this.canvas.width/2,
@@ -305,6 +299,11 @@ export default defineComponent({
             this.canvasGrd.addColorStop(1, "rgb(36,252,82,1)");
 
             this.renderGame();
+            window.addEventListener('resize', () => {
+                this.canvas.width = this.canvas.offsetWidth ;
+                this.factor = this.canvas.width / this.scw;
+                this.canvas.height = this.sch * this.factor;
+            });
         },
         renderGame(): void{
             this.context.fillStyle = this.canvasGrd;
@@ -344,7 +343,12 @@ export default defineComponent({
             this.socket.on('connect', () => {
                 this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('canvasWH', (canvas: any) => {
-                    console.log(this.scw, this.sch);
+                    console.log('roomwh', canvas.scw, canvas.sch);
+                    this.scw = canvas.scw;
+                    this.sch = canvas.sch;
+                    this.canvas.width = this.canvas.offsetWidth ;
+                    this.factor = this.canvas.width / this.scw;
+                    this.canvas.height = this.sch * this.factor;
                     this.initGame(canvas.scw, canvas.sch);
                 });
                 //console.log(this.socket.id);
@@ -353,8 +357,8 @@ export default defineComponent({
                 this.playerLeft = clientData.pl;
                 this.playerRight = clientData.pr;
                 this.ball = clientData.b;
-                // this.scw = clientData.scw;
-                // this.sch = clientData.sch;
+                this.scw = clientData.scw;
+                this.sch = clientData.sch;
                 // console.log(this.scw);
                 this.renderGame();
             });
