@@ -82,7 +82,7 @@ let BanService = class BanService {
         }
     }
     async unbanUserFromRoom(sessionId, roomData, roomId, userId) {
-        if (roomData.admins.includes(sessionId))
+        if (!roomData.admins.includes(sessionId))
             throw new common_1.HttpException({ message: 'You\'re not an admin of this room!' }, common_1.HttpStatus.UNAUTHORIZED);
         const unBannedUser = await this.findUserInRoom(roomId, userId);
         if (unBannedUser) {

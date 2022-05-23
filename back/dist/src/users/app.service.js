@@ -118,6 +118,41 @@ let AppService = class AppService {
             }
         }
     }
+    async addRoomIdToJoinedRooms(user_id, room_id) {
+        const { joinedRooms } = await this.userRepository.findOne(user_id);
+        joinedRooms.push(room_id);
+        this.userRepository.update(user_id, { joinedRooms: joinedRooms });
+    }
+    async removeRoomIdFromJoinedRooms(user_id, room_id) {
+        const { joinedRooms } = await this.userRepository.findOne(user_id);
+        joinedRooms.map((r_id, index) => {
+            if (room_id === r_id) {
+                joinedRooms.splice(index, 1);
+                return;
+            }
+        });
+        this.userRepository.update(user_id, { joinedRooms: joinedRooms });
+    }
+    async removeFromJoinedRooms(room_id) {
+        const users_table = this.userRepository.createQueryBuilder('users');
+        const users = await users_table.getMany();
+        let joinedRooms;
+        let changed;
+        users.map((one_user) => {
+            joinedRooms = one_user.joinedRooms;
+            changed = false;
+            joinedRooms.map((r_id, index) => {
+                if (r_id === room_id) {
+                    changed = true;
+                    joinedRooms.splice(index, 1);
+                    return;
+                }
+            });
+            if (changed) {
+                this.userRepository.update(one_user.id, { joinedRooms: joinedRooms });
+            }
+        });
+    }
     arrayRemove(joinedRooms, roomId) {
         return joinedRooms.filter(function (ele) {
             return ele != roomId;

@@ -172,6 +172,12 @@ let AppController = class AppController {
             throw new common_1.NotFoundException();
         }
     }
+    async amIJoinedToThisRoom(request, body) {
+        const user = await this.appService.getUserDataFromJwt(request);
+        const { joinedRooms } = await this.appService.getUserById(user.id);
+        let status = joinedRooms.includes(body.room_id);
+        return { status: status };
+    }
     async verify(request, body) {
         try {
             const { token } = request.body;
@@ -456,6 +462,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "updateU", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
+    (0, common_1.Post)('amijoinedtoroom'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "amIJoinedToThisRoom", null);
 __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Post)('verify'),

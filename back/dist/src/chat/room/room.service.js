@@ -30,6 +30,12 @@ let RoomService = class RoomService {
         });
     }
     async create(sessionId, createRoomDto) {
+        let test = await this.roomsRepository.findOne({ name: createRoomDto.name });
+        if (test !== undefined) {
+            return { status: false, error: 'there exists room with this name!' };
+        }
+        createRoomDto.admins = [];
+        createRoomDto.admins.push(sessionId);
         const newRoom = this.roomsRepository.create(createRoomDto);
         if (newRoom.locked) {
             const saltOrRounds = 10;
@@ -49,7 +55,7 @@ let RoomService = class RoomService {
             };
         }
         else {
-            return { status: false };
+            return { status: false, error: 'backend failure' };
         }
     }
     async findRoomMessages(sessionId, excludeUsersList, roomId) {

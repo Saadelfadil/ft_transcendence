@@ -39,6 +39,9 @@ export declare class AppController {
         login?: undefined;
     }>;
     updateU(request: Request, body: any): Promise<any>;
+    amIJoinedToThisRoom(request: Request, body: any): Promise<{
+        status: boolean;
+    }>;
     verify(request: Request, body: any): Promise<void>;
     validate(request: Request): Promise<{
         success: boolean;

@@ -11,10 +11,12 @@ export declare class RoomService {
     arrayRemove(roomAdmins: number[], userId: number): number[];
     create(sessionId: number, createRoomDto: CreateRoomDto): Promise<{
         status: boolean;
-        roomData: Rooms;
+        error: string;
+        roomData?: undefined;
     } | {
         status: boolean;
-        roomData?: undefined;
+        roomData: Rooms;
+        error?: undefined;
     }>;
     findRoomMessages(sessionId: number, excludeUsersList: number[], roomId: number): Promise<any>;
     saveMessageToRoom(sessionId: number, createRoomMessageDto: CreateRoomMessageDto): Promise<RoomMessage>;

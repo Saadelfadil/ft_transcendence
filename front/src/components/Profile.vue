@@ -29,8 +29,9 @@
         <div class="pb-6">
           <label for="name" class="font-semibold text-gray-700 block pb-1">Name</label>
           <div class="flex" @dblclick="editUserName">
-            <input disabled id="username" class="border-1  rounded-r px-4 py-2 w-full" type="text" v-if="!user_name_editing" :value="user_info.user_name" />
-            <input id="username" class="border-1  rounded-r px-4 py-2 w-full" type="text" v-else v-focus :class="{'bg-red-600 bg-opacity-75' : invalid_user_name}" v-model="tmp_user_name" @keypress="userIsTyping" @keyup="userIsTyping" @blur="doneEditing(false)" @keypress.enter="doneEditing(true)"/>
+            <!-- <input disabled id="username" class="border-1  rounded-r px-4 py-2 w-full" type="text" v-if="!user_name_editing" :value="user_info.user_name" /> -->
+            <div class="px-4 py-2 w-full border border-gray-300 rounded-md" v-if="!user_name_editing">{{user_info.user_name}}</div>
+            <input id="username" class="border-1  rounded-r px-4 py-2 w-full" :placeholder="user_name_placeholder" type="text" v-else v-focus :class="{'bg-red-600 bg-opacity-75' : invalid_user_name}" v-model="tmp_user_name" @keypress="userIsTyping" @keyup="userIsTyping" @blur="doneEditing(false)" @keypress.enter="doneEditing(true)"/>
           </div>
         </div>
         <div class="pb-4">
@@ -73,7 +74,6 @@
 import { defineComponent } from 'vue'
 import axios from 'axios';
 import store from '@/store';
-import router from '@/router';
 
 import InitAuthBlock from './auth/initAuth.vue';
 
@@ -97,6 +97,7 @@ export default defineComponent({
                 wins: 0 as number,
                 loses: 0 as number,
             },
+            user_name_placeholder: 'username' as string,
             max_avatar_size: 10000 as number,
             auth2_enabled: false as boolean,
             invalid_user_name: false as boolean,
@@ -185,7 +186,12 @@ export default defineComponent({
                 let tmp = this.tmp_user_name.trim();
                 if (tmp.length !== 0){
                     // here i should send to the backend to check if user name he typed is valid
-                    
+                    if (tmp.length > 10){
+                        this.tmp_user_name = '';
+                        this.user_name_placeholder = 'must be less or equal 10 chars';
+                        this.invalid_user_name = true;
+                        return ;
+                    }
                     // if valid i will update otherwise no
                     if (tmp !== this.user_info.user_name){
                         const check = await this.isUserNameValid(tmp);
@@ -193,6 +199,8 @@ export default defineComponent({
                             this.user_info.user_name = tmp;
                         else
                         {
+                            this.tmp_user_name = '';
+                            this.user_name_placeholder = 'not available username';
                             this.invalid_user_name = true;
                             return ;
                         }
@@ -200,12 +208,18 @@ export default defineComponent({
                 }
                 else
                 {
+                    if (tmp.length !== this.tmp_user_name.length)
+                        this.user_name_placeholder = 'only spaces are not valid';
+                    else
+                        this.user_name_placeholder = 'can not be empty';
+                    this.tmp_user_name = '';
                     this.invalid_user_name = true;
                     return ;
                 }
             }
             this.user_name_editing = false;
             this.tmp_user_name = '';
+            this.user_name_placeholder = 'username';
             this.invalid_user_name = false;
         },
         async isUserNameValid(userName:string){
@@ -232,7 +246,10 @@ export default defineComponent({
         },
         userIsTyping(e:any){
             if (e.keyCode !== 13) // 13 is for enter
+            {
+                this.user_name_placeholder = 'username';
                 this.invalid_user_name = false;
+            }
         },
         async changeAuth()
         {
@@ -324,5 +341,18 @@ function sleep(ms:number) {
 <style scoped>
 .checked{
     display: block;
+}
+
+ ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: blue;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: blue;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: blue;
 }
 </style>

@@ -140,6 +140,11 @@
 
             </div>
           </form>
+
+          <div v-if="invalid_name" class="bg-red-100 border border-red-400 text-red-700 px-4 py-1 mt-1 rounded-lg">
+            <span class="block sm:inline">{{error_reason}}</span>
+          </div>
+    
         </div>
       </div>
     </div>
@@ -156,61 +161,56 @@ export default defineComponent({
     data()
     {
         return {
-            room_password: '' as string,
-            room_name: '' as string,
-            tmp_password: '' as string,
-            tmp_name: '' as string,
-            invalid_name: false as boolean,
-            inavlid_pass: false as boolean,
+          error_reason: 'hello' as string,
+          room_password: '' as string,
+          room_name: '' as string,
+          tmp_password: '' as string,
+          tmp_name: '' as string,
+          invalid_name: false as boolean,
+          inavlid_pass: false as boolean,
       }
     },
     methods: {
         async createRoom()
         {
-            this.tmp_name = this.room_name.trim();
-            this.tmp_password = this.room_password.trim();
-            if (this.tmp_name.length !== 0)
+          this.tmp_name = this.room_name.trim();
+          this.tmp_password = this.room_password.trim();
+          if (this.tmp_name.length !== 0)
+          {
+            const resp = await axios.post(
+              `http://localhost:8080/room`,
+              {
+                "name": this.tmp_name,
+                "locked": this.tmp_password.length > 0 ? true : false,
+                "password": this.tmp_password
+              },
+            );
+            if(!resp.data.status)
             {
-
-
-				const resp = await axios.post(
-					`http://localhost:8080/room`,
-					{
-						"name": this.tmp_name,
-						"locked": this.tmp_password.length > 0 ? true : false,
-						"password": this.tmp_password
-					},
-					// {
-					// 	headers: { Authorization: `Bearer ${localStorage.token}` }
-					// }
-				);
-
-	            if(!resp.data.status)
-				{
-					this.invalid_name = true;
-                	this.inavlid_pass = true;
-				}
-				else
-				{
-					store.commit('addRoom', resp.data.roomData);
-					router.push({name: 'chatpublic'});
-				}
+              this.invalid_name = true;
+              this.inavlid_pass = true;
+              this.error_reason = resp.data.error;
             }
+            else
+            {
+              store.commit('addRoom', resp.data.roomData);
+              router.push({name: 'chatpublic'});
+            }
+        }
 			else
-            {
-                this.invalid_name = !this.tmp_name.length;
-                this.inavlid_pass = !this.tmp_password.length;
-            }
+      {
+          this.invalid_name = !this.tmp_name.length;
+          this.inavlid_pass = !this.tmp_password.length;
+      }
 
         },
         userIsTyping(e:any, index:number)
         {
             if (e.keyCode !== 13)
             {
-                if (index === 0)
-                    this.invalid_name = false;
-                else
-                    this.inavlid_pass = false;
+              this.error_reason = '';
+              this.invalid_name = false;
+              this.inavlid_pass = false;
             }
         }
     }

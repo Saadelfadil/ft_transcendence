@@ -14,15 +14,23 @@ export declare class RoomController {
     constructor(roomService: RoomService, blockService: BlockService, userService: AppService, banService: BanService);
     create(createRoomDto: CreateRoomDto, req: Request): Promise<{
         status: boolean;
-        roomData: import("./entities/room.entity").Rooms;
+        error: string;
+        roomData?: undefined;
     } | {
         status: boolean;
-        roomData?: undefined;
+        roomData: import("./entities/room.entity").Rooms;
+        error?: undefined;
     }>;
     findAll(): Promise<import("./entities/room.entity").Rooms[]>;
+    IsRoomPassValid(body: any, req: Request): Promise<{
+        status: boolean;
+    }>;
+    LeaveRoom(body: any, req: Request): Promise<{
+        status: boolean;
+    }>;
     findOne(id: string): Promise<import("./entities/room.entity").Rooms>;
     update(id: string, changePasswordDto: ChangePasswordDto, req: Request): Promise<import("./entities/room.entity").Rooms>;
-    remove(id: string, req: Request): Promise<import("./entities/room.entity").Rooms>;
+    remove(id: string, req: Request): Promise<void>;
     findRoomMessages(roomId: string, req: Request): Promise<any>;
     saveMessageToRoom(roomId: string, createRoomMessageDto: CreateRoomMessageDto, req: Request): Promise<import("./entities/room-message.entity").RoomMessage>;
     addRoomAdmin(roomId: string, data: string, req: Request): Promise<{

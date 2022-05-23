@@ -29,7 +29,8 @@ export class RoomController {
 	async create(@Body() createRoomDto: CreateRoomDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// const sessionId : number = 1;
+
+		
 		return this.roomService.create(sessionId, createRoomDto);
 	}
 
@@ -38,6 +39,29 @@ export class RoomController {
 	findAll() {
 		return this.roomService.findAll();
 	}
+
+	@UseInterceptors(ClassSerializerInterceptor)
+	@Post('checkroompass')
+	async IsRoomPassValid(@Body() body, @Req() req: Request){
+		const user = await this.userService.getUserDataFromJwt(req);
+		let status:boolean = true;
+		if (body.room_pass !== '')
+			status = await this.roomService.checkAuth(body.room_id, body.room_pass);
+		if (status){
+			// here i will add to joinedrooms id of the joined room
+			this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+		}
+		return {status: status};
+	}
+
+	@UseInterceptors(ClassSerializerInterceptor)
+	@Post('leaveroom')
+	async LeaveRoom(@Body() body, @Req() req:Request){
+		const user = await this.userService.getUserDataFromJwt(req);
+		await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
+		return {status:true};
+	}
+
 
 	// TODO: should be protected : only edit only from room owner
 	@Get(':id')
@@ -61,7 +85,9 @@ export class RoomController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId: number = 1;
-		return this.roomService.remove(sessionId, +id);
+		await this.roomService.remove(sessionId, +id);
+		// added by mohamed
+		this.userService.removeFromJoinedRooms(+id);
 	}
 
 

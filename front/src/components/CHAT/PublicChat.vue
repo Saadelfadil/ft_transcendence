@@ -26,7 +26,7 @@
                                             @blur="ignorePassword"
                                             @keyup="userIsTyping"
                                             @keypress="userIsTyping"
-                                            autoComplete="true" type="password" name="serch" placeholder="Password" class="bg-white h-10 px-5 pr-20 rounded-full text-sm focus:outline-none"
+                                            autoComplete="true" type="password" name="serch" :placeholder="password_placeholder" class="bg-white h-10 px-5 pr-20 rounded-full text-sm focus:outline-none"
                                             v-model="user_room_pass"
                                             :class="badInput"
                                             >
@@ -98,7 +98,7 @@ import { defineComponent } from 'vue'
 import axios from 'axios';
 import store from '@/store';
 import router from '@/router';
-// import io from 'socket.io-client';
+
 
 import RoomSettingBlock from './RoomSetting.vue';
 
@@ -110,8 +110,8 @@ export default defineComponent({
     data()
     {
         return {
+            password_placeholder: 'password' as string,
             isPopUp: false as boolean,
-            // socket: io("http://localhost:8000"),
             invalid_pass: false as boolean,
             user_room_pass: '' as string,
             typing_room_id: -1 as number,    
@@ -144,29 +144,19 @@ export default defineComponent({
             });
         },
         joinTheRoom(roomId:number, password:string){
-            this.getRoomData(roomId);
-        //     this.socket.emit(
-        //     'join-room',
-        //     { 
-        //         data: {
-        //             from_id: this.user_id,
-        //             roomName: roomId,
-        //             password: password
-        //         }
-        //     },
-        //     (response: any) => {
-        //         // join-room callback
-        //         if(response.status)
-        //         {
-        //             this.getRoomData(roomId);
-        //         }
-        //         else
-        //         {
-        //             console.log("Error joining the room"); // ok
-        //             this.passIsInvalid();
-        //         }
-        //     }
-        // )
+            axios({
+                method: 'POST',
+                url: `http://localhost:8080/room/checkroompass/`,
+                data:{room_pass: password, room_id: roomId}
+            }).then(({data}) => {
+
+                if (data.status){
+                    // means valid password
+                    this.getRoomData(roomId);
+                }else{
+                    this.passIsInvalid();
+                }
+            });
         },
 		getJoinedRooms(){
 			return axios({
@@ -177,7 +167,7 @@ export default defineComponent({
 		},
         joinToRoom(room_id:number, is_locked:boolean)
         {
-            console.log("joing to: ", room_id);
+            console.log("joing to: ", room_id, " locked: ", is_locked);
             // probably this function shoould by async
             if (is_locked)
                 this.joinToPrivateRoom(room_id);
@@ -204,6 +194,8 @@ export default defineComponent({
         },
         passIsInvalid(){
             this.invalid_pass = true;
+            this.password_placeholder = 'invalid passowrd';
+            this.user_room_pass = '';
         },
         async getRoomData(room_id:number)
         {     
@@ -214,8 +206,10 @@ export default defineComponent({
         },
         userIsTyping(e:any)
         {
-            if (e.keyCode !== 13)
+            if (e.keyCode !== 13){
+                this.password_placeholder = 'passowrd';
                 this.invalid_pass = false;
+            }
         },
         roomNameIsVisible(room:Room)
         {
@@ -228,6 +222,7 @@ export default defineComponent({
         ignorePassword()
         {
             this.typing_room_id = -1;
+            this.password_placeholder = 'passowrd';
             this.invalid_pass = false;
             this.user_room_pass = '';
         },

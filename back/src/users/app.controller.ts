@@ -273,7 +273,7 @@ export class AppController {
 		return "Hello to game route";
 	}
 
-	// @UseGuards(AuthenticatedGuard)
+	// @UseGuards(AuthenticatedGuard)  // chnaged by mohamed maybe wronge need to be verfied by saad
 	@Get('islogin')
 	async loginOrNot(@Req() request: Request) {
 		try {
@@ -294,6 +294,23 @@ export class AppController {
 			throw new NotFoundException();
 		}
 	}
+
+
+	@UseGuards(AuthenticatedGuard)
+	@Post('amijoinedtoroom')
+	async amIJoinedToThisRoom(@Req() request: Request, @Body() body)
+	{
+		const user = await this.appService.getUserDataFromJwt(request);
+		const {joinedRooms} = await this.appService.getUserById(user.id);
+		let status:boolean = joinedRooms.includes(body.room_id);
+		return {status:status};
+	}
+
+
+
+	
+
+
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('verify')
@@ -507,29 +524,6 @@ export class AppController {
 		return {users:users};
 	}
 
-		// @Post('getfrienddata')
-	// async getFriendData(@Body() body)
-	// {
-	// 	const { id, user_id} = body;
-	// 	let profileData : any;
-	// 	let isFriend = false;
-	// 	let frontId = 0;
-	// 	let histObj : { id: number, user_score: number, opponent_avatar: string, opponent_score: number, opponent_login: string};
-	// 	const { wins, loses} = await this.appService.getUserByIdGame(id);
-	// 	const { login, image_url} = await this.appService.getUserById(user_id);
-	// 	const { user_friends } = await this.appService.getUserByIdFriend(user_id);
-	// 	const { opponent, user_score, opponent_score } = await this.appService.getUserByIdHistory(id);
-
-	// 	await Promise.all(opponent.map(async (oppenentId, oppenentIndex) => {
-	// 		const userOpponent = await this.appService.getUserById(oppenentId);
-	// 		histObj.id = frontId;
-	// 		frontId++;
-			
-	// 	}));
-	// 	isFriend = user_friends.includes(id);
-
-	// 	return profileData;
-	// }
 
 	@Get('users')
 	async users(){
