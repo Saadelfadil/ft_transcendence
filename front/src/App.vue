@@ -24,13 +24,16 @@ export default defineComponent({
   data(){
     return {
       user_id: 0 as number,
-      socket : io("http://localhost:3000/onlineUsers"),
+      socket : io("http://localhost:3000/onlineUsers") as any,
     }
   },
   methods:{
   },
   watch:{
     user_id(){
+
+      store.commit('set_main_app_socket', this.socket);
+      
 			(this).socket.emit('online', { data: { userId: (this).user_id } }, (response: any) => {
             let newArray: Array<number> = [];
             for (let user in response.onlineUsers) {
@@ -39,12 +42,18 @@ export default defineComponent({
             }
             store.commit('set_online_users', newArray);
       });
-      this.socket.on("online-users", (data) => {
+      this.socket.on("online-users", (data:any) => {
             let newArray: Array<number> = [];
             for (let user in data) {
                 newArray.push(data[user]);
             }
             store.commit('set_online_users', newArray);
+      });
+
+
+      this.socket.on('all-users-in-game', (data:any) => {
+        console.log(`in game users ${data}`);
+        store.commit('set_in_game_users', data);
       });
     }
   }

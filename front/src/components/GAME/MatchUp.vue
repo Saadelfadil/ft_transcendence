@@ -53,6 +53,7 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import router   from '@/router';
+import store from '@/store';
 import { io } from "socket.io-client";
 import StartPlayingComp from './StartPlaying.vue';
 
@@ -292,6 +293,7 @@ export default defineComponent({
 
                     this.socket.on("startMouseEvent", () => {
                         this.startMouseEvent();
+                        store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
                         this.game_state = 2;
                         this.socket.on("updateClient", (clientData: any) => {
                             this.playerLeft = clientData.pl;
@@ -320,6 +322,7 @@ export default defineComponent({
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
@@ -358,8 +361,10 @@ export default defineComponent({
             }
         },
         tabClosed(event:any){
-            if (this.socket)
+            if (this.socket){
+                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.socket.disconnect();
+            }
         },
         tabChanged(event:any){
             this.tabClosed(event);
@@ -377,8 +382,10 @@ export default defineComponent({
         console.log('matchup unmounted------');
         if (this.timerInterval)
             clearInterval(this.timerInterval);
-        if (this.socket)
+        if (this.socket){
+            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.socket.disconnect();
+        }
     },
 })
 </script>

@@ -246,6 +246,7 @@ export default  defineComponent({
 	},
 	NewhandleSubmitNewInvite(){
 
+			console.log(`called invite`);
 			const messageData = {
 				id: 0,
 				isInvite: true,
@@ -264,10 +265,11 @@ export default  defineComponent({
 				},
 				// send message callback
 				(response: any) => {
+					console.log(response);
 					if(response.status)
 					{
 						// this.newMessage(messageData);
-						//// console.log('onevone');
+						console.log('onevone');
 						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'left'}});
 					}
 				}

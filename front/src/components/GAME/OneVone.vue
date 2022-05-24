@@ -16,8 +16,7 @@
                 <div v-if="game_state == 0"> waiting... </div>
                 <div v-else-if="game_state == 1"> {{timer}} </div>
                 <div v-else>
-                    <div class="mt-2.5">VS</div>
-                    <div class="mt-2.5">{{gameCounter}}</div>
+                    <div class="mt-2.5"> {{time_min}} : {{time_sec}} </div>
                 </div>
             </div>
 
@@ -50,6 +49,7 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
+import store from '@/store';
 import { io } from "socket.io-client";
 import ChatAlertMessageBlock from './alertMessage.vue';
 
@@ -120,10 +120,33 @@ export default defineComponent({
                 color: '' as string,
             } as Ball,
             timer: 0 as number,
-            gameCounter: '' as string,
+            gameCounter: 0 as number,
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
+            tmp_number_min: 0 as number,
+            tmp_number_sec: 0 as number,
+            timerInterval: null as any,
+        }
+    },
+    computed: {
+        time_min(): string {
+            this.tmp_number_min = Math.floor(this.gameCounter / 60);
+            if (this.tmp_number_min === 0)
+            {
+                return '00';
+            }
+            else if (this.tmp_number_min < 10)
+                return '0' + this.tmp_number_min.toString();
+            return  this.tmp_number_min.toString();
+        },
+        time_sec(): string {
+            this.tmp_number_sec = this.gameCounter % 60;
+            if (this.tmp_number_sec === 0)
+                return '00';
+            else if (this.tmp_number_sec < 10)
+                return '0' + this.tmp_number_sec.toString();
+            return this.tmp_number_sec.toString();
         }
     },
     watch: {
@@ -269,6 +292,7 @@ export default defineComponent({
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
@@ -293,6 +317,7 @@ export default defineComponent({
                 this.socket.on("startMouseEvent", () => {
                     
                     this.startMouseEvent();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
                     this.game_state = 2;
                     this.socket.on("updateClient", (clientData: any) => {
                         this.playerLeft = clientData.pl;
@@ -304,6 +329,10 @@ export default defineComponent({
                         }
                     });
                 });
+
+                this.socket.on('updateTime', (time: number) => {
+                        this.gameCounter = time;
+                })
 
                 this.socket.on("initData", (clientData: any) => {
                     this.playerLeft = clientData.pl;
@@ -345,8 +374,10 @@ export default defineComponent({
             }
         },
         tabClosed(event:any){
-            if (this.socket)
+            if (this.socket){
+                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.socket.disconnect();
+            }
         },
         tabChanged(event:any){
             this.tabClosed(event);
@@ -359,10 +390,12 @@ export default defineComponent({
         document.removeEventListener('visibilitychange', this.tabChanged);
     },
     unmounted(){
-        console.log('onevone unmounted');
-        //this.socket.emit("stopTime");
-        if (this.socket)
+        if (this.timerInterval)
+            clearInterval(this.timerInterval);
+        if (this.socket){
+            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.socket.disconnect();
+        }
     },
 })
 </script>

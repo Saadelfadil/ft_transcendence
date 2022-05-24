@@ -1,6 +1,5 @@
 <template>
     <div>
-ttttttttt
 <div class="h-full mt-5">
  
   <div class="border-b-2 block md:flex">
@@ -89,6 +88,10 @@ export default defineComponent({
             return this.user_info.login;
         },
         userStatus() : string {
+            if (store.getters.get_in_game_users.includes(Number(this.$route.query.friend_id))){
+                this.status_color = 'bg-yellow-500';
+                return 'In Game';
+            }
             if (store.getters.get_online_users.includes(Number(this.$route.query.friend_id)))
             {
                 this.status_color = 'bg-green-500';

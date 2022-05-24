@@ -13,6 +13,7 @@ export class oneVoneLogic {
     playerLeft = new Player();
     playerRight = new Player();
     ball = new Ball();
+    time: number = 60;
 
     initGmae(){
         let playerLeft = new Player();

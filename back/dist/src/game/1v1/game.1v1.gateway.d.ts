@@ -20,6 +20,7 @@ export declare class oneVoneGateway implements OnGatewayInit, OnGatewayConnectio
     setRoom(client: Socket, data: any): void;
     clientType(client: any, data: any): void;
     startGame(client: any): void;
+    startTime(client: any): void;
     updatePos(client: any, curspos: number): void;
     decline(client: Socket, room: string): void;
 }
