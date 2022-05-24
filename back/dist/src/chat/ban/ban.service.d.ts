@@ -6,10 +6,10 @@ import { Ban } from './entities/ban.entity';
 export declare class BanService {
     private bansRepository;
     constructor(bansRepository: Repository<Ban>);
-    create(sessionId: number, roomData: Rooms, createBanDto: CreateBanDto): unknown;
-    findAll(): any;
-    roomBannedList(roomId: number): unknown;
-    findUserInRoom(roomId: number, userId: number): unknown;
-    update(sessionId: number, roomData: Rooms, updateBanDto: UpdateBanDto): unknown;
-    unbanUserFromRoom(sessionId: number, roomData: Rooms, roomId: number, userId: number): unknown;
+    create(sessionId: number, roomData: Rooms, createBanDto: CreateBanDto): Promise<Ban>;
+    findAll(): Promise<Ban[]>;
+    roomBannedList(roomId: number): Promise<number[]>;
+    findUserInRoom(roomId: number, userId: number): Promise<Ban>;
+    update(sessionId: number, roomData: Rooms, updateBanDto: UpdateBanDto): Promise<Ban>;
+    unbanUserFromRoom(sessionId: number, roomData: Rooms, roomId: number, userId: number): Promise<Ban>;
 }

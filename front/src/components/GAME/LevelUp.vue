@@ -123,27 +123,31 @@ export default defineComponent({
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
-            tmp_number: 0 as number,
+            timerInterval: null as any,
+            tmp_number_min: 0 as number,
+            tmp_number_sec: 0 as number,
         }
     },
     computed: {
         time_min(): string {
-            this.tmp_number = Math.floor(this.gameCounter / 60);
-            if (this.tmp_number === 0)
+            // return '00';
+            this.tmp_number_min = Math.floor(this.gameCounter / 60);
+            if (this.tmp_number_min === 0)
             {
                 return '00';
             }
-            else if (this.tmp_number < 10)
-                return '0' + this.tmp_number.toString();
-            return  this.tmp_number.toString();
+            else if (this.tmp_number_min < 10)
+                return '0' + this.tmp_number_min.toString();
+            return  this.tmp_number_min.toString();
         },
         time_sec(): string {
-            this.tmp_number = this.gameCounter % 60;
-            if (this.tmp_number === 0)
+            // return '11';
+            this.tmp_number_sec = this.gameCounter % 60;
+            if (this.tmp_number_sec === 0)
                 return '00';
-            else if (this.tmp_number < 10)
-                return '0' + this.tmp_number.toString();
-            return this.tmp_number.toString();
+            else if (this.tmp_number_sec < 10)
+                return '0' + this.tmp_number_sec.toString();
+            return this.tmp_number_sec.toString();
         }
     },
     watch: {
@@ -288,9 +292,9 @@ export default defineComponent({
                     this.timer = timer;
                     this.plName = players[0];
                     this.prName = players[1];
-                    const timerInterval = setInterval(() => {
+                    this.timerInterval = setInterval(() => {
                         if (this.timer <= 0){
-                            clearInterval(timerInterval);
+                            clearInterval(this.timerInterval);
                         }
                         else{
                             this.timer--;
@@ -377,6 +381,8 @@ export default defineComponent({
     unmounted(){
         console.log('levelup unmounted');
         //this.socket.emit("stopTime");
+        if (this.timerInterval)
+            clearInterval(this.timerInterval);
         if (this.socket)
             this.socket.disconnect();
     },
