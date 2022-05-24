@@ -35,6 +35,7 @@ let BanController = class BanController {
         return this.banService.create(sessionId, roomData, createBanDto);
     }
     findAll() {
+        console.log(`BAN GET`);
         return this.banService.findAll();
     }
     async update(updateBanDto, req) {

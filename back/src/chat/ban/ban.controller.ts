@@ -32,6 +32,7 @@ export class BanController {
 
 	@Get()
 	findAll() {
+		console.log(`BAN GET`);
 		return this.banService.findAll();
 	}
 
