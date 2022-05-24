@@ -4,7 +4,6 @@
 <div class="h-full mt-5">
 
   <div class="border-b-2 block md:flex" style="height:80vh">
-
     <div class="w-full md:w-3/6">
 
         <div class="overflow-auto" style="height: 80vh;">
@@ -337,15 +336,17 @@ export default defineComponent({
             this.canvas.height = this.sch * this.factor;
             if (this.socket){
                 this.socket.disconnect();
+                //this.socket.off();
             }
             this.socket = io(`http://localhost:3000/${namespace}`);
 
             this.socket.on('connect', () => {
+                console.log(name,'heeeeere');
+                this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('noRoom', ()=>{
-                    console.log( `room ${this.socket}`);
+                    console.log( `room ${name}`);
                     this.room_display.splice(room_index, 1);
                 });
-                this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('canvasWH', (canvas: any) => {
                     console.log('roomwh', canvas.scw, canvas.sch);
                     this.scw = canvas.scw;
@@ -368,6 +369,7 @@ export default defineComponent({
             });
             this.socket.on("leaveRoom", () => {
                 console.log('leve stream');
+
                 this.$router.push('/profile');
             });
         },

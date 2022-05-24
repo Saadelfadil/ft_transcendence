@@ -1,4 +1,5 @@
 <template>
+
   <div class="flex flex-row h-full">
     <ManagerBlock />
     <div class="px-16 py-4 text-gray-700 bg-gray-200 h-screen w-screen">

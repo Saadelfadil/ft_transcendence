@@ -1,47 +1,43 @@
 <template>
     <div class="container mx-auto">
-
-    <div v-if="start == 1">
-
-
-        <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
-            
-            <div class="flex justify-around bg-blue w-3/12">
-                <div class="flex flex-col">
-                    <img :src="left_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
-                    <div>{{left_player_login}} </div>
+        <div v-if="start == 1">
+            <div class="flex justify-around mb-3 py-5 rounded-lg bg-white mt-3">
+                <div class="flex justify-around bg-blue w-3/12">
+                    <div class="flex flex-col">
+                        <img :src="left_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
+                        <div>{{left_player_login}} </div>
+                    </div>
+                    <div class="mt-2.5"> {{playerLeft.score}} </div>
                 </div>
-                <div class="mt-2.5"> {{playerLeft.score}} </div>
+
+                <div>
+                    <div v-if="game_state == 0"> waiting... </div>
+                    <div v-else-if="game_state == 1"> {{timer}} </div>
+                    <div v-else>
+                        <div class="mt-2.5"> {{time_min}} : {{time_sec}} </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-around bg-blue w-3/12">
+                    <div class="flex flex-col">
+                        <img :src="right_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
+                        <div>{{right_player_login}} </div>
+                    </div>
+                    <div class="mt-2.5"> {{playerRight.score}} </div>
+                </div>
+                
             </div>
 
-            <div>
-                <div v-if="game_state == 0"> waiting... </div>
-                <div v-else-if="game_state == 1"> {{timer}} </div>
-                <div v-else>
-                    <div class="mt-2.5"> {{time_min}} : {{time_sec}} </div>
+            <div class="w-full">    
+                <div class="overflow-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch" style="height: 70vh;">
+                    <div id = "pong-table" class="pong-table flex justify-center">
+                        <canvas id="canvas"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex justify-around bg-blue w-3/12">
-                <div class="flex flex-col">
-                    <img :src="right_player_avatar" class="rounded-full max-w-xs w-16 items-center border" />
-                    <div>{{right_player_login}} </div>
-                </div>
-                <div class="mt-2.5"> {{playerRight.score}} </div>
-            </div>
-            
         </div>
-
-        <div class="w-full">    
-            <div class="overflow-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch" style="height: 70vh;">
-                <div id = "pong-table" class="pong-table flex justify-center">
-                    <canvas id="canvas"></canvas>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <StartPlayingComp v-else @startPlaying="levelup"/>
+        <StartPlayingComp v-else @startPlaying="levelup"/>
     </div>
 </template>
 
@@ -130,7 +126,6 @@ export default defineComponent({
     },
     computed: {
         time_min(): string {
-            // return '00';
             this.tmp_number_min = Math.floor(this.gameCounter / 60);
             if (this.tmp_number_min === 0)
             {
@@ -141,7 +136,6 @@ export default defineComponent({
             return  this.tmp_number_min.toString();
         },
         time_sec(): string {
-            // return '11';
             this.tmp_number_sec = this.gameCounter % 60;
             if (this.tmp_number_sec === 0)
                 return '00';
@@ -220,7 +214,7 @@ export default defineComponent({
 
             this.renderGame();
         },
-        renderGame(): void{
+        renaderTable(){
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -246,11 +240,13 @@ export default defineComponent({
             this.context.moveTo(this.canvas.width/2, 0);
             this.context.lineTo(this.canvas.width/2,this.canvas.height);
             this.context.stroke();
+        },
+        renderGame(): void{
+            this.renaderTable();
 
             this.context.fillStyle = this.playerLeft.color;
             this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
             this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
-            //console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
             this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
@@ -258,12 +254,8 @@ export default defineComponent({
             this.context.fill();
         },
         startMouseEvent(){
-            // this.socket.emit("startTime");
-            //this.socket.emit("startGame");
             this.canvas.addEventListener("mousemove", (e: any) => {
-                //console.log(`her${this.canvasHtml.getBoundingClientRect().top}`);
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
-                //console.log(cursPos);
                 this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
@@ -272,7 +264,6 @@ export default defineComponent({
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);
 
-            //let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/levelup");
             this.socket.on('connect', () => {
 
@@ -280,15 +271,10 @@ export default defineComponent({
 
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
-                    console.log(pos);
-                    // msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
                     this.game_state = 0;
                 });
 
                 this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
-                    // this.playerPos = pos;
-                    // console.log(room);
-                    // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];
                     this.prName = players[1];
@@ -298,16 +284,13 @@ export default defineComponent({
                         }
                         else{
                             this.timer--;
-                            console.log(this.timer);
                         }
                     }, 1000);
                     this.game_state = 1;
                 });
 
                 this.socket.on('roomCreated', (room: string, players: string[]) => {
-                    // msgHtml.innerHTML = `hello ${this.playerPos}`;
                     this.socket.emit('setRoom', room);
-
                     this.socket.on("startMouseEvent", () => {
                         this.startMouseEvent();
                         this.game_state = 2;
@@ -315,11 +298,7 @@ export default defineComponent({
                             this.playerLeft = clientData.pl;
                             this.playerRight = clientData.pr;
                             this.ball = clientData.b;
-                            // console.log(clientData.pl);
-                            // console.log(clientData.pr);
-                            //console.log(clientData.b);
                             if (clientData.b && clientData.pr && clientData.pl){
-                                //console.log('render')
                                 this.renderGame();
                             }
                         });
@@ -335,17 +314,31 @@ export default defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    //console.log(clientData.pl);
                     this.initGame(clientData.scw, clientData.sch);
                 });
 
                 this.socket.on("leaveRoom", () => {
-                    //this.socket.emit('clear');
-                    this.$router.push('/profile');
+                    this.displayResult();
+                    setTimeout(() => {
+                        this.$router.push('/matchhistory');
+                    }, 3000);
                 });
-                console.log(this.socket.id);
 
             });
+        },
+        displayResult(){
+            this.renaderTable();
+            this.context.font = "30px Arial";
+            this.context.textAlign = "center";
+            this.context.fillStyle = "RED";
+            this.context.fillText("Game Over\n", this.canvas.width/2 , (this.canvas.height/2));
+            if(this.playerLeft.score > this.playerRight.score){
+                this.context.fillText(`${this.left_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            } else if (this.playerLeft.score < this.playerRight.score){
+                this.context.fillText(`${this.right_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }  else {
+                this.context.fillText(`NULL MATCH`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }
         },
         async isUserPlaying(){
             const resp = await axios({
@@ -357,7 +350,7 @@ export default defineComponent({
             });
 
             if (resp.data.in_game)
-            {
+            {   
                 router.push({name: 'profile'});
                 return ;
             }
@@ -379,8 +372,6 @@ export default defineComponent({
         }
     },
     unmounted(){
-        console.log('levelup unmounted');
-        //this.socket.emit("stopTime");
         if (this.timerInterval)
             clearInterval(this.timerInterval);
         if (this.socket)
@@ -391,8 +382,6 @@ export default defineComponent({
 
 
 <style scoped>
-
-
 #canvas {
     /* margin-top: 10px; */
     border: solid 1px rgb(240, 46, 170);
@@ -406,7 +395,6 @@ export default defineComponent({
     /* max-height: 800px; */
     /* position: absolute; */
     /* overflow: hidden; */
-
 }
 
 

@@ -30,6 +30,7 @@ export declare class roomNode {
     gameLoop: any;
     gameTimer: any;
     time: number;
+    first_logout: string;
 }
 export interface roomDb {
     name: string;
