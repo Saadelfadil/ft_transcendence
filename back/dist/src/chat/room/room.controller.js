@@ -40,6 +40,8 @@ let RoomController = class RoomController {
     async IsRoomPassValid(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         let status = true;
+        if (body.room_pass == undefined || body.room_id == undefined)
+            return;
         if (body.room_pass !== '')
             status = await this.roomService.checkAuth(body.room_id, body.room_pass);
         if (status) {
@@ -49,6 +51,8 @@ let RoomController = class RoomController {
     }
     async LeaveRoom(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
+        if (body.room_id == undefined)
+            return;
         await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
         return { status: true };
     }
@@ -82,6 +86,8 @@ let RoomController = class RoomController {
     async addRoomAdmin(roomId, data, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (data.user_id == undefined)
+            return;
         const roomData = await this.roomService.findOne(+roomId);
         if (sessionId == roomData.owner_id || roomData.admins.includes(sessionId)) {
             return this.roomService.addRoomAdmin(+roomId, +data['user_id']);
@@ -187,7 +193,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], RoomController.prototype, "addRoomAdmin", null);
 __decorate([
@@ -196,7 +202,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], RoomController.prototype, "removeRoomAdmin", null);
 RoomController = __decorate([

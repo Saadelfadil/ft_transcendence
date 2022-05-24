@@ -29,13 +29,18 @@ export class RoomService {
 
 
 	async create(sessionId: number, createRoomDto: CreateRoomDto) {
+		// added by saad for protection of Body undefined
+		createRoomDto.admins = [];
+		if (createRoomDto.name == undefined)
+			return;
+			
 		let test = await this.roomsRepository.findOne({name: createRoomDto.name});
 		if (test !== undefined)
 		{
 			// means that already room with this name
 			return { status: false, error: 'there exists room with this name!' };
 		}
-		createRoomDto.admins = [];
+		
 		createRoomDto.admins.push(sessionId);
 		const newRoom = this.roomsRepository.create(createRoomDto);
 		if( newRoom.locked )
@@ -115,6 +120,8 @@ export class RoomService {
 		if(sessionId != room.owner_id)
 			throw new HttpException({ message: 'You can\'t edit this room!' }, HttpStatus.UNAUTHORIZED);
 
+		if (changePasswordDto.password == undefined)
+			return;
 		room.password = changePasswordDto.password;
 
 		if( changePasswordDto.password != "" )

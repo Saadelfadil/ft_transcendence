@@ -8,7 +8,6 @@ export declare class MessagesController {
     private readonly blockService;
     private readonly userService;
     constructor(messagesService: MessagesService, blockService: BlockService, userService: AppService);
-    finfffdOne(id: string, req: Request): Promise<import("./entities/message.entity").Message>;
     create(createMessageDto: CreateMessageDto, req: Request): Promise<import("./entities/message.entity").Message>;
     findAll(req: Request): Promise<any>;
     findOne(id: string, req: Request): Promise<any>;

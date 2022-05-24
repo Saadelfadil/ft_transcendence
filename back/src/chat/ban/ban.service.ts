@@ -19,15 +19,13 @@ export class BanService {
 	async create(sessionId: number, roomData: Rooms, createBanDto: CreateBanDto) {
 
 		// Get room owner ==> user_id != owner_id (you can't ban room's owner)
-
 		if(!roomData.admins.includes(sessionId))
 			throw new HttpException({ message: 'You\'re not an admin of this room!' }, HttpStatus.UNAUTHORIZED);
 
-		if(createBanDto.user_id == roomData.owner_id)
-			throw new HttpException({ message: 'You can\'t ban the room crater!' }, HttpStatus.UNAUTHORIZED);
+		if(+createBanDto.user_id == roomData.owner_id)
+			throw new HttpException({ message: 'You can\'t ban the room creater!' }, HttpStatus.UNAUTHORIZED);
 
-		// console.log(`room id is ${createBanDto.room_id} user id ${createBanDto.user_id}`);
-		const bannedUser = await this.findUserInRoom(createBanDto.room_id, createBanDto.user_id);
+		const bannedUser = await this.findUserInRoom(createBanDto.room_id, +createBanDto.user_id);
 		
 		if( bannedUser )
 		{
@@ -44,9 +42,6 @@ export class BanService {
 	
 			return data;
 		}
-		
-		
-		
 	}
 
 	findAll() {
@@ -84,12 +79,8 @@ export class BanService {
 			room_id: roomId,
 			user_id: userId,
 		});
-		
-		// when i reques http://localhost:8080/ban data returnd is undefind i have checked room id and user id both are correct 
 
-		// if (!data)
-		// 	throw new HttpException({ error: 'User Not Found' }, HttpStatus.NOT_FOUND);
-
+		console.log(`data ${data}`);
 		return data;
 	}
 
@@ -117,7 +108,6 @@ export class BanService {
 	}
 
 	async unbanUserFromRoom(sessionId: number, roomData: Rooms , roomId: number, userId: number) {
-		
 		if(!roomData.admins.includes(sessionId))
 			throw new HttpException({ message: 'You\'re not an admin of this room!' }, HttpStatus.UNAUTHORIZED);
 

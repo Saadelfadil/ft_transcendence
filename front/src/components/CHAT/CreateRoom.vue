@@ -182,7 +182,8 @@ export default defineComponent({
               {
                 "name": this.tmp_name,
                 "locked": this.tmp_password.length > 0 ? true : false,
-                "password": this.tmp_password
+                "password": this.tmp_password,
+                // "admins": [],
               },
             );
             if(!resp.data.status)

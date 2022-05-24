@@ -24,6 +24,9 @@ export class BanController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (createBanDto.room_id == undefined || createBanDto.user_id == undefined)
+			return ;
 		createBanDto.created =  Date.now();
 		
 		const roomData = await this.roomService.findOne(createBanDto.room_id);
@@ -32,7 +35,6 @@ export class BanController {
 
 	@Get()
 	findAll() {
-		console.log(`BAN GET`);
 		return this.banService.findAll();
 	}
 
@@ -42,6 +44,9 @@ export class BanController {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		// added by saad for protection of Body undefined
+		if (updateBanDto.room_id == undefined || updateBanDto.user_id == undefined)
+			return;
 		const roomData = await this.roomService.findOne(updateBanDto.room_id);
 		return this.banService.update(sessionId, roomData, updateBanDto);
 	}
@@ -59,6 +64,7 @@ export class BanController {
 
 	@Delete('room/:roomId/user/:userId')
 	async unbanUserFromRoom(@Param('roomId', ParseIntPipe) roomId: string, @Param('userId', ParseIntPipe) userId: string, @Req() req: Request) {
+		
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 

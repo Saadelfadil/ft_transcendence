@@ -16,23 +16,18 @@ export class MessagesController {
 	  private readonly userService: AppService,
 	 ) {}
 
-	/*
-	// Save message
-		- from_id, to_id, msg
-	*/
 
-
-	@Get('/ffff/:id')
-	async finfffdOne(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
-		return this.messagesService.updateMessage(+id);
-	}
-	
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
 	async create(@Body() createMessageDto: CreateMessageDto,  @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId : number = 1;
+
+		// added by saad for protection of Body undefined
+		if (createMessageDto.to_id == undefined)
+			return;
+			
 		const userBlockedList: number[] = await this.blockService.blockedList(createMessageDto.to_id);
 		if(userBlockedList.includes(sessionId))
 			throw new HttpException({ message: 'You can\'t send message to this user!' }, HttpStatus.UNAUTHORIZED);
@@ -49,7 +44,6 @@ export class MessagesController {
 		const sessionId: number = user.id;
 		
 		return this.messagesService.getChatList(sessionId);
-		// return this.messagesService.findAll();
 	}
 
 	// Get my messages with user (:id)
@@ -59,19 +53,10 @@ export class MessagesController {
 		// const sessionId : number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+
 		return this.messagesService.findOne(sessionId, +id);
 	}
 
-	// Delete all messages that i've had with this user
-	// @UseInterceptors(ClassSerializerInterceptor)
-	// @Delete(':id')
-	// async remove(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
-	// 	// const sessionId : number = 1;
-	// 	const user = await this.userService.getUserDataFromJwt(req);
-	// 	const sessionId: number = user.id;
-		
-	// 	return this.messagesService.remove(sessionId, +id);
-	// }
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Delete(':id')

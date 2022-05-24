@@ -34,6 +34,8 @@ let BlockService = class BlockService {
     async blockUser(sessionId, createBlockDto) {
         const userData = await this.findUser(sessionId);
         if (userData) {
+            if (createBlockDto.blocked == undefined)
+                return;
             if (!userData.blocked.includes(createBlockDto.blocked))
                 userData.blocked.push(createBlockDto.blocked);
             return this.blocksRepository.save(userData);
@@ -47,6 +49,8 @@ let BlockService = class BlockService {
     }
     async unBlockUser(sessionId, createBlockDto) {
         const userData = await this.findUser(sessionId);
+        if (createBlockDto.blocked == undefined)
+            return;
         if (userData)
             userData.blocked = this.arrayRemove(userData.blocked, createBlockDto.blocked);
         return this.blocksRepository.save(userData);

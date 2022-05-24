@@ -30,17 +30,20 @@ let BanController = class BanController {
     async create(createBanDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (createBanDto.room_id == undefined || createBanDto.user_id == undefined)
+            return;
         createBanDto.created = Date.now();
         const roomData = await this.roomService.findOne(createBanDto.room_id);
         return this.banService.create(sessionId, roomData, createBanDto);
     }
     findAll() {
-        console.log(`BAN GET`);
         return this.banService.findAll();
     }
     async update(updateBanDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (updateBanDto.room_id == undefined || updateBanDto.user_id == undefined)
+            return;
         const roomData = await this.roomService.findOne(updateBanDto.room_id);
         return this.banService.update(sessionId, roomData, updateBanDto);
     }

@@ -25,12 +25,11 @@ let MessagesController = class MessagesController {
         this.blockService = blockService;
         this.userService = userService;
     }
-    async finfffdOne(id, req) {
-        return this.messagesService.updateMessage(+id);
-    }
     async create(createMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (createMessageDto.to_id == undefined)
+            return;
         const userBlockedList = await this.blockService.blockedList(createMessageDto.to_id);
         if (userBlockedList.includes(sessionId))
             throw new common_1.HttpException({ message: 'You can\'t send message to this user!' }, common_1.HttpStatus.UNAUTHORIZED);
@@ -53,14 +52,6 @@ let MessagesController = class MessagesController {
         return this.messagesService.removeMessage(sessionId, +id);
     }
 };
-__decorate([
-    (0, common_1.Get)('/ffff/:id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], MessagesController.prototype, "finfffdOne", null);
 __decorate([
     (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Post)(),

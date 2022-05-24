@@ -17,7 +17,6 @@ export class BlockController {
 	async blockUser(@Body() createBlockDto: CreateBlockDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// const sessionId: number = 1; // TODO: get it from jwt
 		return this.blockService.blockUser(sessionId, createBlockDto);
 	}
 
@@ -47,7 +46,7 @@ export class BlockController {
 		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// TODO: get it from jwt
+
 		return this.blockService.isBlocked(sessionId, +id);
 	}
 }

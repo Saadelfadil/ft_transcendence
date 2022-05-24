@@ -24,9 +24,9 @@ let BanService = class BanService {
     async create(sessionId, roomData, createBanDto) {
         if (!roomData.admins.includes(sessionId))
             throw new common_1.HttpException({ message: 'You\'re not an admin of this room!' }, common_1.HttpStatus.UNAUTHORIZED);
-        if (createBanDto.user_id == roomData.owner_id)
-            throw new common_1.HttpException({ message: 'You can\'t ban the room crater!' }, common_1.HttpStatus.UNAUTHORIZED);
-        const bannedUser = await this.findUserInRoom(createBanDto.room_id, createBanDto.user_id);
+        if (+createBanDto.user_id == roomData.owner_id)
+            throw new common_1.HttpException({ message: 'You can\'t ban the room creater!' }, common_1.HttpStatus.UNAUTHORIZED);
+        const bannedUser = await this.findUserInRoom(createBanDto.room_id, +createBanDto.user_id);
         if (bannedUser) {
             bannedUser.created = Date.now();
             bannedUser.banned = createBanDto.banned;
@@ -63,6 +63,7 @@ let BanService = class BanService {
             room_id: roomId,
             user_id: userId,
         });
+        console.log(`data ${data}`);
         return data;
     }
     async update(sessionId, roomData, updateBanDto) {

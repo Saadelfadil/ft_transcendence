@@ -25,7 +25,7 @@ export class AppController {
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>) { }
 
 	@Post('getrequests')
-	async getRequests(@Body() body, @Req() request: Request)
+	async getRequests(@Req() request: Request)
 	{
 		let reqs : Array<any> = [];
 		const userJwt = await this.appService.getUserDataFromJwt(request);
@@ -40,7 +40,7 @@ export class AppController {
 	}
 
 	@Post('getfriends')
-	async getFriends(@Body() body, @Req() request: Request)
+	async getFriends(@Req() request: Request)
 	{
 		let reqs : Array<any> = [];
 		const userJwt = await this.appService.getUserDataFromJwt(request);
@@ -131,7 +131,7 @@ export class AppController {
 	{
 		const { is_accept, request_user_id } : {is_accept: boolean, user_id: number, request_user_id: number} = body;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
-		if (userJwt.id == undefined)
+		if (userJwt.id == undefined || is_accept == undefined || request_user_id == undefined)
 			return;
 		if (is_accept)
 		{
@@ -177,6 +177,8 @@ export class AppController {
 	async loginOrNot(@Req() request: Request) {
 		try {
 			const user = await this.appService.getUserDataFromJwt(request);
+			if (user == undefined)
+				return;
 			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status:true};
 		} catch (error) {
 			return {status:false};
@@ -188,9 +190,9 @@ export class AppController {
 	async updateU(@Req() request: Request, @Body() body)
 	{
 		try {
-			return this.appService.updateUser(request, body);
+			const user = await this.appService.updateUser(request, body);
+			return user;
 		} catch (error) {
-			throw new NotFoundException();
 		}
 	}
 
@@ -199,7 +201,9 @@ export class AppController {
 	async amIJoinedToThisRoom(@Req() request: Request, @Body() body)
 	{
 		const user = await this.appService.getUserDataFromJwt(request);
-		const {joinedRooms} = await this.appService.getUserById(user.id);
+		if (user == undefined)
+				return;
+		const { joinedRooms } = await this.appService.getUserById(user.id);
 		let status:boolean = joinedRooms.includes(body.room_id);
 		return {status:status};
 	}
@@ -208,7 +212,9 @@ export class AppController {
 	@Post('verify')
 	async verify(@Req() request: Request, @Body() body) {
 		try {
-			const {token} = request.body; 
+			const { token } = request.body;
+			if (token == undefined)
+				return;
 			const cookie = request.cookies['jwt'];
 			const data = await this.jwtService.verifyAsync(cookie);
 
@@ -233,6 +239,8 @@ export class AppController {
 	{
 		try {
 			const { twof_qrcode, change, twof } = request.body;
+			if (twof_qrcode == undefined || change == undefined || twof == undefined)
+				return;
 			const cookie = request.cookies['jwt'];
 			const data = await this.jwtService.verifyAsync(cookie);
 
@@ -279,7 +287,7 @@ export class AppController {
 	}
 
 	@Post('getgamestatus')
-	async getgamestate(@Body() body, @Req() request: Request){
+	async getgamestate(@Req() request: Request){
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)
 			return;
@@ -296,9 +304,10 @@ export class AppController {
 		const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
 		const REDIRECT_URI = "http://localhost:8080/login";
 
+		if (code == undefined)
+			return;
 		// 42 authenticator instance
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
-
 		var token = await appp.get_Access_token(code);
 		if (token == undefined)
 			return;
@@ -388,7 +397,8 @@ export class AppController {
 		let users : Array<typeof match> = [];
 
 		const { usersId } = body;
-
+		if (usersId == undefined)
+			return;
 		let tmp:any;
 		const length = usersId.length;
 
@@ -416,7 +426,9 @@ export class AppController {
 			id:number;
 		}
 		let users : Array<typeof SingleUser> = [];
-		const {usersId} = body;
+		const { usersId } = body;
+		if (usersId == undefined)
+			return;
 		await Promise.all(
 			usersId.map(async (user_id:any) =>{
 				const { login, id } = await this.appService.getUserById(user_id);
@@ -439,9 +451,10 @@ export class AppController {
 	async getExactUser(@Body() body, @Req() request: Request){
 
 		let tmp = false;
-		const {friend_id} = body;
+		const { friend_id } = body;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
-		if (userJwt.id == undefined)
+		console.log(friend_id);
+		if (userJwt.id == undefined || friend_id == undefined)
 			return;
 		const {login, image_url,  wins, loss} = await this.appService.getUserById(friend_id);
 		
@@ -473,7 +486,9 @@ export class AppController {
 	@UseGuards(AuthenticatedGuard)
 	@Post('getloginbyid')
 	async getloginbyid(@Body() body){
-		const {id} = body;
+		const { id } = body;
+		if (id == undefined)
+			return;
 		const {login, image_url} = await this.appService.getUserById(id);
 		return {login: login, image_url: image_url};
 	}
@@ -481,20 +496,24 @@ export class AppController {
 	@UseGuards(AuthenticatedGuard)
 	@Post('joinedRooms')
 	async getUserJoindAndBlocked(@Body() body){
-		const {id} = body;
-		const {joinedRooms} = await this.appService.getUserById(id);
-		return {joinedRooms: joinedRooms}; // i will add here blocked rooms too
+		const { id } = body;
+		if (id == undefined)
+			return;
+		const { joinedRooms } = await this.appService.getUserById(id);
+		return { joinedRooms: joinedRooms }; // i will add here blocked rooms too
 	}
 
 	@Post('userbylogin')
 	async FindUserByLogin(@Body() body){
-		const {login} = body;
+		const { login } = body;
+		if (login == undefined)
+			return;
 		try{
 			const { id } = await this.appService.getUserByLogin(login);
-			return {status: true, id:id};
+			return { status: true, id: id };
 		}catch(e)
 		{
-			return {status: false, id:-1};
+			return { status: false, id: -1} ;
 		}
 	}
 

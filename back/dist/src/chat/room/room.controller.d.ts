@@ -33,10 +33,10 @@ export declare class RoomController {
     remove(id: string, req: Request): Promise<void>;
     findRoomMessages(roomId: string, req: Request): Promise<any>;
     saveMessageToRoom(roomId: string, createRoomMessageDto: CreateRoomMessageDto, req: Request): Promise<import("./entities/room-message.entity").RoomMessage>;
-    addRoomAdmin(roomId: string, data: string, req: Request): Promise<{
+    addRoomAdmin(roomId: string, data: any, req: Request): Promise<{
         status: boolean;
     }>;
-    removeRoomAdmin(roomId: string, data: string, req: Request): Promise<{
+    removeRoomAdmin(roomId: string, data: any, req: Request): Promise<{
         status: boolean;
     }>;
 }

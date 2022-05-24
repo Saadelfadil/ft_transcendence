@@ -45,21 +45,29 @@ export class RoomController {
 	async IsRoomPassValid(@Body() body, @Req() req: Request){
 		const user = await this.userService.getUserDataFromJwt(req);
 		let status:boolean = true;
+		
+		// added by saad for protection of Body undefined
+		if (body.room_pass == undefined || body.room_id == undefined)
+			return;
+
 		if (body.room_pass !== '')
 			status = await this.roomService.checkAuth(body.room_id, body.room_pass);
 		if (status){
 			// here i will add to joinedrooms id of the joined room
 			this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
 		}
-		return {status: status};
+		return { status: status };
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post('leaveroom')
 	async LeaveRoom(@Body() body, @Req() req:Request){
 		const user = await this.userService.getUserDataFromJwt(req);
+		// added by saad for protection of Body undefined
+		if (body.room_id == undefined)
+			return;
 		await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
-		return {status:true};
+		return { status:true };
 	}
 
 
@@ -74,9 +82,7 @@ export class RoomController {
 	async update(@Param('id', ParseIntPipe) id: string, @Body() changePasswordDto: ChangePasswordDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// const sessionId: number = 1;
 		return this.roomService.update(sessionId, +id, changePasswordDto);
-
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
@@ -84,9 +90,7 @@ export class RoomController {
 	async remove(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// const sessionId: number = 1;
 		await this.roomService.remove(sessionId, +id);
-		// added by mohamed
 		this.userService.removeFromJoinedRooms(+id);
 	}
 
@@ -117,11 +121,13 @@ export class RoomController {
 	}
 
 	@Post(':roomId/add-admin')
-	async addRoomAdmin(@Param('roomId', ParseIntPipe) roomId: string, @Body() data: string, @Req() req: Request) {
+	async addRoomAdmin(@Param('roomId', ParseIntPipe) roomId: string, @Body() data, @Req() req: Request) {
 		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 
+		if (data.user_id == undefined)
+			return;
 		const roomData =  await this.roomService.findOne(+roomId);
 		if( sessionId == roomData.owner_id || roomData.admins.includes(sessionId) )
 		{
@@ -130,10 +136,9 @@ export class RoomController {
 		else
 			throw new HttpException({ message: 'Unauthorized operation' }, HttpStatus.UNAUTHORIZED);
 
-
 	}
 	@Post(':roomId/remove-admin')
-	async removeRoomAdmin(@Param('roomId', ParseIntPipe) roomId: string, @Body() data: string, @Req() req: Request) {
+	async removeRoomAdmin(@Param('roomId', ParseIntPipe) roomId: string, @Body() data, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
 		// const sessionId: number = 1;
