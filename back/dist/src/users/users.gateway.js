@@ -16,12 +16,29 @@ const common_1 = require("@nestjs/common");
 let OnlineGateway = class OnlineGateway {
     constructor() {
         this.onlineUsers = {};
+        this.inGameUsers = [];
         this.logger = new common_1.Logger('MessageGateway');
     }
     handleOnlineUsers(client, payload) {
         this.onlineUsers[client.id] = payload.data.userId;
         this.server.emit('online-users', this.onlineUsers);
         return { onlineUsers: this.onlineUsers };
+    }
+    InGameUsers(client, payload) {
+        console.log(`in game players ${this.inGameUsers}`);
+        if (payload.playing) {
+            this.inGameUsers.push(payload.user_id);
+            this.server.emit('all-users-in-game', this.inGameUsers);
+        }
+        else {
+            this.inGameUsers.map((id, index) => {
+                if (id === payload.user_id) {
+                    this.inGameUsers.splice(index, 1);
+                    this.server.emit('all-users-in-game', this.inGameUsers);
+                    return;
+                }
+            });
+        }
     }
     afterInit(server) {
     }
@@ -43,6 +60,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Object)
 ], OnlineGateway.prototype, "handleOnlineUsers", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('in-game-user'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], OnlineGateway.prototype, "InGameUsers", null);
 OnlineGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         namespace: 'onlineUsers',

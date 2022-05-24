@@ -9,6 +9,7 @@ export declare class oneVoneLogic {
     playerLeft: Player;
     playerRight: Player;
     ball: Ball;
+    time: number;
     initGmae(): void;
     collision(ball: any, player: any): boolean;
     resetBall(clientData: any): void;

@@ -19,6 +19,7 @@ let LevelUpLogic = class LevelUpLogic {
         this.playerLeft = new game_interface_1.Player();
         this.playerRight = new game_interface_1.Player();
         this.ball = new game_interface_1.Ball();
+        this.time = 60;
     }
     initGmae() {
         let playerLeft = new game_interface_1.Player();

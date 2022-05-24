@@ -41,6 +41,12 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   handleDisconnect(client: Socket) {
     console.log('-----disconnect socket (levelup)------');
     console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
+    if (client.data.node){
+      if (client.data.node.time < this.levelUpLogic.time && client.data.node.first_logout === ''){
+        client.data.node.first_logout =  client.data.pos;
+        console.log('first: ', client.data.pos);
+      }
+    }
     this.clear(client);
     console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
     console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
@@ -50,11 +56,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   checkRoomconnection(client: Socket){
     let room = this.levelUpLogic.joinRoom(client);
     if (room){
-      //client.data.room = room;
-      //console.log(client.data.node);
       let timer: number = 5;
-      //client.data.roomStatus = 'play';
-      console.log()
       this.server.to(room.id).emit('connectedToRoom', timer, room.players);
       setTimeout(() => {
         this.server.to(room.id).emit('roomCreated', room.id, room.players);
@@ -86,9 +88,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       scw: this.levelUpLogic.canvasW,
       sch: this.levelUpLogic.canvasH,
     });
-    //if (client.data.pos === 'left')
-      //this.startGame(client);
-    //console.log('here');
   }
 
   @SubscribeMessage('updatePos')
@@ -133,20 +132,11 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       client.data.roomStatus = 'waiting';
       this.initGame(client);
       this.checkRoomconnection(client);
-
-      // console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
-      // this.levelUpLogic.wRooms.values().forEach(element => {
-      //   console.log(element);
-      // });
-      // console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
-      // this.levelUpLogic.rooms.values().forEach(element => {
-      //   console.log(element);
-      // });
-
     } else if (data.type === 'stream'){
       console.log(data.room, 'stream');
       client.data.room = data.room;
       if (!this.levelUpLogic.rooms.find(Number(data.room))){
+        console.log("no room");
         client.emit('noRoom');
         return;
       }
@@ -164,14 +154,28 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         this.server.to(client.data.room).emit('leaveRoom');
         this.userRepository.update(client.data.userId, {in_game: false});
         this.levelUpLogic.wRooms.remove(Number(client.data.room));
-        //this.gameRepository.deleteRoom(client.data.room);
       } else if (client.data.roomStatus === 'play'){
         console.log('clear ***');
+        if (client.data.node.first_logout === "left"){
+          client.data.node.playerLeft.score = 0;
+          client.data.node.playerRight.score = 10;
+        } else if (client.data.node.first_logout === "right"){
+          client.data.node.playerRight.score = 0;
+          client.data.node.playerLeft.score = 10;
+        }
+        this.server.to(client.data.room).emit("updateClient", {
+          pl: client.data.node.playerLeft,
+          pr: client.data.node.playerRight,
+          b: client.data.node.ball,
+        });
         client.leave(client.data.room);
         this.server.to(client.data.room).emit('leaveRoom');
         clearInterval(client.data.node.gameLoop);
         clearInterval(client.data.node.gameTimer);
         if (client.data.pos === 'left'){
+          console.log(client.data.node.playerLeft.score);
+          console.log(client.data.node.playerRight.score);
+          console.log(client.data.node.first_logout);
           this.matchRepository.addMatchData(client.data.node, 'levelup');
           if (client.data.node.playerLeft.score > client.data.node.playerRight.score){
             this.userRepository.createQueryBuilder()
@@ -202,9 +206,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           this.userRepository.update(Number(client.data.node.players[0]), {in_game: false});
           this.userRepository.update(Number(client.data.node.players[1]), {in_game: false});
         }
-        //console.log(client.data.node);
         this.levelUpLogic.rooms.remove(Number(client.data.room));
-        //console.log('delet room');
         this.gameRepository.deleteRoom(client.data.room);
       }
     }
@@ -236,8 +238,11 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           client.data.node.playerRight.h -= 2.5;
         }
         this.server.to(client.data.room).emit("updateTime", client.data.node.time);
-        if (timer === 30)
+        if (timer === this.levelUpLogic.time){
+          clearInterval(client.data.node.gameTimer);
+          clearInterval(client.data.node.gameLoop);
           this.server.to(client.data.room).emit('leaveRoom');
+        }
         console.log(timer);
     }, 1000);
   }

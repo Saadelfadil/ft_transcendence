@@ -53,6 +53,7 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import router   from '@/router';
+import store from '@/store';
 import { io } from "socket.io-client";
 import StartPlayingComp from './StartPlaying.vue';
 
@@ -200,14 +201,39 @@ export default defineComponent({
 
             this.renderGame();
         },
-        renderGame(): void{
+        renaderTable(){
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // this.context.beginPath();
+            // this.context.arc(this.canvas.width/2, this.canvas.height/2, this.canvas.height/6, 0, 2 * Math.PI);
+            // this.context.lineWidth = 2.5;
+            // this.context.strokeStyle = "WHITE";
+            // this.context.stroke();
+
+            // this.context.beginPath();
+            // this.context.arc(0, this.canvas.height/2, this.canvas.height/8, 3/2 * Math.PI , 1/2 * Math.PI);
+            // this.context.lineWidth = 2;
+            // this.context.strokeStyle = "WHITE";
+            // this.context.stroke();
+
+            // this.context.beginPath();
+            // this.context.arc(this.canvas.width, this.canvas.height/2, this.canvas.height/8, 1/2 * Math.PI, 3/2 * Math.PI);
+            // this.context.lineWidth = 2;
+            // this.context.strokeStyle = "WHITE";
+            // this.context.stroke();
+
+            // this.context.beginPath(); 
+            // this.context.moveTo(this.canvas.width/2, 0);
+            // this.context.lineTo(this.canvas.width/2,this.canvas.height);
+            // this.context.stroke();
+        },
+        renderGame(): void{
+            this.renaderTable();
 
             this.context.fillStyle = this.playerLeft.color;
             this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
             this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
-            //console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
             this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
@@ -246,9 +272,6 @@ export default defineComponent({
                 });
 
                 this.socket.on('connectedToRoom', (timer: number, players: string[]) => {
-                    // this.playerPos = pos;
-                    // console.log(room);
-                    // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];
                     this.prName = players[1];
@@ -270,6 +293,7 @@ export default defineComponent({
 
                     this.socket.on("startMouseEvent", () => {
                         this.startMouseEvent();
+                        store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
                         this.game_state = 2;
                         this.socket.on("updateClient", (clientData: any) => {
                             this.playerLeft = clientData.pl;
@@ -297,12 +321,29 @@ export default defineComponent({
                 });
 
                 this.socket.on("leaveRoom", () => {
-                    //this.socket.emit('clear');
-                    this.$router.push('/profile');
+                    this.displayResult();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                    setTimeout(() => {
+                        this.$router.push('/matchhistory');
+                    }, 3000);
                 });
                 console.log(this.socket.id);
 
             });
+        },
+        displayResult(){
+            this.renaderTable();
+            this.context.font = "30px Arial";
+            this.context.textAlign = "center";
+            this.context.fillStyle = "RED";
+            this.context.fillText("Game Over\n", this.canvas.width/2 , (this.canvas.height/2));
+            if(this.playerLeft.score > this.playerRight.score){
+                this.context.fillText(`${this.left_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            } else if (this.playerLeft.score < this.playerRight.score){
+                this.context.fillText(`${this.right_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }  else {
+                this.context.fillText(`NULL MATCH`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }
         },
         async isUserPlaying(){
             const resp = await axios({
@@ -320,8 +361,10 @@ export default defineComponent({
             }
         },
         tabClosed(event:any){
-            if (this.socket)
+            if (this.socket){
+                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.socket.disconnect();
+            }
         },
         tabChanged(event:any){
             this.tabClosed(event);
@@ -337,11 +380,12 @@ export default defineComponent({
     },
     unmounted(){
         console.log('matchup unmounted------');
-        //this.socket.emit("stopTime");
         if (this.timerInterval)
             clearInterval(this.timerInterval);
-        if (this.socket)
+        if (this.socket){
+            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.socket.disconnect();
+        }
     },
 })
 </script>

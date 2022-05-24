@@ -34,6 +34,7 @@ class roomNode {
         this.playerRight = new Player();
         this.ball = new Ball();
         this.time = 0;
+        this.first_logout = '';
     }
 }
 exports.roomNode = roomNode;

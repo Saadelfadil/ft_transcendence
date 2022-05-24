@@ -33,6 +33,7 @@ export class roomNode{
     gameLoop: any;
     gameTimer: any;
     time: number = 0;
+    first_logout: string = '';
 }
 
 export interface roomDb{

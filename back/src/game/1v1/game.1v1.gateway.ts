@@ -168,7 +168,7 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   //@SubscribeMessage('startGame')
   startGame(client: any){
-    //this.startTime(client);
+    this.startTime(client);
     client.data.roomNode.gameLoop = setInterval(() => {
         this.oneVoneLogic.update(client.data);
         this.server.to(client.data.room).emit("updateClient", {
@@ -177,6 +177,29 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           b: client.data.roomNode.ball,
         });
     }, 1000/64);
+  }
+
+  startTime(client: any){
+    let start = Date.now();
+    console.log('start time', client.data.roomNode);
+    client.data.roomNode.gameTimer = setInterval(() => {
+        let delta = Date.now() - start;
+        let timer = Math.floor(delta / 1000);
+        client.data.roomNode.time = timer;
+        if (client.data.roomNode.time % 5 === 0){
+          console.log("1v1");
+          client.data.roomNode.ball.speed += 0.25;
+          client.data.roomNode.playerLeft.h -= 2.5;
+          client.data.roomNode.playerRight.h -= 2.5;
+        }
+        this.server.to(client.data.room).emit("updateTime", client.data.roomNode.time);
+        if (timer === this.oneVoneLogic.time){
+          clearInterval(client.data.roomNode.gameTimer);
+          clearInterval(client.data.roomNode.gameLoop);
+          this.server.to(client.data.room).emit('leaveRoom');
+        }
+        console.log(timer);
+    }, 1000);
   }
 
   @SubscribeMessage('updatePos')

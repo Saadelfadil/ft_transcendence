@@ -21,7 +21,8 @@ export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
 
 
-    private  onlineUsers = {};
+  private  onlineUsers = {};
+  private inGameUsers : Array<number> = [];
 	constructor(  
 	) {}
 
@@ -37,8 +38,24 @@ export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         return { onlineUsers: this.onlineUsers };
     }
       
-
-
+    @SubscribeMessage('in-game-user')
+    InGameUsers(client, payload:any){
+      console.log(`in game players ${this.inGameUsers}`);
+      if (payload.playing){
+        this.inGameUsers.push(payload.user_id);
+        this.server.emit('all-users-in-game', this.inGameUsers);
+      }
+      else{
+        this.inGameUsers.map((id, index) => {
+          if (id === payload.user_id)
+          {
+            this.inGameUsers.splice(index, 1);
+            this.server.emit('all-users-in-game', this.inGameUsers);
+            return ;
+          }
+        });
+      }
+    }
 
     afterInit(server: Server) {
     }

@@ -16,8 +16,7 @@
                 <div v-if="game_state == 0"> waiting... </div>
                 <div v-else-if="game_state == 1"> {{timer}} </div>
                 <div v-else>
-                    <div class="mt-2.5">VS</div>
-                    <div class="mt-2.5">{{gameCounter}}</div>
+                    <div class="mt-2.5"> {{time_min}} : {{time_sec}} </div>
                 </div>
             </div>
 
@@ -50,6 +49,7 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
+import store from '@/store';
 import { io } from "socket.io-client";
 import ChatAlertMessageBlock from './alertMessage.vue';
 
@@ -120,10 +120,33 @@ export default defineComponent({
                 color: '' as string,
             } as Ball,
             timer: 0 as number,
-            gameCounter: '' as string,
+            gameCounter: 0 as number,
             playerPos: '' as string,
             plName: '' as string,
             prName: '' as string,
+            tmp_number_min: 0 as number,
+            tmp_number_sec: 0 as number,
+            timerInterval: null as any,
+        }
+    },
+    computed: {
+        time_min(): string {
+            this.tmp_number_min = Math.floor(this.gameCounter / 60);
+            if (this.tmp_number_min === 0)
+            {
+                return '00';
+            }
+            else if (this.tmp_number_min < 10)
+                return '0' + this.tmp_number_min.toString();
+            return  this.tmp_number_min.toString();
+        },
+        time_sec(): string {
+            this.tmp_number_sec = this.gameCounter % 60;
+            if (this.tmp_number_sec === 0)
+                return '00';
+            else if (this.tmp_number_sec < 10)
+                return '0' + this.tmp_number_sec.toString();
+            return this.tmp_number_sec.toString();
         }
     },
     watch: {
@@ -206,7 +229,7 @@ export default defineComponent({
 
             this.renderGame();
         },
-        renderGame(): void{
+        renaderTable(){
             this.context.fillStyle = this.canvasGrd;
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -232,11 +255,12 @@ export default defineComponent({
             this.context.moveTo(this.canvas.width/2, 0);
             this.context.lineTo(this.canvas.width/2,this.canvas.height);
             this.context.stroke();
-
+        },
+        renderGame(): void{
+            this.renaderTable();
             this.context.fillStyle = this.playerLeft.color;
             this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
             this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
-            //console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
             this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
@@ -244,12 +268,9 @@ export default defineComponent({
             this.context.fill();
         },
         startMouseEvent(){
-            // this.socket.emit("startTime");
-            //this.socket.emit("startGame");
+           
             this.canvas.addEventListener("mousemove", (e: any) => {
-                //console.log(`her${this.canvasHtml.getBoundingClientRect().top}`);
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
-                //console.log(cursPos);
                 this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
@@ -258,7 +279,6 @@ export default defineComponent({
             document.addEventListener('visibilitychange', this.tabChanged);
             console.log(this.$route.query.room_name_1vs1, this.$route.query.pos);
 
-            //let msgHtml = document.getElementById('msg') as any;
             this.socket = io("http://localhost:3000/onevone");
             this.socket.on('connect', () => {
 
@@ -270,22 +290,15 @@ export default defineComponent({
                     this.acceptedWhenFriendIsInvalid();
                 });
 
-                this.socket.on('leaveRoom', () => {
-                    
-                    this.$router.push('/profile');
+                this.socket.on("leaveRoom", () => {
+                    this.displayResult();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                    setTimeout(() => {
+                        this.$router.push('/matchhistory');
+                    }, 3000);
                 });
 
-                // this.socket.on('waitingForRoom', (pos: string) => {
-                //     this.playerPos = pos;
-                //     console.log(pos);
-                //     // msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
-                //     this.game_state = 0;
-                // });
-
                 this.socket.on('rightJoined', (timer: number, players: string[]) => {
-                    // this.playerPos = pos;
-                    // console.log(room);
-                    // msgHtml.innerHTML = `connected to room ${room}, you are ${pos} player`;
                     this.timer = timer;
                     this.plName = players[0];
                     this.prName = players[1];
@@ -301,31 +314,25 @@ export default defineComponent({
                     this.game_state = 1;
                 });
 
-                //this.socket.on('startGame',() => {
-
-                    this.socket.on("startMouseEvent", () => {
+                this.socket.on("startMouseEvent", () => {
+                    
+                    this.startMouseEvent();
+                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
+                    this.game_state = 2;
+                    this.socket.on("updateClient", (clientData: any) => {
+                        this.playerLeft = clientData.pl;
+                        this.playerRight = clientData.pr;
+                        this.ball = clientData.b;
                         
-                        this.startMouseEvent();
-                        this.game_state = 2;
-                        this.socket.on("updateClient", (clientData: any) => {
-                            this.playerLeft = clientData.pl;
-                            this.playerRight = clientData.pr;
-                            this.ball = clientData.b;
-                            // console.log(clientData.pl);
-                            // console.log(clientData.pr);
-                            //console.log(clientData.b);
-                            if (clientData.b && clientData.pr && clientData.pl){
-                                //console.log('render')
-                                this.renderGame();
-                            }
-                        });
+                        if (clientData.b && clientData.pr && clientData.pl){
+                            this.renderGame();
+                        }
                     });
+                });
 
-                    // this.socket.on('updateTime', (time: number) => {
-                    //     this.gameCounter = time.toString();
-                    // })
-
-                //});
+                this.socket.on('updateTime', (time: number) => {
+                        this.gameCounter = time;
+                })
 
                 this.socket.on("initData", (clientData: any) => {
                     this.playerLeft = clientData.pl;
@@ -335,14 +342,21 @@ export default defineComponent({
                     this.initGame(clientData.scw, clientData.sch);
                 });
 
-                // this.socket.on("leaveRoom", () => {
-                //     //this.socket.emit('clear');
-                //     this.$router.push('/profile');
-                // });
-                // console.log(this.socket.id);
-
             });
-            //this.initGame(800, 400);
+        },
+        displayResult(){
+            this.renaderTable();
+            this.context.font = "30px Arial";
+            this.context.textAlign = "center";
+            this.context.fillStyle = "RED";
+            this.context.fillText("Game Over\n", this.canvas.width/2 , (this.canvas.height/2));
+            if(this.playerLeft.score > this.playerRight.score){
+                this.context.fillText(`${this.left_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            } else if (this.playerLeft.score < this.playerRight.score){
+                this.context.fillText(`${this.right_player_login} Win!`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }  else {
+                this.context.fillText(`NULL MATCH`, this.canvas.width/2 , (this.canvas.height/2) + 50);
+            }
         },
         async isUserPlaying(){
             const resp = await axios({
@@ -360,8 +374,10 @@ export default defineComponent({
             }
         },
         tabClosed(event:any){
-            if (this.socket)
+            if (this.socket){
+                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.socket.disconnect();
+            }
         },
         tabChanged(event:any){
             this.tabClosed(event);
@@ -374,10 +390,12 @@ export default defineComponent({
         document.removeEventListener('visibilitychange', this.tabChanged);
     },
     unmounted(){
-        console.log('onevone unmounted');
-        //this.socket.emit("stopTime");
-        if (this.socket)
+        if (this.timerInterval)
+            clearInterval(this.timerInterval);
+        if (this.socket){
+            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.socket.disconnect();
+        }
     },
 })
 </script>

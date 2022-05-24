@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import axios from 'axios';
+import { Socket } from 'engine.io-client';
 interface message{
 	id: number;
 	room_id: number;
@@ -41,16 +42,25 @@ interface Room{
 
 
 export default createStore({
-  strict: true,
+  // strict: true,
   state: {
     chatPublicMsgs: [
     ] as Array<message>,
     rooms: [] as Array<Room>,
     beforeAuth2 : false as boolean,
     is_verify: false as boolean, // V
-    onlineUsers: [] as Array<number>
+    onlineUsers: [] as Array<number>,
+    inGameUsers: [] as Array<number>,
+    MainAppSocket: '' as any,
+    num: 0 as number,
   },
   getters: {
+    get_main_app_socket(state:any){
+      return state.MainAppSocket;
+    },
+    get_in_game_users(state:any){
+      return state.inGameUsers;
+    },
     get_online_users(state:any){
       return state.onlineUsers;
     },
@@ -76,6 +86,17 @@ export default createStore({
   mutations: {
     remove_at(state:any, index:number){
       state.chatPublicMsgs.splice(index, 1);
+    },
+    set_in_game_users(state:any, ingameusers:Array<number>){
+      state.inGameUsers = ingameusers;
+    },
+    set_number(state:any, n:number){
+      console.log(`before ${state.num}`);
+      state.num = n;
+      console.log(`after ${state.num}`);
+    },
+    set_main_app_socket(state:any, socket:any){
+      state.MainAppSocket = socket;
     },
     set_online_users(state:any, us:Array<number>){
       state.onlineUsers = us;
