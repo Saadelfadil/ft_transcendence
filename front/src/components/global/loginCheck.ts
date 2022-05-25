@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import router from '@/router';
 import { numberLiteralTypeAnnotation } from '@babel/types';
@@ -21,7 +20,6 @@ export default {
             console.log("component name: ", (this as any).$options.name);
             if ((this as any).$options.name === "RouterLink" ||
             (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === "LoginBlock") return 
-            console.log(`global check`);
 
                 const resp = await axios({
                     method: 'get',
@@ -35,6 +33,10 @@ export default {
                     (this as any).avatar = resp.data.image_url;
                     (this as any).username = resp.data.login;
                     (this as any).joinedRooms = resp.data.joinedRooms;
+                    if (resp.data.twof && (this as any).auth_switch)
+                    {
+                        router.replace({name: 'profile'});
+                    }
                 } else {
                     (this as any).logged = false;
                     router.replace({name: 'login'});

@@ -97,7 +97,7 @@ export default defineComponent({
                         if (!sig)
                             sig = !store.getters.get_prev_auth;
                         store.commit('set_verify', false);
-                        await this.changeDBAuth();
+                        // await this.changeDBAuth();
                         if (!sig)
                         {
                             this.$emit('change_auth_display', {twof_qrcode: response.data.twof_qrcode, twof_secret: response.data.twof_secret});

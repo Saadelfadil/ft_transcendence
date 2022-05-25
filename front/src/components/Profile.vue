@@ -40,7 +40,7 @@
                 <input type="checkbox" class="opacity-0 absolute" @click="changeAuth">
                 <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" :class="{checked : auth2_enabled}" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
             </div>
-            <div class="select-none font-semibold text-gray-700">enable authentication</div>
+            <div class="select-none font-semibold text-gray-700"> enable authentication </div>
             </label>
         </div>
       </div>
@@ -111,13 +111,6 @@ export default defineComponent({
             auth_switch: false as boolean,
             history_category: 0 as number,
         }
-    },
-    async created(){
-        console.log("PROFILE COMPONENT: " ,this.$router.options.history);
-        await this.getUserInfo();
-        store.commit('set_verify', this.auth_switch && this.auth2_enabled);
-        if (this.auth2_enabled && this.auth_switch)
-            this.state = 1;
     },
     computed: {
         error_trigger() : boolean {
@@ -322,6 +315,13 @@ export default defineComponent({
         }
     },
     watch: {
+        async user_id(){
+            await this.getUserInfo();
+            store.commit('set_verify', this.auth_switch && this.auth2_enabled);
+            if (this.auth2_enabled && this.auth_switch) {
+                this.state = 1;
+            }
+        },
         state()
         {
             if (this.state === 1)
@@ -342,3 +342,8 @@ const toBase64 =(file:any) => new Promise((resolve, reject) => {
 
 </script>
 
+<style scoped>
+.checked{
+    display: block;
+}
+</style>

@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    container_name: ${DB_HOST}
+
+  nestjs:
+    build: 
+      context: ./back
+      dockerfile: ./Dockerfile
+    image: back_nest
+    environment: 
+      DB_TYPE: ${DB_TYPE}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      HOST_IP: ${HOST_IP}
+    ports: 
+      - "3000:3000"
+    container_name: nest-trans
+    depends_on: 
+      - db
+
+  vuejs:
+    build: 
+      context: ./front
+      dockerfile: ./Dockerfile
+    image: front_vue
+    # environment: 
+    #   - HOST_IP=${HOST_IP}
+    #   - AUTH=${AUTH}
+    ports: 
+      - "8080:8080"
+    container_name: vue-trans
