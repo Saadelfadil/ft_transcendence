@@ -228,7 +228,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'get',
-                    url: `http://localhost:3000/game/rooms`
+                    url: `http://${process.env.VUE_APP_HOST_IP}:3000/game/rooms`
                 });
                 this.rooms_info = resp.data;
 
@@ -250,7 +250,7 @@ export default defineComponent({
             try {
                 const resp = await axios({
                     method: 'post',
-                    url: `http://localhost:8080/api/getusers`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getusers`,
                     data : {usersId: this.users_ids}
                 });
                 
@@ -314,7 +314,7 @@ export default defineComponent({
             this.context.fill();
         },
         async getRooms(){
-            const resp = await axios.get(`http://localhost:3000/game/rooms`);
+            const resp = await axios.get(`http://${process.env.VUE_APP_HOST_IP}:3000/game/rooms`);
             this.gameRooms = resp.data;
             console.log(resp.data);
         },
@@ -334,7 +334,7 @@ export default defineComponent({
                 this.socket.disconnect();
                 //this.socket.off();
             }
-            this.socket = io(`http://localhost:3000/${namespace}`);
+            this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/${namespace}`);
 
             this.socket.on('connect', () => {
                 console.log(name,'heeeeere');

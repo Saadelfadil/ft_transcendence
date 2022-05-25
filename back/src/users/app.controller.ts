@@ -300,9 +300,9 @@ export class AppController {
 
 	@Post('login')
 	async getData(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
-		const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
-		const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
-		const REDIRECT_URI = "http://localhost:8080/login";
+		const UID = process.env.UID;
+		const SECRET = process.env.SECRET;
+		const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
 
 		// 42 authenticator instance
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);

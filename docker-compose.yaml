@@ -22,6 +22,8 @@ services:
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
       HOST_IP: ${HOST_IP}
+      SECRET: ${SECRET}
+      UID: ${UID}
     ports: 
       - "3000:3000"
     container_name: nest-trans
@@ -33,9 +35,9 @@ services:
       context: ./front
       dockerfile: ./Dockerfile
     image: front_vue
-    # environment: 
-    #   - HOST_IP=${HOST_IP}
-    #   - AUTH=${AUTH}
+    environment: 
+      HOST_IP: ${HOST_IP}
+      RED_URI: ${RED_URI}
     ports: 
       - "8080:8080"
     container_name: vue-trans

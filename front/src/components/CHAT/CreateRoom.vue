@@ -178,7 +178,7 @@ export default defineComponent({
           if (this.tmp_name.length !== 0)
           {
             const resp = await axios.post(
-              `http://localhost:8080/room`,
+              `http://${process.env.VUE_APP_HOST_IP}:8080/room`,
               {
                 "name": this.tmp_name,
                 "locked": this.tmp_password.length > 0 ? true : false,

@@ -121,7 +121,7 @@ export default defineComponent({
       {
         await axios ({
           method: 'post',
-          url: `http://localhost:8080/api/logout`
+          url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/logout`
         });
         router.replace({name: 'login'});
       }

@@ -120,7 +120,7 @@ export default  defineComponent({
    data()
    {
       return {
-		socket : io("http://localhost:3000/privateChat"),
+		socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/privateChat`),
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
 		isOwner: false as boolean,
@@ -166,21 +166,21 @@ export default  defineComponent({
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
-				url: `http://localhost:8080/api/joinedRooms`,
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/joinedRooms`,
                 data: {id:this.user_id}
 			});
 		},
 		getBlockedList(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/block/users`
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/block/users`
 			});
 		},
 		async getUserMessages()
         {
 			// console.log(`display blocked list ${this.blockedList}`)
             const resp = await axios.get(
-				`http://localhost:8080/messages/${this.uId}`,
+				`http://${process.env.VUE_APP_HOST_IP}:8080/messages/${this.uId}`,
 			);
             const data = resp.data;
 			let newArray = [];
@@ -203,7 +203,7 @@ export default  defineComponent({
 		joinedAndBlocked(){
 			axios({
 				method: 'get',
-				url: `http://localhost:8080/messages/${this.uId}`
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/messages/${this.uId}`
 			});
 		},
     addMessage()
@@ -311,7 +311,7 @@ export default  defineComponent({
 		declineInvite(msgObj:message, msg_index:number){
 
 			// console.log(`decline at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
-			let socket = io("http://localhost:3000/onevone");
+			let socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/onevone`);
 			socket.on('connect', () => {
 				socket.emit('decline', this.getRoomQuery());
 				socket.disconnect();
@@ -472,7 +472,7 @@ export default  defineComponent({
 	async addAdmin()
 	{
 		const resp = await axios.post(
-			`http://localhost:8080/room/${this.roomId}/add-admin`,
+			`http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.roomId}/add-admin`,
 			{
 				"user_id": this.clickeduser_id
 			},

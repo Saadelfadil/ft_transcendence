@@ -33,11 +33,11 @@ AppModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: process.env.POSTGRES_HOST,
-                port: parseInt(process.env.POSTGRES),
-                username: process.env.DATABASE_USER,
-                password: process.env.DATABASE_PASSWORD,
-                database: process.env.DB_NAME,
+                host: process.env.DB_HOST || 'localhost',
+                port: parseInt(process.env.DB_PORT) || 5432,
+                username: process.env.DB_USER || 'admin',
+                password: process.env.DB_PASS || 'admin',
+                database: process.env.DB_NAME || 'ft_transcendence',
                 entities: [user_entity_1.UserEntity, userFriends_entity_1.UserFriendsEntity, userGame_entity_1.UserGameEntity, userHistory_entity_1.UserHistoryEntity, game_entities_1.Room, game_entities_1.Match, message_entity_1.Message, ban_entity_1.Ban, block_entity_1.Block, room_message_entity_1.RoomMessage, room_entity_1.Rooms],
                 synchronize: true,
             }),

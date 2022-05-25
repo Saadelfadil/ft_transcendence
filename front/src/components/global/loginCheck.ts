@@ -23,7 +23,7 @@ export default {
 
                 const resp = await axios({
                     method: 'get',
-                    url: `http://localhost:8080/api/islogin`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/islogin`,
                     withCredentials: true
                 });
                 if (resp.data.status){

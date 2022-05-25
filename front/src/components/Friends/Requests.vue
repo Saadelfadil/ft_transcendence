@@ -64,7 +64,7 @@ export default defineComponent({
           try{
               const resp = await axios({
                   method: 'post',
-                  url: `http://localhost:8080/api/getrequests`,
+                  url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getrequests`,
                   data: { id: this.user_id },
                   withCredentials: true,
               });
@@ -85,7 +85,7 @@ export default defineComponent({
                 is_accept: val,
                 request_user_id: id
               },
-              url: `http://localhost:8080/api/requesttofriend`,
+              url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/requesttofriend`,
               withCredentials: true
           });
           this.user.map((req, index) => {

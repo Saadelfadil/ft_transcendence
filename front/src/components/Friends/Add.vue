@@ -42,7 +42,7 @@ export default defineComponent({
                 const resp = await axios({
                     method: 'post',
                     data: { login: this.username_ },
-                    url: `http://localhost:8080/api/userbylogin`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/userbylogin`,
                     withCredentials: true
                 });
                 if (!resp.data.status){

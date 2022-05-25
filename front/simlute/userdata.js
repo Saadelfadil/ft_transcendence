@@ -6,7 +6,7 @@ const server = createServer((req, res) => {
 	
 	const response = axios({
 		method: 'get',
-		url: 'http://localhost:3000/api/user',
+		url: `http://${process.env.VUE_APP_HOST_IP}:3000/api/user`,
 		withCredentials: true
 	}).then((response) => {
 		console.log(response);

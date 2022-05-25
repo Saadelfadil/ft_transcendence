@@ -200,7 +200,7 @@ export default  defineComponent({
             // let popup : any = document.getElementById("popup");
             // popup.classList.remove('fade');
             
-            this.socket = io("http://localhost:3000/warmup");
+            this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/warmup`);
             this.socket.on("connect", () => {
                 this.plName = this.user_id.toString();
                 this.socket.emit("initGame", {userId: this.user_id});
@@ -240,7 +240,7 @@ export default  defineComponent({
         async isUserPlaying(){
             const resp = await axios({
                 method: 'POST',
-                url: `http://localhost:8080/api/getgamestatus`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getgamestatus`,
                 data: {
                     user_id: this.user_id,
                 }
@@ -256,7 +256,7 @@ export default  defineComponent({
             try {
                 let resp = await  axios({
                     method: 'POST',
-                    url: `http://localhost:8080/api/getloginbyid`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getloginbyid`,
                     data: {id: this.user_id}
                 });
                 this.left_player_avatar = resp.data.image_url;
@@ -264,7 +264,7 @@ export default  defineComponent({
 
                 resp = await  axios({
                     method: 'POST',
-                    url: `http://localhost:8080/api/getloginbyid`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getloginbyid`,
                     data: {id: 0}
                 });
                 this.right_player_avatar = resp.data.image_url;

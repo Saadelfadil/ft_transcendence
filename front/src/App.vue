@@ -24,7 +24,7 @@ export default defineComponent({
   data(){
     return {
       user_id: 0 as number,
-      socket : io("http://localhost:3000/onlineUsers") as any,
+      socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/onlineUsers`) as any,
     }
   },
   methods:{

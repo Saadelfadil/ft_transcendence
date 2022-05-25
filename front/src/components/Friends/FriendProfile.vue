@@ -111,7 +111,7 @@ export default defineComponent({
             // to be blocked this.$route.query.friend_id
             const resp = await axios({
                 method: 'POST',
-                url: `http://localhost:8080/block`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/block`,
                 data: {
                     blocked: this.$route.query.friend_id,
                 }
@@ -130,7 +130,7 @@ export default defineComponent({
                         friend_id:_id,
                         user_id:this.user_id    
                     },
-                    url: `http://localhost:8080/api/exactuser`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/exactuser`,
                     withCredentials: true,
                 });
         },
@@ -143,7 +143,7 @@ export default defineComponent({
                     data: {
                         login: this.user_info.login,
                     },
-                    url: `http://localhost:8080/api/addfriend`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/addfriend`,
                     withCredentials: true
                 });
                 this.user_info.is_friend = true;
@@ -167,7 +167,7 @@ export default defineComponent({
         isUserBlocked(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/block/${this.friend_id_query}`
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/block/${this.friend_id_query}`
 			});
 		},
     },

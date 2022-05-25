@@ -48,7 +48,7 @@ export default defineComponent({
     async unblockUser(blocked_user_id:number){
       const resp = await axios({
         method: 'DELETE',
-        url: `http://localhost:8080/block`,
+        url: `http://${process.env.VUE_APP_HOST_IP}:8080/block`,
         data:{
           blocked: blocked_user_id
         }
@@ -64,13 +64,13 @@ export default defineComponent({
     getBlockedList(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/block/users`
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/block/users`
 			});
 		},
     getListUsers(users_ids:Array<number>){
       return axios({
         method: 'POST',
-        url: `http://localhost:8080/api/listofusers`,
+        url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/listofusers`,
         data:{
           usersId: users_ids
         }

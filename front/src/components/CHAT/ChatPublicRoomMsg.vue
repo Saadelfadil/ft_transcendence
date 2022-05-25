@@ -124,8 +124,8 @@ export default  defineComponent({
    data()
    {
       return {
-		socket: io("http://localhost:3000/publicChat"),
-		socket2 : io("http://localhost:3000/privateChat"),
+		socket: io(`http://${process.env.VUE_APP_HOST_IP}:3000/publicChat`),
+		socket2 : io(`http://${process.env.VUE_APP_HOST_IP}:3000/privateChat`),
 		user_id: 0 as number,
 		clickeduser_id: 0 as number,
 		ownerId: 0 as number,
@@ -178,14 +178,14 @@ export default  defineComponent({
 	   amIJoinedToThisRoom(){
 		   return axios({
 			   method: 'POST',
-			   url: `http://localhost:8080/api/amijoinedtoroom`,
+			   url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/amijoinedtoroom`,
 			   data: {room_id: this.roomId}
 		   });
 	   },
 		getBlockedList(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/block/users`
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/block/users`
 			});
 		},
 	   chatStartUp(){
@@ -213,7 +213,7 @@ export default  defineComponent({
 		getBannedUsers(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/ban/room/${this.roomId}/banned`,
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/ban/room/${this.roomId}/banned`,
 			});
 		},
 		getRoomName(){
@@ -272,14 +272,14 @@ export default  defineComponent({
         {
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/room/${this.roomId}`,
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.roomId}`,
 			});
         },
 		getRoomsMessages()
         {
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/room/${this.roomId}/messages`,
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.roomId}/messages`,
 			});
         },
       addMessage()
@@ -336,7 +336,7 @@ export default  defineComponent({
 	  {
 		  axios({
 			  method: 'POST',
-			  url: `http://localhost:8080/room/leaveroom`,
+			  url: `http://${process.env.VUE_APP_HOST_IP}:8080/room/leaveroom`,
 			  data:{room_id: this.roomId}
 		  }).then(({data}) =>{
 			  if (data.status)
@@ -384,7 +384,7 @@ export default  defineComponent({
 			  	// TODO : axios:
 				//   if success
 				const resp = await axios.post(
-					`http://localhost:8080/ban`,
+					`http://${process.env.VUE_APP_HOST_IP}:8080/ban`,
 					{
 						"banned": false,
 						"room_id": this.roomId,
@@ -406,7 +406,7 @@ export default  defineComponent({
 	  async banClicked()
 	  {
 		  	const resp = await axios.post(
-				`http://localhost:8080/ban`,
+				`http://${process.env.VUE_APP_HOST_IP}:8080/ban`,
 				{
 					"banned": true,
 					"room_id": this.roomId,
@@ -420,7 +420,7 @@ export default  defineComponent({
 	  },
 	  async unBanClicked(){
 		const resp = await axios.delete(
-			`http://localhost:8080/ban/room/${this.roomId}/user/${this.clickeduser_id}`,
+			`http://l${process.env.VUE_APP_HOST_IP}:8080/ban/room/${this.roomId}/user/${this.clickeduser_id}`,
 		);
 		this.isPopUp = false;
 		this.bannedUsers.map((id,index) => {
@@ -436,7 +436,7 @@ export default  defineComponent({
 	async addAdmin()
 	{
 		const resp = await axios.post(
-			`http://localhost:8080/room/${this.roomId}/add-admin`,
+			`http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.roomId}/add-admin`,
 			{
 				"user_id": this.clickeduser_id
 			},
@@ -457,7 +457,7 @@ export default  defineComponent({
 	async removeAdmin()
 	{
 		const resp = await axios.post(
-			`http://localhost:8080/room/${this.roomId}/remove-admin`,
+			`http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.roomId}/remove-admin`,
 			{
 				"user_id": this.clickeduser_id
 			},

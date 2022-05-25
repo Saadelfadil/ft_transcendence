@@ -140,13 +140,13 @@ export default defineComponent({
         newGetRooms(){
             return axios({
                 method: 'get',
-                url: `http://localhost:8080/room`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/room`,
             });
         },
         joinTheRoom(roomId:number, password:string){
             axios({
                 method: 'POST',
-                url: `http://localhost:8080/room/checkroompass/`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/room/checkroompass/`,
                 data:{room_pass: password, room_id: roomId}
             }).then(({data}) => {
 
@@ -161,7 +161,7 @@ export default defineComponent({
 		getJoinedRooms(){
 			return axios({
 				method: 'POST',
-				url: `http://localhost:8080/api/joinedRooms`,
+				url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/joinedRooms`,
                 data: {id:this.user_id}
 			});
 		},
@@ -231,7 +231,7 @@ export default defineComponent({
 		},
         async removeRoom(){
             const resp = await axios.delete(
-                `http://localhost:8080/room/${this.clickedRoom.id}`,
+                `http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.clickedRoom.id}`,
 			);
             this.isPopUp = false;
             //removeRoomWithId
@@ -241,7 +241,7 @@ export default defineComponent({
             console.log(`new password ${newpass}`);
 
             const resp = await axios.patch(
-					`http://localhost:8080/room/${this.clickedRoom.id}`,
+					`http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.clickedRoom.id}`,
 					{
                         password: newpass
 					},

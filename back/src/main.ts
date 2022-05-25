@@ -12,7 +12,7 @@ async function bootstrap() {
 
 
   app.enableCors({
-    origin: "http://localhost:8080",
+    origin: `http://${process.env.HOST_IP}:8080`,
     credentials: true,
   });
 

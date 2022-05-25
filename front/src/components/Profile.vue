@@ -151,7 +151,7 @@ export default defineComponent({
                 return ;
             await axios({
                 method: 'post',
-                url: `http://localhost:8080/api/update`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/update`,
                 data: {
                     login: null,
                     image_url: this.user_info.avatar_file_obj,
@@ -234,7 +234,7 @@ export default defineComponent({
 
             const resp = await axios({
                 method: 'post',
-                url: `http://localhost:8080/api/update`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/update`,
                 data: {
                     login: userName,
                     image_url: null,
@@ -283,7 +283,7 @@ export default defineComponent({
             try {
                 await axios({
                     method: 'get',
-                    url: `http://localhost:8080/api/user`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/user`,
                     withCredentials: true
                 }).then((response) => {
                     this.user_info.avatar_file_name = response.data.image_url;

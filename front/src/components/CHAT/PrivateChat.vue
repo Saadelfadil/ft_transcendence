@@ -82,7 +82,7 @@ export default defineComponent({
             try {
 
                 const resp = await axios.get(
-					`http://localhost:8080/messages`,
+					`http://${process.env.VUE_APP_HOST_IP}:8080/messages`,
 				);
                 this.privateList = resp.data;
             }

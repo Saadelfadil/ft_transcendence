@@ -82,7 +82,7 @@ export default defineComponent({
             {
                 await axios({
                 method: 'post',
-                url: `http://localhost:8080/api/validate`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/validate`,
                 data: {
                     twof_qrcode: this.input_code,
                     change: store.getters.get_verify,
@@ -126,7 +126,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'post',
-                    url: `http://localhost:8080/api/logout`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/logout`,
                     withCredentials: true
                 });
                 router.replace({name : 'login'});
@@ -144,7 +144,7 @@ export default defineComponent({
         {
             await axios({
                 method: 'post',
-                url: `http://localhost:8080/api/update`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/update`,
                 data: {
                     login: null,
                     image_url: null,

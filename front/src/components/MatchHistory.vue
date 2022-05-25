@@ -128,7 +128,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'get',
-                    url: `http://localhost:3000/game/matchs/` + (this.$route.query.history_id ? this.$route.query.history_id : '')
+                    url: `http://${process.env.VUE_APP_HOST_IP}:3000/game/matchs/` + (this.$route.query.history_id ? this.$route.query.history_id : '')
                 });
                 this.matchs_info = resp.data.reverse();
                 this.users_ids = []; // do not remove this line
@@ -149,7 +149,7 @@ export default defineComponent({
             try {
                 const resp = await axios({
                     method: 'post',
-                    url: `http://localhost:8080/api/getusers`,
+                    url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getusers`,
                     data : {usersId: this.users_ids}
                 });
                 this.match_display = resp.data;

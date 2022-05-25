@@ -1,7 +1,7 @@
 <template>
     <div class="bg-slate-800  flex z-[1000] justify-center absolute top-0 right-0 bottom-0 left-0">
         <div class="flex flex-col justify-center">
-        <a v-if="!is_logged" href="https://api.intra.42.fr/oauth/authorize?client_id=3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin&response_type=code">
+        <a v-if="!is_logged" v-bind:href = "process.env.VUE_APP_RED_URI">
             <button class="bg-blue-500 py-5 px-8 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
                 LOGIN
             </button>
@@ -33,7 +33,7 @@ export default defineComponent({
             async redirectIfLogged(){
             const resp = await axios({
                 method: 'get',
-                url: `http://localhost:8080/api/islogin`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/islogin`,
                 withCredentials: true,
             });
             this.is_logged = resp.data.status;
@@ -46,7 +46,7 @@ export default defineComponent({
         {
             await axios({
                 method: 'post',
-                url: `http://localhost:8080/api/login`,
+                url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/login`,
                 data: {
                     code: this.$route.query.code
                 },
