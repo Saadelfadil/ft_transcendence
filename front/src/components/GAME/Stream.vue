@@ -247,7 +247,6 @@ export default defineComponent({
         },
         async getUsers()
         {
-            console.log("array: ", this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',
@@ -271,10 +270,6 @@ export default defineComponent({
                 return ;
             }
             router.push({name: 'FriendProfile', query: {friend_id: target_id}});
-        },
-        startStreaming(stream_id:number)
-        {
-            console.log(`stream id ${stream_id}`);
         },
         initGame(scw: number, sch: number){
             
@@ -326,6 +321,7 @@ export default defineComponent({
 
         roomClicked(namespace:string, name:string, oneroom: OneRoom, room_index:number)
         {
+            
             this.left_player_avatar = oneroom.left_player.image_url;
             this.left_player_login = oneroom.left_player.login;
             this.right_player_avatar = oneroom.right_player.image_url;
@@ -346,6 +342,7 @@ export default defineComponent({
                 this.socket.on('noRoom', ()=>{
                     console.log( `room ${name}`);
                     this.room_display.splice(room_index, 1);
+                    this.rooms_info.splice(room_index, 1);
                 });
                 this.socket.on('canvasWH', (canvas: any) => {
                     console.log('roomwh', canvas.scw, canvas.sch);
