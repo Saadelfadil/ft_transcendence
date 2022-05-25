@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessagesController = void 0;
 const common_1 = require("@nestjs/common");
 const messages_service_1 = require("./messages.service");
-const create_message_dto_1 = require("./dto/create-message.dto");
 const block_service_1 = require("../block/block.service");
 const auth_guard_1 = require("../../users/auth.guard");
 const app_service_1 = require("../../users/app.service");
@@ -25,19 +24,7 @@ let MessagesController = class MessagesController {
         this.blockService = blockService;
         this.userService = userService;
     }
-    async finfffdOne(id, req) {
-        return this.messagesService.updateMessage(+id);
-    }
-    async create(createMessageDto, req) {
-        const user = await this.userService.getUserDataFromJwt(req);
-        const sessionId = user.id;
-        const userBlockedList = await this.blockService.blockedList(createMessageDto.to_id);
-        if (userBlockedList.includes(sessionId))
-            throw new common_1.HttpException({ message: 'You can\'t send message to this user!' }, common_1.HttpStatus.UNAUTHORIZED);
-        return this.messagesService.create(sessionId, createMessageDto);
-    }
     async findAll(req) {
-        console.log(`normal get request`);
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
         return this.messagesService.getChatList(sessionId);
@@ -47,29 +34,7 @@ let MessagesController = class MessagesController {
         const sessionId = user.id;
         return this.messagesService.findOne(sessionId, +id);
     }
-    async remove(id, req) {
-        const user = await this.userService.getUserDataFromJwt(req);
-        const sessionId = user.id;
-        return this.messagesService.removeMessage(sessionId, +id);
-    }
 };
-__decorate([
-    (0, common_1.Get)('/ffff/:id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], MessagesController.prototype, "finfffdOne", null);
-__decorate([
-    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_message_dto_1.CreateMessageDto, Object]),
-    __metadata("design:returntype", Promise)
-], MessagesController.prototype, "create", null);
 __decorate([
     (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
     (0, common_1.Get)(),
@@ -87,15 +52,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], MessagesController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.UseInterceptors)(common_1.ClassSerializerInterceptor),
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], MessagesController.prototype, "remove", null);
 MessagesController = __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthenticatedGuard),
     (0, common_1.Controller)('messages'),

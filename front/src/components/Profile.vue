@@ -31,7 +31,7 @@
           <div class="flex" @dblclick="editUserName">
             <!-- <input disabled id="username" class="border-1  rounded-r px-4 py-2 w-full" type="text" v-if="!user_name_editing" :value="user_info.user_name" /> -->
             <div class="px-4 py-2 w-full border border-gray-300 rounded-md" v-if="!user_name_editing">{{user_info.user_name}}</div>
-            <input id="username" class="border-1  rounded-r px-4 py-2 w-full" :placeholder="user_name_placeholder" type="text" v-else v-focus :class="{'bg-red-600 bg-opacity-75' : invalid_user_name}" v-model="tmp_user_name" @keypress="userIsTyping" @keyup="userIsTyping" @blur="doneEditing(false)" @keypress.enter="doneEditing(true)"/>
+            <input id="username" class="border-1  rounded-r px-4 py-2 w-full" placeholder="username" type="text" v-else v-focus :class="{'bg-red-600 bg-opacity-75' : invalid_user_name}" v-model="tmp_user_name" @keypress="userIsTyping" @keyup="userIsTyping" @blur="doneEditing(false)" @keypress.enter="doneEditing(true)"/>
           </div>
         </div>
         <div class="pb-4">
@@ -58,9 +58,10 @@
         </div>
         </div>
     </div>
-
   </div>
-
+    <div v-if="error_trigger" class="bg-red-100 border border-red-400 text-red-700 px-4 py-1 mt-1 rounded-lg">
+        <span class="block sm:inline">{{error_reason}}</span>
+    </div>
 </div>
 
 <InitAuthBlock   :twof_qrcode="qr_image" @valid_auth="setAuth2" @cancel_signal="cancel_sig"  @change_auth_display="update_auth" :twof_secret="qr_secret" v-if="state === 1" />
@@ -97,10 +98,11 @@ export default defineComponent({
                 wins: 0 as number,
                 loses: 0 as number,
             },
-            user_name_placeholder: 'username' as string,
+            error_reason: '' as string, 
             max_avatar_size: 10000 as number,
             auth2_enabled: false as boolean,
             invalid_user_name: false as boolean,
+            invalid_image_upload: false as boolean,
             tmp_user_name: '' as string,
             user_name_editing: false as boolean,
             userInfoSendEndPoint: '' as string /* for example http://localhost:3000/upload */,
@@ -118,6 +120,9 @@ export default defineComponent({
             this.state = 1;
     },
     computed: {
+        error_trigger() : boolean {
+            return (this.invalid_user_name || this.invalid_image_upload);
+        },
         avatar_img()
         {
             const img : string = this.user_info.avatar_file_name;
@@ -153,7 +158,7 @@ export default defineComponent({
                 return ;
             await axios({
                 method: 'post',
-                url: 'http://localhost:8080/api/update',
+                url: `http://localhost:8080/api/update`,
                 data: {
                     login: null,
                     image_url: this.user_info.avatar_file_obj,
@@ -163,8 +168,18 @@ export default defineComponent({
             }).then((response) => {
                 if (response.data.status)
                     this.user_info.avatar_file_name = response.data.image_url;
+                else {
+                    this.image_upload_failure();
+                }
                 this.user_info.avatar_file_obj = null;
             });
+        },
+        image_upload_failure(){
+            this.error_reason = 'not able to upload maybe too big or not image';
+            this.invalid_image_upload = true;
+            setTimeout(() => {
+                this.invalid_image_upload = false;
+            },  2000);
         },
         promptChoosFile ()
         {
@@ -185,7 +200,7 @@ export default defineComponent({
                     // here i should send to the backend to check if user name he typed is valid
                     if (tmp.length > 10){
                         this.tmp_user_name = '';
-                        this.user_name_placeholder = 'must be less or equal 10 chars';
+                        this.error_reason = 'must be less or equal 10 chars';
                         this.invalid_user_name = true;
                         return ;
                     }
@@ -197,7 +212,7 @@ export default defineComponent({
                         else
                         {
                             this.tmp_user_name = '';
-                            this.user_name_placeholder = 'not available username';
+                            this.error_reason = 'not available username';
                             this.invalid_user_name = true;
                             return ;
                         }
@@ -206,9 +221,9 @@ export default defineComponent({
                 else
                 {
                     if (tmp.length !== this.tmp_user_name.length)
-                        this.user_name_placeholder = 'only spaces are not valid';
+                        this.error_reason = 'only spaces are not valid';
                     else
-                        this.user_name_placeholder = 'can not be empty';
+                        this.error_reason = 'can not be empty';
                     this.tmp_user_name = '';
                     this.invalid_user_name = true;
                     return ;
@@ -216,35 +231,31 @@ export default defineComponent({
             }
             this.user_name_editing = false;
             this.tmp_user_name = '';
-            this.user_name_placeholder = 'username';
+            this.error_reason = 'username';
             this.invalid_user_name = false;
         },
         async isUserNameValid(userName:string){
             // simlation for getting data from db base and check if username already there 
             // request for check username
             let val: boolean = true;
-            await axios({
+
+            const resp = await axios({
                 method: 'post',
-                url: 'http://localhost:8080/api/update',
+                url: `http://localhost:8080/api/update`,
                 data: {
                     login: userName,
                     image_url: null,
                     twof: null
                 },
                 withCredentials: true
-            }).then((response) => {
-                val = true;
-            }, (error) => {
-                console.log(error);
-                val = false;
             });
-            return {value: val};
+            return {value: resp.data.status};
 
         },
         userIsTyping(e:any){
             if (e.keyCode !== 13) // 13 is for enter
             {
-                this.user_name_placeholder = 'username';
+                this.error_reason = 'username';
                 this.invalid_user_name = false;
             }
         },
@@ -279,7 +290,7 @@ export default defineComponent({
             try {
                 await axios({
                     method: 'get',
-                    url: 'http://localhost:8080/api/user',
+                    url: `http://localhost:8080/api/user`,
                     withCredentials: true
                 }).then((response) => {
                     this.user_info.avatar_file_name = response.data.image_url;
@@ -328,29 +339,6 @@ const toBase64 =(file:any) => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-// these function are just for testing
-function sleep(ms:number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 </script>
-
-
-<style scoped>
-.checked{
-    display: block;
-}
-
- ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: blue;
-  opacity: 1; /* Firefox */
-}
-
-:-ms-input-placeholder { /* Internet Explorer 10-11 */
-  color: blue;
-}
-
-::-ms-input-placeholder { /* Microsoft Edge */
-  color: blue;
-}
-</style>
 

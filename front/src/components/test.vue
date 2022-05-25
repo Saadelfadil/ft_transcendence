@@ -154,16 +154,7 @@ export default defineComponent({
       }
     }
 })
-/*
-				await Promise.all([this.getRoomsMessages()]).then((data:Array<any>) =>{
-					store.commit('updatePublicRoomMsgs', data[0].data);
-				});
-      getBlockedList(){
-			return axios({
-				method: 'GET',
-				url: 'http://localhost:8080/block/users'
-			});
-		},*/
+
 
 </script>
 

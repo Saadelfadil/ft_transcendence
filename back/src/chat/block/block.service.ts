@@ -32,7 +32,6 @@ export class BlockService {
 		{
 			if( !userData.blocked.includes(createBlockDto.blocked) )
 				userData.blocked.push(createBlockDto.blocked);
-		
 			return this.blocksRepository.save(userData);
 		}
 		else
@@ -68,17 +67,11 @@ export class BlockService {
 		return data.map(a => a.id);
 	}
 
-	blockedListUsers(sessionId: number) {
-
-		return getConnection().query(`
-			SELECT public."users".*  FROM
-				public."block"
-				JOIN
-						public."users"
-					ON
-						public."users".id = ANY(public."block".blocked)
-				WHERE public."block".user_id = ${sessionId}
-		`);
+	async blockedListUsers(sessionId: number) {
+		const data =  await this.blocksRepository.findOne({user_id : sessionId});
+		if (data)
+			return data.blocked;
+		return [];
 	}
 	
 

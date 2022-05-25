@@ -228,7 +228,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'get',
-                    url: 'http://localhost:3000/game/rooms'
+                    url: `http://localhost:3000/game/rooms`
                 });
                 this.rooms_info = resp.data;
 
@@ -251,7 +251,7 @@ export default defineComponent({
             try {
                 const resp = await axios({
                     method: 'post',
-                    url: 'http://localhost:8080/api/getusers',
+                    url: `http://localhost:8080/api/getusers`,
                     data : {usersId: this.users_ids}
                 });
                 
@@ -319,7 +319,7 @@ export default defineComponent({
             this.context.fill();
         },
         async getRooms(){
-            const resp = await axios.get('http://localhost:3000/game/rooms');
+            const resp = await axios.get(`http://localhost:3000/game/rooms`);
             this.gameRooms = resp.data;
             console.log(resp.data);
         },

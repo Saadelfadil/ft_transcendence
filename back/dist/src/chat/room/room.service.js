@@ -31,6 +31,8 @@ let RoomService = class RoomService {
     }
     async create(sessionId, createRoomDto) {
         let test = await this.roomsRepository.findOne({ name: createRoomDto.name });
+        if (createRoomDto.name == undefined || createRoomDto.locked == undefined || createRoomDto.password == undefined)
+            return;
         if (test !== undefined) {
             return { status: false, error: 'there exists room with this name!' };
         }

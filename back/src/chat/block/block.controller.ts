@@ -17,37 +17,31 @@ export class BlockController {
 	async blockUser(@Body() createBlockDto: CreateBlockDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// const sessionId: number = 1; // TODO: get it from jwt
 		return this.blockService.blockUser(sessionId, createBlockDto);
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('users')
 	async blockedList(@Req() req: Request) {
-		// const sessionId: number = 1;
+
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// TODO: get it from jwt
-		return this.blockService.blockedListUsers(sessionId); // Return list of all blocked users
+		return this.blockService.blockedListUsers(sessionId);
 	}
 	
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Delete()
 	async unBlockUser(@Body() createBlockDto: CreateBlockDto, @Req() req: Request) {
-		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// TODO: get it from jwt
 		return this.blockService.unBlockUser(sessionId, createBlockDto);
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get(':id')
 	async isBlocked(@Param('id', ParseIntPipe) id: string, @Req() req: Request) {
-		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		// TODO: get it from jwt
 		return this.blockService.isBlocked(sessionId, +id);
 	}
 }

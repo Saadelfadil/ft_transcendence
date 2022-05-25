@@ -64,7 +64,7 @@ export default defineComponent({
           try{
               const resp = await axios({
                   method: 'post',
-                  url: 'http://localhost:8080/api/getrequests',
+                  url: `http://localhost:8080/api/getrequests`,
                   data: { id: this.user_id },
                   withCredentials: true,
               });
@@ -83,10 +83,9 @@ export default defineComponent({
               method: 'post',
               data: {
                 is_accept: val,
-                user_id: this.user_id,
                 request_user_id: id
               },
-              url: 'http://localhost:8080/api/requesttofriend',
+              url: `http://localhost:8080/api/requesttofriend`,
               withCredentials: true
           });
           this.user.map((req, index) => {

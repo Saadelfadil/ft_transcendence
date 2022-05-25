@@ -150,10 +150,10 @@ export default defineComponent({
                 data:{room_pass: password, room_id: roomId}
             }).then(({data}) => {
 
-                if (data.status){
+                if (data.status || password === ''){
                     // means valid password
                     this.getRoomData(roomId);
-                }else{
+                } else {
                     this.passIsInvalid();
                 }
             });
@@ -167,7 +167,6 @@ export default defineComponent({
 		},
         joinToRoom(room_id:number, is_locked:boolean)
         {
-            console.log("joing to: ", room_id, " locked: ", is_locked);
             // probably this function shoould by async
             if (is_locked)
                 this.joinToPrivateRoom(room_id);
@@ -198,9 +197,7 @@ export default defineComponent({
             this.user_room_pass = '';
         },
         async getRoomData(room_id:number)
-        {     
-            console.log("called get room data");  
-
+        {
 			store.commit('setRoomId', room_id);
             router.push({name: 'chatpublicmsg', query: { roomId: room_id}});
         },
@@ -242,8 +239,6 @@ export default defineComponent({
         },
         async updateRoomPassword(newpass:string){
             console.log(`new password ${newpass}`);
-            // if password changed correctly
-            // this.isPopUp = false;
 
             const resp = await axios.patch(
 					`http://localhost:8080/room/${this.clickedRoom.id}`,

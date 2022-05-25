@@ -9,7 +9,7 @@ export declare class BlockService {
     blockUser(sessionId: number, createBlockDto: CreateBlockDto): Promise<Block>;
     unBlockUser(sessionId: number, createBlockDto: CreateBlockDto): Promise<Block>;
     blockedList(sessionId: number): Promise<any>;
-    blockedListUsers(sessionId: number): Promise<any>;
+    blockedListUsers(sessionId: number): Promise<number[]>;
     isBlocked(sessionId: number, userId: number): Promise<{
         blocked: boolean;
     }>;

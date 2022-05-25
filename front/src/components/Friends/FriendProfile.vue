@@ -73,6 +73,7 @@ export default defineComponent({
     data()
     {
         return {
+            friend_id_query: Number(this.$route.query.friend_id) as number, 
             status_color : 'bg-blue-500',
             onlineUsers: [] as Array<number>,
             user_id: 0 as number,
@@ -88,11 +89,11 @@ export default defineComponent({
             return this.user_info.login;
         },
         userStatus() : string {
-            if (store.getters.get_in_game_users.includes(Number(this.$route.query.friend_id))){
+            if (store.getters.get_in_game_users.includes(this.friend_id_query)){
                 this.status_color = 'bg-yellow-500';
                 return 'In Game';
             }
-            if (store.getters.get_online_users.includes(Number(this.$route.query.friend_id)))
+            if (store.getters.get_online_users.includes(this.friend_id_query))
             {
                 this.status_color = 'bg-green-500';
                 return 'Online';
@@ -110,7 +111,7 @@ export default defineComponent({
             // to be blocked this.$route.query.friend_id
             const resp = await axios({
                 method: 'POST',
-                url: 'http://localhost:8080/block',
+                url: `http://localhost:8080/block`,
                 data: {
                     blocked: this.$route.query.friend_id,
                 }
@@ -129,7 +130,7 @@ export default defineComponent({
                         friend_id:_id,
                         user_id:this.user_id    
                     },
-                    url: 'http://localhost:8080/api/exactuser',
+                    url: `http://localhost:8080/api/exactuser`,
                     withCredentials: true,
                 });
         },
@@ -141,9 +142,8 @@ export default defineComponent({
                     method: 'post',
                     data: {
                         login: this.user_info.login,
-                        user_id: this.user_id, 
                     },
-                    url: 'http://localhost:8080/api/addfriend',
+                    url: `http://localhost:8080/api/addfriend`,
                     withCredentials: true
                 });
                 this.user_info.is_friend = true;
@@ -153,6 +153,11 @@ export default defineComponent({
             }
         },
         validFriend(friend_id:number){
+            if (isNaN(this.friend_id_query) || friend_id === 0)
+            {
+                router.go(-1);
+                return ;
+            }
             if (this.user_id === friend_id)
             {
                 router.replace({name: 'profile'});
@@ -162,18 +167,25 @@ export default defineComponent({
         isUserBlocked(){
 			return axios({
 				method: 'GET',
-				url: `http://localhost:8080/block/${Number(this.$route.query.friend_id)}`
+				url: `http://localhost:8080/block/${this.friend_id_query}`
 			});
 		},
     },
     watch:{
         async user_id()
         {
-            this.validFriend(Number(this.$route.query.friend_id));
-            await Promise.all([this.isUserBlocked(), this.getExactUserData(Number(this.$route.query.friend_id))]).then((resps:Array<any>) =>{
-                this.user_info = resps[1].data;
-                this.user_info.is_blocked = resps[0].data.blocked; // do not move this linbe above
-            });
+            this.validFriend(this.friend_id_query);
+            try{
+                await Promise.all([this.isUserBlocked(), this.getExactUserData(this.friend_id_query)]).then((resps:Array<any>) =>{
+                    if (resps[1].data.error){
+                        router.go(-1);
+                    }
+                    this.user_info = resps[1].data;
+                    this.user_info.is_blocked = resps[0].data.blocked; // do not move this linbe above
+                });
+            }catch(e){
+                router.go(-1);
+            }
         }
     }
 

@@ -118,7 +118,7 @@ export default defineComponent({
             this.context.fill();
         },
         async getRooms(){
-            const resp = await axios.get('http://localhost:3000/game/rooms');
+            const resp = await axios.get(`http://localhost:3000/game/rooms`);
             this.gameRooms = resp.data;
             console.log(resp.data);
         },

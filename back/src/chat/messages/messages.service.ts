@@ -19,7 +19,6 @@ export class MessagesService {
 	create(sessionId: number, createMessageDto: CreateMessageDto) {
 		let newMessage = this.messageRepository.create(createMessageDto);
 		newMessage.from_id = sessionId;
-		console.log(`reached create ${JSON.stringify(newMessage)}`); // create return undefined
 
 		return this.messageRepository.save(newMessage);
 	}

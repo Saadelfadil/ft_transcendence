@@ -36,7 +36,6 @@ export declare class AppController {
     amIJoinedToThisRoom(request: Request, body: any): Promise<{
         status: boolean;
     }>;
-    verify(request: Request, body: any): Promise<void>;
     validate(request: Request): Promise<{
         success: boolean;
         twof_qrcode: any;
@@ -83,6 +82,14 @@ export declare class AppController {
         is_friend: boolean;
         wins: number;
         loses: number;
+        error?: undefined;
+    } | {
+        error: boolean;
+        login?: undefined;
+        image_url?: undefined;
+        is_friend?: undefined;
+        wins?: undefined;
+        loses?: undefined;
     }>;
     getloginbyid(body: any): Promise<{
         login: string;

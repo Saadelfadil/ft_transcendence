@@ -29,8 +29,6 @@ export class RoomController {
 	async create(@Body() createRoomDto: CreateRoomDto, @Req() req: Request) {
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-
-		
 		return this.roomService.create(sessionId, createRoomDto);
 	}
 
@@ -45,25 +43,27 @@ export class RoomController {
 	async IsRoomPassValid(@Body() body, @Req() req: Request){
 		const user = await this.userService.getUserDataFromJwt(req);
 		let status:boolean = true;
-		if (body.room_pass !== '')
-			status = await this.roomService.checkAuth(body.room_id, body.room_pass);
-		if (status){
-			// here i will add to joinedrooms id of the joined room
-			this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+		if (body.room_id !== undefined && body.room_pass !== undefined) {
+			if (body.room_pass !== '')
+				status = await this.roomService.checkAuth(body.room_id, body.room_pass);
+			if (status) {
+				this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+			}
+			return {status: status};
 		}
-		return {status: status};
+		return {status: false};
 	}
 
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post('leaveroom')
 	async LeaveRoom(@Body() body, @Req() req:Request){
 		const user = await this.userService.getUserDataFromJwt(req);
-		await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
+		if (body.room_id)
+			await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
 		return {status:true};
 	}
 
 
-	// TODO: should be protected : only edit only from room owner
 	@Get(':id')
 	findOne(@Param('id', ParseIntPipe) id: string) {
 		return this.roomService.findOne(+id);
@@ -72,8 +72,11 @@ export class RoomController {
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Patch(':id')
 	async update(@Param('id', ParseIntPipe) id: string, @Body() changePasswordDto: ChangePasswordDto, @Req() req: Request) {
+		
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
+		if (changePasswordDto.password == undefined)
+			return ;
 		// const sessionId: number = 1;
 		return this.roomService.update(sessionId, +id, changePasswordDto);
 
@@ -98,7 +101,9 @@ export class RoomController {
 		// const sessionId: number = 1;
 		const user = await this.userService.getUserDataFromJwt(req);
 		const sessionId: number = user.id;
-		return this.roomService.findRoomMessages(sessionId, [], +roomId);
+
+		const myBlockedList: number[] = await this.blockService.blockedList(sessionId);
+		return this.roomService.findRoomMessages(sessionId, myBlockedList, +roomId);
 	}
 
 	// Save msg to room

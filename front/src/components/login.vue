@@ -33,7 +33,7 @@ export default defineComponent({
             async redirectIfLogged(){
             const resp = await axios({
                 method: 'get',
-                url: 'http://localhost:8080/api/islogin',
+                url: `http://localhost:8080/api/islogin`,
                 withCredentials: true,
             });
             this.is_logged = resp.data.status;

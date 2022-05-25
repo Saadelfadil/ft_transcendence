@@ -139,31 +139,39 @@ export default  defineComponent({
 		avatar: '' as string,
 		roomInfo: null as any,
 		invalidTime: false as boolean,
+		blockedList: [] as Array<any>,
 		bannedUsers: [] as Array<number>,
 		clicked_user_name: '' as string,
       }
    },
 	watch:{
 		async user_id(){
-			console.log("current id: ", this.user_id);
+			if (isNaN(this.roomId))
+			{
+				router.go(-1);
+				return ;
+			}
 			this.chatStartUp();
-			await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBannedUsers(), this.amIJoinedToThisRoom()]).then((resps:Array<any>) =>{
-				if (!resps[3].data.status)
-				{
-					// means that you are in place that should not be
-					router.replace({name: 'chatpublic'});
-					return ;
-				}
-				resps[0].data.map((msg:any) => {
-					console.log(`all messages ${JSON.stringify(msg.msg)}`);
+			try{
+				await Promise.all([this.getRoomsMessages(), this.getRoomsInfo(), this.getBannedUsers(), this.amIJoinedToThisRoom(), this.getBlockedList()]).then((resps:Array<any>) =>{
+					if (!resps[3].data.status)
+					{
+						router.replace({name: 'chatpublic'});
+						return ;
+					}
+					store.commit('updatePublicRoomMsgs', resps[0].data);
+					this.roomInfo = resps[1].data;
+					this.isAdmin = this.roomInfo.admins.includes(this.user_id);
+					this.isOwner = (this.user_id == this.roomInfo.owner_id);
+					this.ownerId = this.roomInfo.owner_id;
+					this.bannedUsers = resps[2].data;
+					if (resps[4].data !== undefined)
+						this.blockedList = Array(resps[4].data);
 				});
-				store.commit('updatePublicRoomMsgs', resps[0].data);
-				this.roomInfo = resps[1].data;
-				this.isAdmin = this.roomInfo.admins.includes(this.user_id);
-				this.isOwner = this.user_id == this.roomInfo.owner_id;
-				this.ownerId = this.roomInfo.owner_id;
-				this.bannedUsers = resps[2].data;
-			});
+			}catch(e)
+			{
+				router.go(-1);
+			}
 		}
 	},
    methods: {
@@ -174,22 +182,23 @@ export default  defineComponent({
 			   data: {room_id: this.roomId}
 		   });
 	   },
+		getBlockedList(){
+			return axios({
+				method: 'GET',
+				url: `http://localhost:8080/block/users`
+			});
+		},
 	   chatStartUp(){
-		   console.log(this.roomId.toString(), "before");
 		   this.socket.on(this.roomId.toString(), ({ data }) => {
-			   console.log('message recieved; ', JSON.stringify(data));
 			   if (data.admin_id !== undefined)
 			   {
-				   console.log(`data is ${JSON.stringify(data)}`);
 				   if (data.add){
-					   console.log(`add value: ${data.admin_id} type: ${typeof data.admin_id}`);
 					   this.roomInfo.admins.push(data.admin_id); // just for front end so no need to refresh
 				   }
 					else{
 						this.roomInfo.admins.map((cur_id:number, index:number) => {
 							if (cur_id === data.admin_id)
 							{
-					   			console.log(`remove value: ${data.admin_id} type: ${typeof data.admin_id}`);
 								this.roomInfo.admins.splice(index, 1);
 								return ;
 							}
@@ -236,14 +245,13 @@ export default  defineComponent({
 				(response: any) => {
 					if(response.status)
 					{
-						// this.newMessage(messageData);
 						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'left'}});
 					}
 				}
 			)
 		},
 	   handleSubmitNewMessage(msg:string){
-		   console.log(`called now handel`);
+		   
 		   	const messageData = {
 				   		isInvite: true,
 						from_id: this.user_id,
@@ -258,9 +266,6 @@ export default  defineComponent({
 						{ 
 							data: messageData
 						},
-						// send message callback
-						(response: any) => {
-						}
 					)
 	   },
 	   getRoomsInfo()
@@ -286,21 +291,34 @@ export default  defineComponent({
 			this.curMsgData = '';
          }
       },
+	  	isUserBlocked(target_id:number){
+			  let tmp : boolean = false;
+			  this.blockedList.map((blocked_user:any) =>{
+				  if (blocked_user[0] == target_id)
+				  {
+					  tmp = true;
+					  return ;
+				  }
+			  });
+			return tmp;
+		},
 
 	  newMessage(data: any)
       {
-		console.log('called now');
-		const msgObj = {
-			id: data.id,
-			room_id: this.roomId,
-			from_id: data.from_id,
-			username: data.username,
-			image_url: data.avatar,
-			msg: data.message,
-			created: Date.now(),
-		};
-		this.curMsgData = '';
-		store.commit('addMessageToRoomMsgs', msgObj);
+		if( !this.isUserBlocked(Number(data.from_id)) )
+	  	{
+			const msgObj = {
+				id: data.id,
+				room_id: this.roomId,
+				from_id: data.from_id,
+				username: data.username,
+				image_url: data.avatar,
+				msg: data.message,
+				created: Date.now(),
+			};
+			this.curMsgData = '';
+			store.commit('addMessageToRoomMsgs', msgObj);
+		}
 	  },
 	  timestampToDateTime(unix_timestamp: number)
 	  {
@@ -359,7 +377,6 @@ export default  defineComponent({
 		  this.isPopUp = false;
 	  },
 
-	  ///ban/room/4/user/59490
 	  async muteClicked()
 	  {
 		  if (Number.isInteger(+this.numOfSeconds) && +this.numOfSeconds > 0)
@@ -394,7 +411,8 @@ export default  defineComponent({
 					"banned": true,
 					"room_id": this.roomId,
 					"user_id": this.clickeduser_id,
-					"duration": 0
+					"duration": 0,
+					created: Date.now(),
 				},
 			);
 		this.isPopUp = false;

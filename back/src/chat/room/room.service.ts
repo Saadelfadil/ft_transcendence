@@ -30,6 +30,8 @@ export class RoomService {
 
 	async create(sessionId: number, createRoomDto: CreateRoomDto) {
 		let test = await this.roomsRepository.findOne({name: createRoomDto.name});
+		if (createRoomDto.name == undefined || createRoomDto.locked == undefined || createRoomDto.password == undefined)
+			return ;
 		if (test !== undefined)
 		{
 			// means that already room with this name

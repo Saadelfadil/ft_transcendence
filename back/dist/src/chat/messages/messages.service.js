@@ -24,7 +24,6 @@ let MessagesService = class MessagesService {
     create(sessionId, createMessageDto) {
         let newMessage = this.messageRepository.create(createMessageDto);
         newMessage.from_id = sessionId;
-        console.log(`reached create ${JSON.stringify(newMessage)}`);
         return this.messageRepository.save(newMessage);
     }
     findOneByCreatedDate(msg_id) {

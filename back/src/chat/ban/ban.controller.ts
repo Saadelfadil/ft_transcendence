@@ -25,26 +25,30 @@ export class BanController {
 		const sessionId: number = user.id;
 
 		createBanDto.created =  Date.now();
-		
+
+		if (createBanDto.banned == undefined || createBanDto.room_id == undefined ||
+		createBanDto.user_id == undefined || createBanDto.duration == undefined)
+			return ;
 		const roomData = await this.roomService.findOne(createBanDto.room_id);
-		return this.banService.create(sessionId, roomData, createBanDto);
+		if (roomData){
+			return this.banService.create(sessionId, roomData, createBanDto);
+		}
+		return ;
 	}
 
 	@Get()
 	findAll() {
-		console.log(`BAN GET`);
 		return this.banService.findAll();
 	}
 
-	@Patch()
-	async update(@Body() updateBanDto: UpdateBanDto, @Req() req: Request) {
-		// const sessionId: number = 1;
-		const user = await this.userService.getUserDataFromJwt(req);
-		const sessionId: number = user.id;
+	// @Patch()
+	// async update(@Body() updateBanDto: UpdateBanDto, @Req() req: Request) {
+	// 	const user = await this.userService.getUserDataFromJwt(req);
+	// 	const sessionId: number = user.id;
 
-		const roomData = await this.roomService.findOne(updateBanDto.room_id);
-		return this.banService.update(sessionId, roomData, updateBanDto);
-	}
+	// 	const roomData = await this.roomService.findOne(updateBanDto.room_id);
+	// 	return this.banService.update(sessionId, roomData, updateBanDto);
+	// }
 
 	
 	@Get('room/:roomId/banned')

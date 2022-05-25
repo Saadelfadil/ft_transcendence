@@ -25,7 +25,7 @@ export default {
 
                 const resp = await axios({
                     method: 'get',
-                    url: 'http://localhost:8080/api/islogin',
+                    url: `http://localhost:8080/api/islogin`,
                     withCredentials: true
                 });
                 if (resp.data.status){

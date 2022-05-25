@@ -94,7 +94,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'GET',
-                    url: 'http://localhost:8080/api/users'
+                    url: `http://localhost:8080/api/users`
                 });
                 this.all_leaders = resp.data;
             }catch(e){

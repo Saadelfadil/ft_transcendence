@@ -157,7 +157,10 @@ export default defineComponent({
             this.rightLogin();
         },
         user_id(){
-            this.onevone();
+            if (this.$router.options.history.state.back)
+                this.onevone();
+            else
+                router.replace({name: 'profile'});
         }
     },
     methods: {
@@ -175,7 +178,7 @@ export default defineComponent({
                     data: {
                         id:+this.plName,
                     },
-                    url: 'http://localhost:8080/api/getloginbyid',
+                    url: `http://localhost:8080/api/getloginbyid`,
                     withCredentials: true
                 });
                 this.left_player_login = resp.data.login;
@@ -191,7 +194,7 @@ export default defineComponent({
                     data: {
                         id:+this.prName,
                     },
-                    url: 'http://localhost:8080/api/getloginbyid',
+                    url: `http://localhost:8080/api/getloginbyid`,
                     withCredentials: true
                 });
                 this.right_player_login = resp.data.login;
@@ -277,7 +280,8 @@ export default defineComponent({
         onevone(){
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);
-            console.log(this.$route.query.room_name_1vs1, this.$route.query.pos);
+
+            console.log(`you reached 1v1 from ${this.$router.options.history.state.back}`);
 
             this.socket = io("http://localhost:3000/onevone");
             this.socket.on('connect', () => {
@@ -361,7 +365,7 @@ export default defineComponent({
         async isUserPlaying(){
             const resp = await axios({
                 method: 'POST',
-                url: 'http://localhost:8080/api/getgamestatus',
+                url:`http://localhost:8080/api/getgamestatus`,
                 data: {
                     user_id: this.user_id,
                 }

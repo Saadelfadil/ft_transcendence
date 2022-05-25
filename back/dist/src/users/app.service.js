@@ -98,10 +98,11 @@ let AppService = class AppService {
     }
     async updateUser(request, body) {
         const user = await this.getUserDataFromJwt(request);
-        const userDb = await this.getUserByLogin(body.login);
-        if (userDb)
-            throw new common_1.UnauthorizedException();
-        if ((body.login) != null) {
+        if (body.login) {
+            const userDb = await this.getUserByLogin(body.login);
+            if (userDb) {
+                return { status: false };
+            }
             await this.userRepository.update(user.id, { login: body.login, username: body.login });
         }
         if (body.image_url != null) {
@@ -117,6 +118,10 @@ let AppService = class AppService {
                 return { status: false };
             }
         }
+        if (body.twof != null) {
+            await this.userRepository.update(user.id, { twof: body.twof });
+        }
+        return { status: true };
     }
     async addRoomIdToJoinedRooms(user_id, room_id) {
         const { joinedRooms } = await this.userRepository.findOne(user_id);
@@ -125,13 +130,15 @@ let AppService = class AppService {
     }
     async removeRoomIdFromJoinedRooms(user_id, room_id) {
         const { joinedRooms } = await this.userRepository.findOne(user_id);
-        joinedRooms.map((r_id, index) => {
-            if (room_id === r_id) {
-                joinedRooms.splice(index, 1);
-                return;
-            }
-        });
-        this.userRepository.update(user_id, { joinedRooms: joinedRooms });
+        if (joinedRooms) {
+            joinedRooms.map((r_id, index) => {
+                if (room_id === r_id) {
+                    joinedRooms.splice(index, 1);
+                    return;
+                }
+            });
+            this.userRepository.update(user_id, { joinedRooms: joinedRooms });
+        }
     }
     async removeFromJoinedRooms(room_id) {
         const users_table = this.userRepository.createQueryBuilder('users');

@@ -18,7 +18,6 @@ const auth_guard_1 = require("../../users/auth.guard");
 const room_service_1 = require("../room/room.service");
 const ban_service_1 = require("./ban.service");
 const create_ban_dto_1 = require("./dto/create-ban.dto");
-const update_ban_dto_1 = require("./dto/update-ban.dto");
 const common_2 = require("@nestjs/common");
 const app_service_1 = require("../../users/app.service");
 let BanController = class BanController {
@@ -31,18 +30,17 @@ let BanController = class BanController {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
         createBanDto.created = Date.now();
+        if (createBanDto.banned == undefined || createBanDto.room_id == undefined ||
+            createBanDto.user_id == undefined || createBanDto.duration == undefined)
+            return;
         const roomData = await this.roomService.findOne(createBanDto.room_id);
-        return this.banService.create(sessionId, roomData, createBanDto);
+        if (roomData) {
+            return this.banService.create(sessionId, roomData, createBanDto);
+        }
+        return;
     }
     findAll() {
-        console.log(`BAN GET`);
         return this.banService.findAll();
-    }
-    async update(updateBanDto, req) {
-        const user = await this.userService.getUserDataFromJwt(req);
-        const sessionId = user.id;
-        const roomData = await this.roomService.findOne(updateBanDto.room_id);
-        return this.banService.update(sessionId, roomData, updateBanDto);
     }
     roomBannedList(roomId) {
         return this.banService.roomBannedList(+roomId);
@@ -71,14 +69,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], BanController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Patch)(),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_2.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_ban_dto_1.UpdateBanDto, Object]),
-    __metadata("design:returntype", Promise)
-], BanController.prototype, "update", null);
 __decorate([
     (0, common_1.Get)('room/:roomId/banned'),
     __param(0, (0, common_1.Param)('roomId', common_1.ParseIntPipe)),

@@ -63,16 +63,11 @@ let BlockService = class BlockService {
 		`);
         return data.map(a => a.id);
     }
-    blockedListUsers(sessionId) {
-        return (0, typeorm_2.getConnection)().query(`
-			SELECT public."users".*  FROM
-				public."block"
-				JOIN
-						public."users"
-					ON
-						public."users".id = ANY(public."block".blocked)
-				WHERE public."block".user_id = ${sessionId}
-		`);
+    async blockedListUsers(sessionId) {
+        const data = await this.blocksRepository.findOne({ user_id: sessionId });
+        if (data)
+            return data.blocked;
+        return [];
     }
     async isBlocked(sessionId, userId) {
         const userData = await this.findUser(sessionId);

@@ -143,15 +143,21 @@ export default  defineComponent({
 
 	watch:{
 		async user_id(){
-			await Promise.all([this.getJoinedRooms(), this.getBlockedList()]).then(
-				(output:Array<any>) => {
-					// console.log("from backend here");
-					// console.log("joined rooms: ", output[0].data.joinedRooms);
-					// console.log("blocked list: ", output[1].data);
-					this.joinedRooms = Array(output[0].data.joinedRooms);
-					this.blockedList =  Array(output[1].data);
-				}
-			);
+			if (isNaN(this.uId))
+			{
+				router.go(-1);
+				return ;
+			}
+			try{
+				await Promise.all([this.getJoinedRooms(), this.getBlockedList()]).then(
+					(output:Array<any>) => {
+						this.joinedRooms = Array(output[0].data.joinedRooms);
+						this.blockedList =  Array(output[1].data);
+					}
+				);
+			}catch(e){
+				router.go(-1);
+			}
 			await this.getUserMessages();
 			this.acceptingMsg();
 		},
@@ -167,7 +173,7 @@ export default  defineComponent({
 		getBlockedList(){
 			return axios({
 				method: 'GET',
-				url: 'http://localhost:8080/block/users'
+				url: `http://localhost:8080/block/users`
 			});
 		},
 		async getUserMessages()
@@ -191,7 +197,6 @@ export default  defineComponent({
 			}
 
 
-			console.log(newArray , " room id: ", this.uId);
 			
 			store.commit('updatePublicRoomMsgs', newArray);
         },
@@ -199,8 +204,6 @@ export default  defineComponent({
 			axios({
 				method: 'get',
 				url: `http://localhost:8080/messages/${this.uId}`
-			}).then((data)=>{
-				// console.log(`tests ${data}`);
 			});
 		},
     addMessage()
@@ -388,9 +391,21 @@ export default  defineComponent({
 			}
 		});
 	},
+	isUserBlocked(target_id:number){
+		let tmp : boolean = false;
+		this.blockedList.map((blocked_user:any) =>{
+			if (blocked_user[0] == target_id)
+			{
+				tmp = true;
+				return ;
+			}
+		});
+		return tmp;
+	},
 	newMessage(data: any)
     {
-		if( !this.blockedList.includes(data.from_id) )
+		
+		if( !this.isUserBlocked(Number(data.from_id)) )
 		{
 			const msgObj = {
 				isInvite:data.isInvite,

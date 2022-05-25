@@ -67,7 +67,7 @@ export default defineComponent({
           try{
               const resp = await axios({
                   method: 'post',
-                  url: 'http://localhost:8080/api/getfriends',
+                  url: `http://localhost:8080/api/getfriends`,
                   data: { id: this.user_id },
                   withCredentials: true,
               });
@@ -83,8 +83,8 @@ export default defineComponent({
           try{
               const resp = await axios({
                   method: 'post',
-                  url: 'http://localhost:8080/api/removefriend',
-                  data: { user_id: this.user_id, friend_id: _id },
+                  url: `http://localhost:8080/api/removefriend`,
+                  data: { friend_id: _id },
                   withCredentials: true,
               });
 

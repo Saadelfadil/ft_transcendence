@@ -57,7 +57,6 @@ export class AppController {
 	@Post('addfriend')
 	async addFriend(@Body() body, @Req() request: Request)
 	{
-		console.log('addfriend used');
 		const { login } = body;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)
@@ -100,6 +99,8 @@ export class AppController {
 	async removeFriend(@Body() body, @Req() request: Request)
 	{
 		const { friend_id } = body;
+		if (friend_id == undefined)
+			return ;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)
 			return;
@@ -130,6 +131,8 @@ export class AppController {
 	async RequestToFriend(@Body() body, @Req() request: Request)
 	{
 		const { is_accept, request_user_id } : {is_accept: boolean, user_id: number, request_user_id: number} = body;
+		if (is_accept == undefined || request_user_id == undefined)
+			return ;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)
 			return;
@@ -200,32 +203,35 @@ export class AppController {
 	{
 		const user = await this.appService.getUserDataFromJwt(request);
 		const {joinedRooms} = await this.appService.getUserById(user.id);
-		let status:boolean = joinedRooms.includes(body.room_id);
-		return {status:status};
+		if (body.room_id){
+			let status:boolean = joinedRooms.includes(body.room_id);
+			return {status:status};
+		}
+		return {status: false};
 	}
 	
-	@UseGuards(AuthenticatedGuard)
-	@Post('verify')
-	async verify(@Req() request: Request, @Body() body) {
-		try {
-			const {token} = request.body; 
-			const cookie = request.cookies['jwt'];
-			const data = await this.jwtService.verifyAsync(cookie);
+	// @UseGuards(AuthenticatedGuard)
+	// @Post('verify')
+	// async verify(@Req() request: Request, @Body() body) {
+	// 	try {
+	// 		const {token} = request.body; 
+	// 		const cookie = request.cookies['jwt'];
+	// 		const data = await this.jwtService.verifyAsync(cookie);
 
-			if (!data)
-				throw new UnauthorizedException();
-			const user = this.appService.getUserById(data['id']);
+	// 		if (!data)
+	// 			throw new UnauthorizedException();
+	// 		const user = this.appService.getUserById(data['id']);
 			
-			const verified = speakeasy.totp.verify({
-				secret: (await user).twof_secret,
-				encoding: 'base32',
-				token
-			  });
+	// 		const verified = speakeasy.totp.verify({
+	// 			secret: (await user).twof_secret,
+	// 			encoding: 'base32',
+	// 			token
+	// 		  });
 			
-		} catch (error) {
-			throw new UnauthorizedException();
-		}
-	}
+	// 	} catch (error) {
+	// 		throw new UnauthorizedException();
+	// 	}
+	// }
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('validate')
@@ -233,15 +239,17 @@ export class AppController {
 	{
 		try {
 			const { twof_qrcode, change, twof } = request.body;
+			if (twof_qrcode == undefined || change == undefined || twof == undefined)
+				return ;
 			const cookie = request.cookies['jwt'];
 			const data = await this.jwtService.verifyAsync(cookie);
 
 			if (!data)
-				throw new UnauthorizedException();
+				return ;
 			const user = await this.appService.getUserById(data['id']);
 			
 			const tokenValidate = speakeasy.totp.verify({
-				secret: (await user).twof_secret,
+				secret: user.twof_secret,
 				encoding: 'base32',
 				token: twof_qrcode,
 				window: 1 // time window
@@ -274,7 +282,7 @@ export class AppController {
 			}
 			return {sucess:false};
 		} catch (error) {
-			throw new UnauthorizedException();
+			return ;
 		}
 	}
 
@@ -389,19 +397,26 @@ export class AppController {
 
 		const { usersId } = body;
 
+		if (usersId == undefined)
+			return users;
 		let tmp:any;
 		const length = usersId.length;
 
-		for (let i = 0; i < length; i +=  2)
+		try{
+			for (let i = 0; i < length; i +=  2)
+			{
+				const user = await this.appService.getUserById(usersId[i]);
+				if (user == undefined)
+					return;
+				const { id, login, image_url } = user;
+				tmp =  await this.appService.getUserById(usersId[i + 1]);
+				if (tmp == undefined)
+					return;
+				users.push({left_player: {id:id, login:login, image_url:image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
+			}
+		}catch(e)
 		{
-			const user = await this.appService.getUserById(usersId[i]);
-			if (user == undefined)
-				return;
-			const { id, login, image_url } = user;
-			tmp =  await this.appService.getUserById(usersId[i + 1]);
-			if (tmp == undefined)
-				return;
-			users.push({left_player: {id:id, login:login, image_url:image_url}, right_player:  {id:tmp.id, login: tmp.login, image_url: tmp.image_url}});
+			return [];
 		}
 
 		return users;
@@ -417,12 +432,19 @@ export class AppController {
 		}
 		let users : Array<typeof SingleUser> = [];
 		const {usersId} = body;
-		await Promise.all(
-			usersId.map(async (user_id:any) =>{
-				const { login, id } = await this.appService.getUserById(user_id);
-				users.push({login:login, id:id});
-			})
-		);
+		if (usersId == undefined)
+			return ;
+		try{
+			await Promise.all(
+				usersId.map(async (user_id:any) =>{
+					const { login, id } = await this.appService.getUserById(user_id);
+					users.push({login:login, id:id});
+				})
+			);
+		}catch(e)
+		{
+			return {users: []};
+		}
 		return {users:users};
 	}
 
@@ -440,50 +462,65 @@ export class AppController {
 
 		let tmp = false;
 		const {friend_id} = body;
-		const userJwt = await this.appService.getUserDataFromJwt(request);
-		if (userJwt.id == undefined)
-			return;
-		const {login, image_url,  wins, loss} = await this.appService.getUserById(friend_id);
-		
-		// const { wins, loses } = await this.appService.getUserByIdGame(friend_id); // this throw expetcion
 
+		if (friend_id == undefined)
+			return ;
 
-		const { user_friends} = await this.appService.getUserByIdFriend(userJwt.id);
-		
-		user_friends.map((fr_id) => {
-			if (fr_id === friend_id)
-			{
-				tmp = true;
-				return ;
-			}
-		});
-		if (!tmp){
-			const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
-			user_requested.map((fr_id) => {
-				if (fr_id === userJwt.id)
+		try{
+			const userJwt = await this.appService.getUserDataFromJwt(request);
+			if (userJwt.id == undefined)
+				return;
+	
+			const {login, image_url,  wins, loss} = await this.appService.getUserById(friend_id);
+	
+			
+			const { user_friends } = await this.appService.getUserByIdFriend(userJwt.id);
+			
+			user_friends.map((fr_id) => {
+				if (fr_id === friend_id)
 				{
 					tmp = true;
 					return ;
 				}
 			});
+			if (!tmp){
+				const { user_requested } = await this.appService.getUserByIdFriend(friend_id);
+				if (user_requested !== undefined) {
+					user_requested.map((fr_id) => {
+						if (fr_id === userJwt.id)
+						{
+							tmp = true;
+							return ;
+						}
+					});
+				}
+			}
+			return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loss};
+		}catch(e)
+		{
+			return {error: true};
 		}
-		return {login:login, image_url:image_url, is_friend:tmp, wins:wins, loses:loss};
 	}
 
 	@UseGuards(AuthenticatedGuard)
 	@Post('getloginbyid')
 	async getloginbyid(@Body() body){
 		const {id} = body;
-		const {login, image_url} = await this.appService.getUserById(id);
-		return {login: login, image_url: image_url};
+		if (id) {
+			const {login, image_url} = await this.appService.getUserById(id);
+			return {login: login, image_url: image_url};
+		}
+		return {login: 'invalid', image_url: 'invalid'};
 	}
 	
 	@UseGuards(AuthenticatedGuard)
 	@Post('joinedRooms')
 	async getUserJoindAndBlocked(@Body() body){
 		const {id} = body;
-		const {joinedRooms} = await this.appService.getUserById(id);
-		return {joinedRooms: joinedRooms}; // i will add here blocked rooms too
+		if (id){
+			const {joinedRooms} = await this.appService.getUserById(id);
+			return {joinedRooms: joinedRooms};
+		}
 	}
 
 	@Post('userbylogin')

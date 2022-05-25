@@ -82,7 +82,7 @@ export default defineComponent({
             {
                 await axios({
                 method: 'post',
-                url: 'http://localhost:8080/api/validate',
+                url: `http://localhost:8080/api/validate`,
                 data: {
                     twof_qrcode: this.input_code,
                     change: store.getters.get_verify,
@@ -91,7 +91,6 @@ export default defineComponent({
                 withCredentials: true
                 }).then(async (response) => {
                     this.valid_code = response.data.success;
-                    console.log(response.data);
                     if (this.valid_code)
                     {
                         let sig = store.getters.get_verify;
@@ -127,7 +126,7 @@ export default defineComponent({
             try{
                 const resp = await axios({
                     method: 'post',
-                    url: 'http://localhost:8080/api/logout',
+                    url: `http://localhost:8080/api/logout`,
                     withCredentials: true
                 });
                 router.replace({name : 'login'});
@@ -145,7 +144,7 @@ export default defineComponent({
         {
             await axios({
                 method: 'post',
-                url: 'http://localhost:8080/api/update',
+                url: `http://localhost:8080/api/update`,
                 data: {
                     login: null,
                     image_url: null,

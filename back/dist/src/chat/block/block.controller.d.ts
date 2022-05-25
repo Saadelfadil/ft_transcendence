@@ -7,7 +7,7 @@ export declare class BlockController {
     private readonly userService;
     constructor(blockService: BlockService, userService: AppService);
     blockUser(createBlockDto: CreateBlockDto, req: Request): Promise<import("./entities/block.entity").Block>;
-    blockedList(req: Request): Promise<any>;
+    blockedList(req: Request): Promise<number[]>;
     unBlockUser(createBlockDto: CreateBlockDto, req: Request): Promise<import("./entities/block.entity").Block>;
     isBlocked(id: string, req: Request): Promise<{
         blocked: boolean;

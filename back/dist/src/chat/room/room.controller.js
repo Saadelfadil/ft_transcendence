@@ -40,16 +40,20 @@ let RoomController = class RoomController {
     async IsRoomPassValid(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         let status = true;
-        if (body.room_pass !== '')
-            status = await this.roomService.checkAuth(body.room_id, body.room_pass);
-        if (status) {
-            this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+        if (body.room_id !== undefined && body.room_pass !== undefined) {
+            if (body.room_pass !== '')
+                status = await this.roomService.checkAuth(body.room_id, body.room_pass);
+            if (status) {
+                this.userService.addRoomIdToJoinedRooms(user.id, body.room_id);
+            }
+            return { status: status };
         }
-        return { status: status };
+        return { status: false };
     }
     async LeaveRoom(body, req) {
         const user = await this.userService.getUserDataFromJwt(req);
-        await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
+        if (body.room_id)
+            await this.userService.removeRoomIdFromJoinedRooms(user.id, body.room_id);
         return { status: true };
     }
     findOne(id) {
@@ -58,6 +62,8 @@ let RoomController = class RoomController {
     async update(id, changePasswordDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
+        if (changePasswordDto.password == undefined)
+            return;
         return this.roomService.update(sessionId, +id, changePasswordDto);
     }
     async remove(id, req) {
@@ -69,7 +75,8 @@ let RoomController = class RoomController {
     async findRoomMessages(roomId, req) {
         const user = await this.userService.getUserDataFromJwt(req);
         const sessionId = user.id;
-        return this.roomService.findRoomMessages(sessionId, [], +roomId);
+        const myBlockedList = await this.blockService.blockedList(sessionId);
+        return this.roomService.findRoomMessages(sessionId, myBlockedList, +roomId);
     }
     async saveMessageToRoom(roomId, createRoomMessageDto, req) {
         const user = await this.userService.getUserDataFromJwt(req);

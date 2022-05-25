@@ -64,7 +64,7 @@ export default defineComponent({
     getBlockedList(){
 			return axios({
 				method: 'GET',
-				url: 'http://localhost:8080/block/users'
+				url: `http://localhost:8080/block/users`
 			});
 		},
     getListUsers(users_ids:Array<number>){
@@ -85,11 +85,11 @@ export default defineComponent({
   watch:{
     async user_id(){
       this.getBlockedList().then((resp:any)=>{
-        let blockedUsers : Array<number> = resp.data;
-        this.getListUsers(blockedUsers).then((resp) => {
-            this.userList = resp.data.users;
-            console.log(this.userList);
-        });
+          let blockedUsers : Array<number> = resp.data;
+          this.getListUsers(blockedUsers).then((resp:any) => {
+              this.userList = resp.data.users;
+              console.log(this.userList);
+          });
       });
     }
   }

@@ -54,7 +54,6 @@ export class BanService {
 	}
 
 	async roomBannedList(roomId: number) {
-		// TODO : baned list : should include ids of all banned users of this room + muted list of this room that expired (created + banned.duration > date.now())
 
 
 		let bannedUsersIds: number[] = [];
