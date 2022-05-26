@@ -83,8 +83,6 @@ export class BanService {
 			room_id: roomId,
 			user_id: userId,
 		});
-		
-		// when i reques http://localhost:8080/ban data returnd is undefind i have checked room id and user id both are correct 
 
 		// if (!data)
 		// 	throw new HttpException({ error: 'User Not Found' }, HttpStatus.NOT_FOUND);

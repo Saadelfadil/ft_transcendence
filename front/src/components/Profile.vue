@@ -105,7 +105,7 @@ export default defineComponent({
             invalid_image_upload: false as boolean,
             tmp_user_name: '' as string,
             user_name_editing: false as boolean,
-            userInfoSendEndPoint: '' as string /* for example http://localhost:3000/upload */,
+            userInfoSendEndPoint: '' as string,
             logged: false as boolean,
             state: 0 as number, // change this to 0
             auth_switch: false as boolean,

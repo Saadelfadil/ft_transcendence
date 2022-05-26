@@ -1,7 +1,7 @@
 <template>
     <div class="bg-slate-800  flex z-[1000] justify-center absolute top-0 right-0 bottom-0 left-0">
         <div class="flex flex-col justify-center">
-        <a v-if="!is_logged" href = "https://api.intra.42.fr/oauth/authorize?client_id=5bb8e41e966ccf84bbfb24438e93c21a9fe6f821648a22cb87d93a3ff59e7a6e&redirect_uri=http%3A%2F%2F10.30.248.85%3A8080%2Flogin&response_type=code">
+        <a v-if="!is_logged" href = "https://api.intra.42.fr/oauth/authorize?client_id=3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7&redirect_uri=http%3A%2F%2F10.12.1.5%3A8080%2Flogin&response_type=code">
             <button class="bg-blue-500 py-5 px-8 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
                 LOGIN
             </button>
@@ -57,6 +57,7 @@ export default defineComponent({
                 console.log(error);
             });
         }
+        console.log(process.env.VUE_APP_HOST_IP, "fgdfgdfgdfgdf");
         await this.redirectIfLogged();
     }
 });

@@ -420,7 +420,7 @@ export default  defineComponent({
 	  },
 	  async unBanClicked(){
 		const resp = await axios.delete(
-			`http://l${process.env.VUE_APP_HOST_IP}:8080/ban/room/${this.roomId}/user/${this.clickeduser_id}`,
+			`http://${process.env.VUE_APP_HOST_IP}:8080/ban/room/${this.roomId}/user/${this.clickeduser_id}`,
 		);
 		this.isPopUp = false;
 		this.bannedUsers.map((id,index) => {

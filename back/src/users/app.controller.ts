@@ -180,7 +180,7 @@ export class AppController {
 	async loginOrNot(@Req() request: Request) {
 		try {
 			const user = await this.appService.getUserDataFromJwt(request);
-			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status:true};
+			return {is_login_db: user.is_login, id: user.id, image_url: user.image_url, login: user.login, status:true, twof:user.twof};
 		} catch (error) {
 			return {status:false};
 		}
@@ -300,11 +300,11 @@ export class AppController {
 
 	@Post('login')
 	async getData(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
-		const UID = process.env.UID;
-		const SECRET = process.env.SECRET;
+		const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
+		const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
 		const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
-
 		// 42 authenticator instance
+		console.log(code);
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
 
 		var token = await appp.get_Access_token(code);
@@ -314,7 +314,9 @@ export class AppController {
 		if (userData == undefined)
 				return;
 		const { id, email, login, image_url } = userData;
+		
 		const userDb = await this.appService.getUserById(id);
+
 		if (!userDb) {
 			let twof_secret = speakeasy.generateSecret();
 			let twof_qrcode;
@@ -349,7 +351,8 @@ export class AppController {
 				user_requested: []
 			});
 		}
-		await this.userRepository.update(id, {is_login: true});
+		if (id != undefined)
+			await this.userRepository.update(id, {is_login: true});
 		if (userData.error === undefined)
 		{
 			const jwt = await this.jwtService.signAsync({ id: id });
