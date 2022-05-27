@@ -133,6 +133,7 @@ export default defineComponent({
                 this.matchs_info = resp.data.reverse();
                 this.users_ids = []; // do not remove this line
 
+                console.log(`history ${JSON.stringify(this.matchs_info)}`);
                 this.matchs_info.map((inp:Match) => {
                     this.users_ids.push(+inp.data[0].id);
                     this.users_ids.push(+inp.data[1].id);
@@ -153,6 +154,7 @@ export default defineComponent({
                     data : {usersId: this.users_ids}
                 });
                 this.match_display = resp.data;
+                console.log(`match display ${JSON.stringify(this.match_display)}`);
             } catch(e){
                 console.log(e);
             }

@@ -22,16 +22,14 @@ const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
 const user_entity_1 = require("./user.entity");
 const userFriends_entity_1 = require("./userFriends.entity");
-const userGame_entity_1 = require("./userGame.entity");
 const userHistory_entity_1 = require("./userHistory.entity");
 const speakeasy = require('speakeasy');
 let AppController = class AppController {
-    constructor(appService, jwtService, userRepository, userFriendsEntity, userGameEntity, userHistoryEntity) {
+    constructor(appService, jwtService, userRepository, userFriendsEntity, userHistoryEntity) {
         this.appService = appService;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.userFriendsEntity = userFriendsEntity;
-        this.userGameEntity = userGameEntity;
         this.userHistoryEntity = userHistoryEntity;
     }
     async getRequests(body, request) {
@@ -59,6 +57,7 @@ let AppController = class AppController {
         return reqs;
     }
     async addFriend(body, request) {
+        console.log('addfriend');
         const { login } = body;
         const userJwt = await this.appService.getUserDataFromJwt(request);
         if (userJwt.id == undefined)
@@ -95,6 +94,7 @@ let AppController = class AppController {
         }
     }
     async removeFriend(body, request) {
+        console.log('remove friend');
         const { friend_id } = body;
         if (friend_id == undefined)
             return;
@@ -238,15 +238,16 @@ let AppController = class AppController {
         return { in_game: in_game };
     }
     async getData(code, response) {
-        const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
-        const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
+        const UID = "a5ffc00459f1fef5558f6e7882102ec8873feba7712de5e2dd2c376354764512";
+        const SECRET = "c96fc611de1556fe03825b1fe48054a14a09f7dbe43546c0aa861a313a29e1bb";
         const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
-        console.log(code);
+        console.log("------------------> ", code, process.env.UID, process.env.SECRET);
         var appp = new _42_authentication_1.default(UID, SECRET, REDIRECT_URI);
         var token = await appp.get_Access_token(code);
         if (token == undefined)
             return;
         const userData = await appp.get_user_data(token.access_token);
+        console.log(`${JSON.stringify(userData)}`);
         if (userData == undefined)
             return;
         const { id, email, login, image_url } = userData;
@@ -268,12 +269,6 @@ let AppController = class AppController {
                 twof_secret: tmp_store,
                 twof_qrcode,
                 joinedRooms: []
-            });
-            await this.userGameEntity.save({
-                id,
-                wins: 0,
-                loses: 0,
-                score: 0
             });
             await this.userFriendsEntity.save({
                 id,
@@ -581,10 +576,8 @@ AppController = __decorate([
     (0, common_1.Controller)('api'),
     __param(2, (0, typeorm_2.InjectRepository)(user_entity_1.UserEntity)),
     __param(3, (0, typeorm_2.InjectRepository)(userFriends_entity_1.UserFriendsEntity)),
-    __param(4, (0, typeorm_2.InjectRepository)(userGame_entity_1.UserGameEntity)),
-    __param(5, (0, typeorm_2.InjectRepository)(userHistory_entity_1.UserHistoryEntity)),
+    __param(4, (0, typeorm_2.InjectRepository)(userHistory_entity_1.UserHistoryEntity)),
     __metadata("design:paramtypes", [app_service_1.AppService, jwt_1.JwtService,
-        typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository])

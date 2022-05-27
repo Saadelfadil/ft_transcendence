@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './users/user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { UserFriendsEntity } from './users/userFriends.entity';
-import { UserGameEntity } from './users/userGame.entity';
 import { UserHistoryEntity } from './users/userHistory.entity';
 import { GameModule } from './game/game.module';
 import { MessagesModule } from './chat/messages/messages.module';
@@ -28,7 +27,7 @@ import { BlockModule } from './chat/block/block.module';
       username: process.env.DB_USER || 'admin',
       password: process.env.DB_PASS || 'admin',
       database: process.env.DB_NAME || 'ft_transcendence',
-      entities: [UserEntity, UserFriendsEntity, UserGameEntity, UserHistoryEntity, Room, Match, Message, Ban, Block, RoomMessage, Rooms],
+      entities: [UserEntity, UserFriendsEntity, UserHistoryEntity, Room, Match, Message, Ban, Block, RoomMessage, Rooms],
       synchronize: true,
     },
   ),

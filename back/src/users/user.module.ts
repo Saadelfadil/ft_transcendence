@@ -5,13 +5,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 import { OnlineGateway } from './users.gateway';
 
 @Module({
   imports: [
-  TypeOrmModule.forFeature([UserEntity, UserFriendsEntity, UserGameEntity, UserHistoryEntity]),
+  TypeOrmModule.forFeature([UserEntity, UserFriendsEntity, UserHistoryEntity]),
   JwtModule.register({
     secret: 'secret',
     signOptions: {expiresIn: '3600s'}

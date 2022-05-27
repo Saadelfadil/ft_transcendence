@@ -9,7 +9,6 @@ import { Index, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 import { match } from 'assert';
 import { use } from 'passport';
@@ -21,7 +20,6 @@ export class AppController {
 	constructor(private readonly appService: AppService, private readonly jwtService: JwtService,
 		@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
 		@InjectRepository(UserFriendsEntity) private readonly userFriendsEntity: Repository<UserFriendsEntity>,
-		@InjectRepository(UserGameEntity) private readonly userGameEntity: Repository<UserGameEntity>,
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>) { }
 
 	@Post('getrequests')
@@ -57,6 +55,7 @@ export class AppController {
 	@Post('addfriend')
 	async addFriend(@Body() body, @Req() request: Request)
 	{
+		console.log('addfriend');
 		const { login } = body;
 		const userJwt = await this.appService.getUserDataFromJwt(request);
 		if (userJwt.id == undefined)
@@ -98,6 +97,7 @@ export class AppController {
 	@Post('removefriend')
 	async removeFriend(@Body() body, @Req() request: Request)
 	{
+		console.log('remove friend');
 		const { friend_id } = body;
 		if (friend_id == undefined)
 			return ;
@@ -130,6 +130,7 @@ export class AppController {
 	@Post('requesttofriend')
 	async RequestToFriend(@Body() body, @Req() request: Request)
 	{
+	
 		const { is_accept, request_user_id } : {is_accept: boolean, user_id: number, request_user_id: number} = body;
 		if (is_accept == undefined || request_user_id == undefined)
 			return ;
@@ -175,7 +176,7 @@ export class AppController {
 	}
 
 
-	// @UseGuards(AuthenticatedGuard)
+	//@UseGuards(AuthenticatedGuard)
 	@Get('islogin')
 	async loginOrNot(@Req() request: Request) {
 		try {
@@ -297,20 +298,20 @@ export class AppController {
 		// await this.userRepository.update(user_id, {in_game: state});
 	}
 
-
 	@Post('login')
 	async getData(@Body('code') code: string, @Res({ passthrough: true }) response: Response) {
-		const UID = "3a392de18612a23eab4db59491af2179c5df757d6278ff42963fefef79dc19a7";
-		const SECRET = "db46d9e4b515ce133284553f8981ed558b8873bf35744006f143f0101d8e3c89";
+		const UID = "a5ffc00459f1fef5558f6e7882102ec8873feba7712de5e2dd2c376354764512";
+		const SECRET = "c96fc611de1556fe03825b1fe48054a14a09f7dbe43546c0aa861a313a29e1bb";
 		const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
 		// 42 authenticator instance
-		console.log(code);
+		console.log("------------------> ", code, process.env.UID, process.env.SECRET);
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
 
 		var token = await appp.get_Access_token(code);
 		if (token == undefined)
 			return;
 		const userData = await appp.get_user_data(token.access_token);
+			console.log(`${JSON.stringify(userData)}`);
 		if (userData == undefined)
 				return;
 		const { id, email, login, image_url } = userData;
@@ -338,12 +339,6 @@ export class AppController {
 					joinedRooms: []
 				}
 			);
-			await this.userGameEntity.save({
-				id,
-				wins: 0,
-				loses: 0,
-				score: 0
-			});
 			await this.userFriendsEntity.save({
 				id,
 				user_friends: [],

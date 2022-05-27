@@ -14,7 +14,6 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_entity_1 = require("./user.entity");
 const userFriends_entity_1 = require("./userFriends.entity");
-const userGame_entity_1 = require("./userGame.entity");
 const userHistory_entity_1 = require("./userHistory.entity");
 const users_gateway_1 = require("./users.gateway");
 let UserModule = class UserModule {
@@ -22,7 +21,7 @@ let UserModule = class UserModule {
 UserModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, userFriends_entity_1.UserFriendsEntity, userGame_entity_1.UserGameEntity, userHistory_entity_1.UserHistoryEntity]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, userFriends_entity_1.UserFriendsEntity, userHistory_entity_1.UserHistoryEntity]),
             jwt_1.JwtModule.register({
                 secret: 'secret',
                 signOptions: { expiresIn: '3600s' }

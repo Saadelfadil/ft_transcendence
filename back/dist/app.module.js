@@ -13,7 +13,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("./users/user.entity");
 const config_1 = require("@nestjs/config");
 const userFriends_entity_1 = require("./users/userFriends.entity");
-const userGame_entity_1 = require("./users/userGame.entity");
 const userHistory_entity_1 = require("./users/userHistory.entity");
 const game_module_1 = require("./game/game.module");
 const messages_module_1 = require("./chat/messages/messages.module");
@@ -38,7 +37,7 @@ AppModule = __decorate([
                 username: process.env.DB_USER || 'admin',
                 password: process.env.DB_PASS || 'admin',
                 database: process.env.DB_NAME || 'ft_transcendence',
-                entities: [user_entity_1.UserEntity, userFriends_entity_1.UserFriendsEntity, userGame_entity_1.UserGameEntity, userHistory_entity_1.UserHistoryEntity, game_entities_1.Room, game_entities_1.Match, message_entity_1.Message, ban_entity_1.Ban, block_entity_1.Block, room_message_entity_1.RoomMessage, room_entity_1.Rooms],
+                entities: [user_entity_1.UserEntity, userFriends_entity_1.UserFriendsEntity, userHistory_entity_1.UserHistoryEntity, game_entities_1.Room, game_entities_1.Match, message_entity_1.Message, ban_entity_1.Ban, block_entity_1.Block, room_message_entity_1.RoomMessage, room_entity_1.Rooms],
                 synchronize: true,
             }),
             jwt_1.JwtModule.register({

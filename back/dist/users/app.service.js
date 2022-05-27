@@ -20,14 +20,12 @@ const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const cloudinary_1 = require("../utils/cloudinary");
 const userFriends_entity_1 = require("./userFriends.entity");
-const userGame_entity_1 = require("./userGame.entity");
 const userHistory_entity_1 = require("./userHistory.entity");
 const QRCode = require('qrcode');
 let AppService = class AppService {
-    constructor(userRepository, userFriendsEntity, userGameEntity, userHistoryEntity, jwtService) {
+    constructor(userRepository, userFriendsEntity, userHistoryEntity, jwtService) {
         this.userRepository = userRepository;
         this.userFriendsEntity = userFriendsEntity;
-        this.userGameEntity = userGameEntity;
         this.userHistoryEntity = userHistoryEntity;
         this.jwtService = jwtService;
     }
@@ -52,12 +50,6 @@ let AppService = class AppService {
     }
     async getUserByIdFriend(id) {
         const user = await this.userFriendsEntity.findOne(id).then((user) => {
-            return user;
-        });
-        return user;
-    }
-    async getUserByIdGame(id) {
-        const user = await this.userGameEntity.findOne(id).then((user) => {
             return user;
         });
         return user;
@@ -195,10 +187,8 @@ AppService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.UserEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(userFriends_entity_1.UserFriendsEntity)),
-    __param(2, (0, typeorm_1.InjectRepository)(userGame_entity_1.UserGameEntity)),
-    __param(3, (0, typeorm_1.InjectRepository)(userHistory_entity_1.UserHistoryEntity)),
+    __param(2, (0, typeorm_1.InjectRepository)(userHistory_entity_1.UserHistoryEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         jwt_1.JwtService])

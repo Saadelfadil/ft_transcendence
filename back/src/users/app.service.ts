@@ -6,7 +6,6 @@ import { UserEntity } from './user.entity';
 import { Response, Request } from 'express';
 import cloudinary from '../utils/cloudinary';
 import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 const QRCode = require('qrcode');
 
@@ -14,7 +13,6 @@ const QRCode = require('qrcode');
 export class AppService {
 		constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
 		@InjectRepository(UserFriendsEntity) private readonly  userFriendsEntity: Repository<UserFriendsEntity>,
-		@InjectRepository(UserGameEntity) private readonly userGameEntity: Repository<UserGameEntity>,
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>,
 		private readonly jwtService: JwtService) {}
 
@@ -49,14 +47,6 @@ export class AppService {
 		async getUserByIdFriend(id: number) : Promise<UserFriendsEntity>
 		{
 			const user = await this.userFriendsEntity.findOne(id).then((user) => {
-				return user;
-			});
-			return user;
-		}
-
-		async getUserByIdGame(id: number) : Promise<UserGameEntity>
-		{
-			const user = await this.userGameEntity.findOne(id).then((user) => {
 				return user;
 			});
 			return user;

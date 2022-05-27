@@ -4,16 +4,14 @@ import { Response, Request } from 'express';
 import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { UserFriendsEntity } from './userFriends.entity';
-import { UserGameEntity } from './userGame.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 export declare class AppController {
     private readonly appService;
     private readonly jwtService;
     private readonly userRepository;
     private readonly userFriendsEntity;
-    private readonly userGameEntity;
     private readonly userHistoryEntity;
-    constructor(appService: AppService, jwtService: JwtService, userRepository: Repository<UserEntity>, userFriendsEntity: Repository<UserFriendsEntity>, userGameEntity: Repository<UserGameEntity>, userHistoryEntity: Repository<UserHistoryEntity>);
+    constructor(appService: AppService, jwtService: JwtService, userRepository: Repository<UserEntity>, userFriendsEntity: Repository<UserFriendsEntity>, userHistoryEntity: Repository<UserHistoryEntity>);
     getRequests(body: any, request: Request): Promise<any[]>;
     getFriends(body: any, request: Request): Promise<any[]>;
     addFriend(body: any, request: Request): Promise<boolean>;
