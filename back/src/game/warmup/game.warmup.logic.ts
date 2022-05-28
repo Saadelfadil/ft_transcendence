@@ -50,8 +50,8 @@ export class WarmUpLogic {
             y: this.canvasH/2,
             r: 10,
             speed: 5,
-            velocityX: 5,
-            velocityY: 5,
+            velocityX: 1,
+            velocityY: 1,
             color: "RED",
         };
         this.playerLeft = playerLeft;
@@ -80,11 +80,13 @@ export class WarmUpLogic {
     }
 
     update(clientData: any){
-        clientData.ball.x += clientData.ball.velocityX;
-        clientData.ball.y += clientData.ball.velocityY;
+        if (clientData.ball.speed < 10)
+            clientData.ball.speed += 0.001;
+        clientData.ball.x += clientData.ball.velocityX * clientData.ball.speed;
+        clientData.ball.y += clientData.ball.velocityY * clientData.ball.speed;
 
         if (clientData.ball.x > this.canvasW/2)
-            clientData.playerRight.y = clientData.ball.y - clientData.playerRight.h/2; 
+            clientData.playerRight.y = (clientData.ball.y - clientData.playerRight.h/2) + Math.floor(Math.random() * (10 + 1));; 
 
         if(clientData.ball.y + clientData.ball.r > this.canvasH || clientData.ball.y - clientData.ball.r < 0){
             clientData.ball.velocityY *= -1;

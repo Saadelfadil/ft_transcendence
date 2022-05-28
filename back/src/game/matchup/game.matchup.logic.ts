@@ -73,33 +73,27 @@ export class MatchUpLogic {
 
     update(clientData: any){
         
-        //if (clientData.node.ball){
-            clientData.node.ball.x += clientData.node.ball.velocityX * clientData.node.ball.speed;
-            clientData.node.ball.y += clientData.node.ball.velocityY * clientData.node.ball.speed;
-            //console.log(clientData.node.ball.x);
-    
-            // if (clientData.ball.x > this.canvasW/2)
-            //     clientData.node.playerRight.y = clientData.ball.y - clientData.node.playerRight.h/2; 
-    
-            if(clientData.node.ball.y + clientData.node.ball.r > this.canvasH || clientData.node.ball.y - clientData.node.ball.r < 0){
-                clientData.node.ball.velocityY *= -1;
-            }
-    
-            let player = (clientData.node.ball.x < this.canvasW/2) ? clientData.node.playerLeft : clientData.node.playerRight;
-            //console.log(player.y);
-            if (this.collision(clientData.node.ball, player)){
-                clientData.node.ball.velocityX *= -1;
-            }
-    
-            if (clientData.node.ball.x - clientData.node.ball.r < 0){
-                clientData.node.playerRight.score++;
-                this.resetBall(clientData);
-            } else if (clientData.node.ball.x + clientData.node.ball.r > this.canvasW){
-                clientData.node.playerLeft.score++;
-                this.resetBall(clientData);
-            }
-        //}
+        if (clientData.node.ball.speed < 10)
+            clientData.node.ball.speed += 0.001;
+        clientData.node.ball.x += clientData.node.ball.velocityX * clientData.node.ball.speed;
+        clientData.node.ball.y += clientData.node.ball.velocityY * clientData.node.ball.speed;
+        
+        if(clientData.node.ball.y + clientData.node.ball.r > this.canvasH || clientData.node.ball.y - clientData.node.ball.r < 0){
+            clientData.node.ball.velocityY *= -1;
+        }
 
+        let player = (clientData.node.ball.x < this.canvasW/2) ? clientData.node.playerLeft : clientData.node.playerRight;
+        if (this.collision(clientData.node.ball, player)){
+            clientData.node.ball.velocityX *= -1;
+        }
+
+        if (clientData.node.ball.x - clientData.node.ball.r < 0){
+            clientData.node.playerRight.score++;
+            this.resetBall(clientData);
+        } else if (clientData.node.ball.x + clientData.node.ball.r > this.canvasW){
+            clientData.node.playerLeft.score++;
+            this.resetBall(clientData);
+        }
 
     }
 

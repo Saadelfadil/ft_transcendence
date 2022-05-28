@@ -188,9 +188,9 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         client.data.roomNode.time = timer;
         if (client.data.roomNode.time % 5 === 0){
           console.log("1v1");
-          client.data.roomNode.ball.speed += 0.25;
-          client.data.roomNode.playerLeft.h -= 2.5;
-          client.data.roomNode.playerRight.h -= 2.5;
+          client.data.roomNode.ball.speed += 0.3;
+          client.data.roomNode.playerLeft.h -= 3;
+          client.data.roomNode.playerRight.h -= 3;
         }
         this.server.to(client.data.room).emit("updateTime", client.data.roomNode.time);
         if (timer === this.oneVoneLogic.time){

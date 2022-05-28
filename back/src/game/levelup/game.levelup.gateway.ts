@@ -224,9 +224,9 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         let timer = Math.floor(delta / 1000);
         client.data.node.time = timer;
         if (client.data.node.time % 5 === 0){
-          client.data.node.ball.speed += 0.25;
-          client.data.node.playerLeft.h -= 2.5;
-          client.data.node.playerRight.h -= 2.5;
+          client.data.node.ball.speed += 0.3;
+          client.data.node.playerLeft.h -= 3;
+          client.data.node.playerRight.h -= 3;
         }
         this.server.to(client.data.room).emit("updateTime", client.data.node.time);
         if (timer === this.levelUpLogic.time){

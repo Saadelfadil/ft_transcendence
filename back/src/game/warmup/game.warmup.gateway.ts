@@ -53,16 +53,12 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.matchRepository.addMatchData(matchData, 'warmup');
     }
     console.log('-----end of disconnect socket ------\n');
-    //this.warmUp.wclients.find(client.id)
-    //this.warmUp.rmClient(client.id);
-    //this.logger.log(`client disconnected ${client}`);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
     console.log('-----connect socket (warmap) ------');
     console.log(`connect: ${client.id}`);
     console.log('-----end of connect socket ------\n');
-    //client.data = this.warmUp.addClient(client.id); --> warmup logic
   }
 
 
@@ -79,16 +75,12 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('initGame')
   initGame(client: any, clientData: any): void {
-    //let initData : {};
     client.data.userId = clientData.userId;
     this.userRepository.update(client.data.userId, {in_game: true});
-    //console.log(`init: ${clientData.canvasW}, ${clientData.canvasH}`);
-    //client.data.playerLeft = this.warmUp.
     this.warmUp.initGmae();
     client.data.playerLeft = this.warmUp.playerLeft;
     client.data.playerRight = this.warmUp.playerRight;
     client.data.ball = this.warmUp.ball;
-    //console.log(client.data);
     client.emit("initData", {
       pl: client.data.playerLeft,
       pr: client.data.playerRight,
