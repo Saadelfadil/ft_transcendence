@@ -3,7 +3,7 @@
 <div>
 <div class="h-full" v-if="is_done && state === 0">
  
-  <div class="border-b-2 block md:flex">
+    <div class="border-b-2 block md:flex overflow-auto" style="max-height:60vh;">
 
     <div class="w-full md:w-2/5 p-4 sm:p-6 lg:p-8 bg-white shadow-md">
         <div class="flex justify-between">

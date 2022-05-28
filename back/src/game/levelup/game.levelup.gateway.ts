@@ -80,7 +80,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     client.data.node.playerRight = this.levelUpLogic.playerRight;
     client.data.node.ball = this.levelUpLogic.ball;
   
-    console.log(client.data.node);
     client.emit("initData", {
       pl: client.data.node.playerLeft,
       pr: client.data.node.playerRight,
@@ -106,9 +105,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (node){
       client.data.roomStatus = 'play';
       client.data.node = node.data;
-      console.log(client.data.node);
       client.emit('startMouseEvent');
-      console.log('mouse event sended');
       if (client.data.pos === 'left'){
         let newDbRoom = {} as roomDb;
         newDbRoom.name = client.data.node.id;
@@ -123,7 +120,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   @SubscribeMessage('clientType')
   clientType(client: any, data: any): void {
     client.data.userId = data.userId;
-    //console.log(client.data.userId);
     client.data.type = data.type;
     if (data.type === 'play'){
       this.userRepository.update(client.data.userId, {in_game: true});
@@ -133,7 +129,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       this.initGame(client);
       this.checkRoomconnection(client);
     } else if (data.type === 'stream'){
-      console.log(data.room, 'stream');
       client.data.room = data.room;
       if (!this.levelUpLogic.rooms.find(Number(data.room))){
         console.log("no room");
@@ -173,9 +168,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         clearInterval(client.data.node.gameLoop);
         clearInterval(client.data.node.gameTimer);
         if (client.data.pos === 'left'){
-          console.log(client.data.node.playerLeft.score);
-          console.log(client.data.node.playerRight.score);
-          console.log(client.data.node.first_logout);
           this.matchRepository.addMatchData(client.data.node, 'levelup');
           if (client.data.node.playerLeft.score > client.data.node.playerRight.score){
             this.userRepository.createQueryBuilder()
@@ -232,7 +224,6 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         let timer = Math.floor(delta / 1000);
         client.data.node.time = timer;
         if (client.data.node.time % 5 === 0){
-          console.log("levelup");
           client.data.node.ball.speed += 0.25;
           client.data.node.playerLeft.h -= 2.5;
           client.data.node.playerRight.h -= 2.5;

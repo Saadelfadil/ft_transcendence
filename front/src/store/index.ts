@@ -42,7 +42,7 @@ interface Room{
 
 
 export default createStore({
-  // strict: true,
+  strict: true,
   state: {
     chatPublicMsgs: [
     ] as Array<message>,
@@ -51,12 +51,12 @@ export default createStore({
     is_verify: false as boolean, // V
     onlineUsers: [] as Array<number>,
     inGameUsers: [] as Array<number>,
-    MainAppSocket: '' as any,
     num: 0 as number,
+    global_user_id: 0 as number,
   },
   getters: {
-    get_main_app_socket(state:any){
-      return state.MainAppSocket;
+    get_global_user_id(state:any){
+      return state.global_user_id;
     },
     get_in_game_users(state:any){
       return state.inGameUsers;
@@ -74,7 +74,7 @@ export default createStore({
     get_auth2_enabled_DB(state:any){
       return state.auth2_enabled_DB;
     },
-	  getRooms(state:any)
+    getRooms(state:any)
     {
       return state.rooms;
     },
@@ -84,6 +84,12 @@ export default createStore({
     }
   },
   mutations: {
+    set_global_user_id(state:any, user_id:number){
+      if (state.global_user_id === 0){
+        state.global_user_id = user_id;
+        console.log(`id changed in store value is ${state.global_user_id }`);
+      }
+    },
     remove_at(state:any, index:number){
       state.chatPublicMsgs.splice(index, 1);
     },
@@ -94,9 +100,6 @@ export default createStore({
       console.log(`before ${state.num}`);
       state.num = n;
       console.log(`after ${state.num}`);
-    },
-    set_main_app_socket(state:any, socket:any){
-      state.MainAppSocket = socket;
     },
     set_online_users(state:any, us:Array<number>){
       state.onlineUsers = us;

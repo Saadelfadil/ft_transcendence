@@ -17,11 +17,12 @@ import {
 	  origin: '*',
 	}
   })
-export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class OnlineGateway implements OnGatewayInit , OnGatewayDisconnect{
 
 
 
-  private  onlineUsers = {};
+  private  onlineUsers : Array<number> = [];
+  private  onlineUsersSockets : Array<string> = [];
   private inGameUsers : Array<number> = [];
 	constructor(  
 	) {}
@@ -30,17 +31,21 @@ export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 	private logger: Logger = new Logger('MessageGateway');
    
 
-    @SubscribeMessage('online')
+    @SubscribeMessage('online-state')
     handleOnlineUsers(client, payload: any ): any {
-        this.onlineUsers[client.id] = payload.data.userId;
-		this.server.emit('online-users', this.onlineUsers);
 
-        return { onlineUsers: this.onlineUsers };
+        
+        this.onlineUsers.push(payload.user_id);
+        this.onlineUsersSockets.push(client.id); // i will use this to remove user_id from array at disconnect
+
+        this.server.emit('online-users', this.onlineUsers);
+
+        return { onlineUsers: this.onlineUsers, inGameUsers: this.inGameUsers};
     }
       
     @SubscribeMessage('in-game-user')
     InGameUsers(client, payload:any){
-      console.log(`in game players ${this.inGameUsers}`);
+  
       if (payload.playing){
         this.inGameUsers.push(payload.user_id);
         this.server.emit('all-users-in-game', this.inGameUsers);
@@ -59,17 +64,18 @@ export class OnlineGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     afterInit(server: Server) {
     }
-    
+
     handleDisconnect(client: Socket) {
-
-      delete this.onlineUsers[client.id];
-
-		    this.server.emit('online-users', this.onlineUsers);
+      this.onlineUsersSockets.map((sock_id, index:number) => {
+        if (sock_id == client.id)
+        {
+          this.onlineUsersSockets.splice(index, 1);
+          this.onlineUsers.splice(index, 1);
+          return ;
+        }
+      });
+      this.server.emit('online-users', this.onlineUsers);
     }
-    
-    handleConnection(client: Socket, ...args: any[]) {
-		  this.server.emit('online-users', this.onlineUsers);
-    }
-
-       
 }
+
+

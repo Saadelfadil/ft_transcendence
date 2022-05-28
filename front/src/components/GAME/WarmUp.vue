@@ -267,6 +267,7 @@ export default  defineComponent({
                     url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/getloginbyid`,
                     data: {id: 0}
                 });
+
                 this.right_player_avatar = resp.data.image_url;
                 this.right_player_login = resp.data.login;
             }catch(e){

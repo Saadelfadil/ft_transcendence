@@ -100,6 +100,19 @@ export class LevelUpLogic {
 
     }
 
+    addwaiting(roomnode: roomNode, client: Socket){
+        let node = this.wRooms.insert(Date.now(), roomnode);
+        while(node === null)
+            node = this.wRooms.insert(Date.now(), roomnode);
+        node.data.id = node.key.toString();
+        client.join(node.data.id);
+        node.data.players.push(client.data.userId);
+        node.data.size = 1;
+        client.data.pos = 'left'; 
+        client.data.room = node.data.id;
+        return null;
+    }
+
     joinRoom(client: Socket) :roomNode{
         let roomnode = new roomNode();
         roomnode.playerLeft = this.playerLeft;
@@ -107,6 +120,14 @@ export class LevelUpLogic {
         roomnode.ball = this.ball;
         if (this.wRooms.size > 0){
             let node = this.wRooms.minNode();
+            while (node && node.data.players[0] === client.data.userId){
+                console.log(node.data);
+
+                node = this.wRooms.next(node);
+            }
+            if (!node){
+                return this.addwaiting(roomnode, client);
+            }
             let newNode = this.rooms.insert(node.key, node.data);
             this.wRooms.remove(node.key);
             client.join(newNode.data.id);
@@ -117,16 +138,7 @@ export class LevelUpLogic {
             client.data.roomStatus = 'play';
             return newNode.data;
         } else {
-            let node = this.wRooms.insert(Date.now(), roomnode);
-            while(node === null)
-                node = this.wRooms.insert(Date.now(), roomnode);
-            node.data.id = node.key.toString();
-            client.join(node.data.id);
-            node.data.players.push(client.data.userId);
-            node.data.size = 1;
-            client.data.pos = 'left'; 
-            client.data.room = node.data.id;
-            return null;
+            return this.addwaiting(roomnode, client);
         }
     }
 

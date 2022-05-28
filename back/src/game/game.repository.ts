@@ -54,7 +54,6 @@ export class GameRepository extends Repository<Room> {
     async getAllRooms(): Promise<Room[]>{
         const query = this.createQueryBuilder('room');
         const rooms = await query.getMany();
-        //console.log(rooms);
         return rooms;
     }
 

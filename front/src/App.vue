@@ -1,5 +1,4 @@
 <template>
-
   <div class="flex flex-row h-full">
     <ManagerBlock />
     <div class="px-16 py-4 text-gray-700 bg-gray-200 h-screen w-screen">
@@ -7,7 +6,6 @@
     </div>
   </div>
 </template>
-     
 
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -23,39 +21,30 @@ export default defineComponent({
   },
   data(){
     return {
-      user_id: 0 as number,
       socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/onlineUsers`) as any,
     }
   },
-  methods:{
-  },
-  watch:{
-    user_id(){
 
-      store.commit('set_main_app_socket', this.socket);
-      
-			(this).socket.emit('online', { data: { userId: (this).user_id } }, (response: any) => {
-            let newArray: Array<number> = [];
-            for (let user in response.onlineUsers) {
-                newArray.push(response.onlineUsers[user]);
-                
-            }
-            store.commit('set_online_users', newArray);
+
+  computed:{
+    GoOnline() : boolean {
+      return store.getters.get_global_user_id;
+    }
+  },
+
+  watch:{
+    GoOnline(){
+			this.socket.emit('online-state',  { user_id: store.getters.get_global_user_id}, (response: any) => {
+            store.commit('set_online_users', response.onlineUsers);
+            store.commit('set_in_game_users', response.inGameUsers);
       });
       this.socket.on("online-users", (data:any) => {
-            let newArray: Array<number> = [];
-            for (let user in data) {
-                newArray.push(data[user]);
-            }
-            store.commit('set_online_users', newArray);
+            store.commit('set_online_users', data);
       });
-
-
       this.socket.on('all-users-in-game', (data:any) => {
-        console.log(`in game users ${data}`);
         store.commit('set_in_game_users', data);
       });
     }
-  }
+  },
 })
 </script>

@@ -1,7 +1,7 @@
 <template>
     <div class="bg-slate-800  flex z-[1000] justify-center absolute top-0 right-0 bottom-0 left-0">
         <div class="flex flex-col justify-center">
-        <a v-if="!is_logged" href = "https://api.intra.42.fr/oauth/authorize?client_id=a5ffc00459f1fef5558f6e7882102ec8873feba7712de5e2dd2c376354764512&redirect_uri=http%3A%2F%2F10.30.248.85%3A8080%2Flogin&response_type=code">
+        <a v-if="!is_logged" v-bind:href = "red_uri">
             <button class="bg-blue-500 py-5 px-8 rounded-lg font-bold text-white text-center px-4 py-3 transition duration-300 ease-in-out hover:bg-blue-600 mr-6 cursor-pointer">
                 LOGIN
             </button>
@@ -27,6 +27,7 @@ export default defineComponent({
     data(){
         return {
             is_logged: false as boolean,
+            red_uri: '' as string,
         }
     },
     methods: {
@@ -42,6 +43,8 @@ export default defineComponent({
 
     async created()
     {
+        this.red_uri = process.env.VUE_APP_RED_URI;
+        console.log(this.red_uri);
         if (this.$route.query.code !== undefined && this.$route.query.code !== null && this.$route.query.code !== "")
         {
             console.log(`value is ${this.$route.query.code}`);
@@ -57,7 +60,6 @@ export default defineComponent({
                 console.log(error);
             });
         }
-        console.log(process.env.VUE_APP_HOST_IP, "fgdfgdfgdfgdf");
         await this.redirectIfLogged();
     }
 });

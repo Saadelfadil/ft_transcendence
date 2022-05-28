@@ -75,6 +75,7 @@ export default defineComponent({
     },
     data(){
         return{
+            in_game_socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/onlineUsers`),
             start: 0  as number,
             socket : null as any,
             canvas: 0 as any,
@@ -294,7 +295,8 @@ export default defineComponent({
                     this.socket.emit('setRoom', room);
                     this.socket.on("startMouseEvent", () => {
                         this.startMouseEvent();
-                        store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
+
+                        this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
                         this.game_state = 2;
                         this.socket.on("updateClient", (clientData: any) => {
                             this.playerLeft = clientData.pl;
@@ -321,7 +323,7 @@ export default defineComponent({
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
-                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                    this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
@@ -360,7 +362,8 @@ export default defineComponent({
         },
         tabClosed(event:any){
             if (this.socket){
-                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                this.in_game_socket.disconnect();
                 this.socket.disconnect();
             }
         },
@@ -380,7 +383,8 @@ export default defineComponent({
         if (this.timerInterval)
             clearInterval(this.timerInterval);
         if (this.socket){
-            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+            this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+            this.in_game_socket.disconnect();
             this.socket.disconnect();
         }
     },

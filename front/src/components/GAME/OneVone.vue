@@ -49,7 +49,6 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import router from '@/router';
-import store from '@/store';
 import { io } from "socket.io-client";
 import ChatAlertMessageBlock from './alertMessage.vue';
 
@@ -75,11 +74,12 @@ interface Ball {
 export default defineComponent({
     name: 'OneVOneBlock',
     components:{
-	   'alert-message-comp': ChatAlertMessageBlock
+        'alert-message-comp': ChatAlertMessageBlock
     },
     data(){
         return{
-		    isNormalMsgs: true as boolean,
+            in_game_socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/onlineUsers`),
+            isNormalMsgs: true as boolean,
             socket : null as any,
             canvas: 0 as any,
             game_state: 0 as number,
@@ -296,7 +296,7 @@ export default defineComponent({
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
-                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                    this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
@@ -321,7 +321,7 @@ export default defineComponent({
                 this.socket.on("startMouseEvent", () => {
                     
                     this.startMouseEvent();
-                    store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
+                    this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:true});
                     this.game_state = 2;
                     this.socket.on("updateClient", (clientData: any) => {
                         this.playerLeft = clientData.pl;
@@ -379,7 +379,8 @@ export default defineComponent({
         },
         tabClosed(event:any){
             if (this.socket){
-                store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                this.in_game_socket.disconnect();
                 this.socket.disconnect();
             }
         },
@@ -397,7 +398,8 @@ export default defineComponent({
         if (this.timerInterval)
             clearInterval(this.timerInterval);
         if (this.socket){
-            store.getters.get_main_app_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+            this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+            this.in_game_socket.disconnect();
             this.socket.disconnect();
         }
     },

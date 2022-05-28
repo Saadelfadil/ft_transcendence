@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GameController } from './game.controller';
 import { GameService } from './game.service';
-import { GameGateway } from './game.gateway';
-import { GameLogic } from './game.logic';
 import { MatchUpGateway } from './matchup/game.matchup.gateway';
 import { MatchUpLogic } from './matchup/game.matchup.logic';
 import { WarmUpLogic } from './warmup/game.warmup.logic';
@@ -21,8 +19,6 @@ import { oneVoneLogic } from './1v1/game.1v1.logic';
                                       UserEntity])],
   controllers: [GameController],
   providers: [GameService,
-              GameGateway,
-              GameLogic,
               MatchUpGateway,
               MatchUpLogic,
               WarmUpLogic,

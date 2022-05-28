@@ -8,6 +8,7 @@ import { UserFriendsEntity } from './userFriends.entity';
 import { UserHistoryEntity } from './userHistory.entity';
 import { OnlineGateway } from './users.gateway';
 
+
 @Module({
   imports: [
   TypeOrmModule.forFeature([UserEntity, UserFriendsEntity, UserHistoryEntity]),

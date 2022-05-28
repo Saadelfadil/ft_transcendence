@@ -39,7 +39,6 @@
                                     </div>
                                 </div>
                             </div>
-     
                         </div>
 
                         </div>
@@ -61,8 +60,8 @@
                 </li>
                 <li @click="next()" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 hover:bg-gray-700 hover:text-gray-200 rounded-lg">
                     <a class="flex items-center font-bold" href="#">
-                               <span class="mx-1">Next</span>
-                   </a>
+                        <span class="mx-1">Next</span>
+                    </a>
                 </li>
             </ul> 
     </div>
@@ -71,7 +70,6 @@
 
 
 <script lang="ts">
-import store from '@/store'
 import { defineComponent } from 'vue'
 import axios from 'axios';
 import router from '@/router';
@@ -133,7 +131,6 @@ export default defineComponent({
                 this.matchs_info = resp.data.reverse();
                 this.users_ids = []; // do not remove this line
 
-                console.log(`history ${JSON.stringify(this.matchs_info)}`);
                 this.matchs_info.map((inp:Match) => {
                     this.users_ids.push(+inp.data[0].id);
                     this.users_ids.push(+inp.data[1].id);
@@ -146,7 +143,6 @@ export default defineComponent({
         },
         async getUsers()
         {
-            console.log(this.users_ids);
             try {
                 const resp = await axios({
                     method: 'post',
@@ -154,7 +150,6 @@ export default defineComponent({
                     data : {usersId: this.users_ids}
                 });
                 this.match_display = resp.data;
-                console.log(`match display ${JSON.stringify(this.match_display)}`);
             } catch(e){
                 console.log(e);
             }
@@ -174,10 +169,9 @@ export default defineComponent({
         previous() {
             if (this.page > 1)
             {
-               this.page -= 1;
-              this.limit -= this.factor;
-              this.prev -= this.factor;
-               console.log('previous');
+                this.page -= 1;
+                this.limit -= this.factor;
+                this.prev -= this.factor;
             }
         },  
         next() {
@@ -186,7 +180,6 @@ export default defineComponent({
                     this.page += 1;
                     this.limit += this.factor;
                     this.prev += this.factor;
-                    console.log('next');
             }
 
 

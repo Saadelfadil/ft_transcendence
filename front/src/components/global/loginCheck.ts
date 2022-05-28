@@ -1,4 +1,5 @@
 import axios from 'axios';
+import store from '@/store';
 import router from '@/router';
 import { numberLiteralTypeAnnotation } from '@babel/types';
 
@@ -30,6 +31,10 @@ export default {
                     (this as any).logged = true;
                     (this as any).auth_switch = resp.data.is_login_db;
                     (this as any).user_id = resp.data.id;
+
+                    console.log(`start working id now is ${(this as any).user_id}`);
+                    store.commit('set_global_user_id', (this as any).user_id);
+
                     (this as any).avatar = resp.data.image_url;
                     (this as any).username = resp.data.login;
                     (this as any).joinedRooms = resp.data.joinedRooms;
