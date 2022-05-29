@@ -39,36 +39,40 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   handleConnection(client: Socket, ...args: any[]) {
     //this.gameService.rooms.push(client.id);
-    ////console.log('-----connect socket (onevone)------');
-    ////console.log(`connect: ${client.id}`);
-    ////console.log('-----end of connect socket ------\n');
+    //////console.log('-----connect socket (onevone)------');
+    //////console.log(`connect: ${client.id}`);
+    //////console.log('-----end of connect socket ------\n');
     //client.data = this.levelUpLogic.addClient(client.id); --> warmup logic
   }
   
   handleDisconnect(client: Socket) {
-    ////console.log('-----disconnect socket (onevone)------');
-    ////console.log(`disconnect: ${client.id}`);
+    //////console.log('-----disconnect socket (onevone)------');
+    //////console.log(`disconnect: ${client.id}`);
     this.clear(client);
-    ////console.log(this.oneVoneLogic.rooms.size)
-    ////console.log('-----end of disconnect socket ------\n');
+    //////console.log(this.oneVoneLogic.rooms.size)
+    //////console.log('-----end of disconnect socket ------\n');
     //this.levelUpLogic.wclients.find(client.id)
     //this.levelUpLogic.rmClient(client.id);
     //this.logger.log(`client disconnected ${client}`);
   }
 
   clear(client: Socket){
+    //console.log(`clear`);
     if (client.data.type === 'stream'){
       client.leave(client.data.room);
       client.emit('leaveRoom');
     } else {
       client.leave(client.data.room);
-      this.server.to(client.data.room).emit('leaveRoom');
       if (client.data.roomNode){
+        //console.log(`first check`);
+        this.server.to(client.data.room).emit('leaveRoom');
         clearInterval(client.data.roomNode.gameLoop);
         clearInterval(client.data.roomNode.gameTimer);
       }
-      if(client.data.pos === 'right'){
-        ////console.log('add data', client.data.roomNode);
+      if(client.data.pos === 'right' && client.data.roomNode){
+        //console.log(`right`);
+
+        //////console.log('add data', client.data.roomNode);
         this.matchRepository.addMatchData(client.data.roomNode, 'onevone');
           if (client.data.roomNode.playerLeft.score > client.data.roomNode.playerRight.score){
             this.userRepository.createQueryBuilder()
@@ -99,8 +103,11 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           this.userRepository.update(Number(client.data.roomNode.players[0]), {in_game: false});
           this.userRepository.update(Number(client.data.roomNode.players[1]), {in_game: false});
       }
-      this.gameRepository.deleteRoom(client.data.room);
-      this.oneVoneLogic.rooms.remove(Number(client.data.room));
+      if (client.data.roomNode){
+        //console.log(`removing`);
+        this.gameRepository.deleteRoom(client.data.room);
+        this.oneVoneLogic.rooms.remove(Number(client.data.room));
+      }
     }
     
   }
@@ -121,13 +128,23 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     client.data.room = data.room;
     client.data.userId = data.id;
     if (client.data.pos === 'left'){
+      let test = this.oneVoneLogic.rooms.find(Number(client.data.room));
+      //console.log(test);
+      if (test){
+        client.emit('roomAlreadyExist');
+        return;
+      }
       client.data.roomNode = this.oneVoneLogic.addRoom(client);
       this.initData(client);
-      ////console.log(`${client.id}: ${client.data.pos} set room: ${client.data.room}.`)
-      ////console.log(client.data.roomNode);
+      //////console.log(`${client.id}: ${client.data.pos} set room: ${client.data.room}.`)
+      //////console.log(client.data.roomNode);
     } else if (client.data.pos === 'right'){
       let node = this.oneVoneLogic.rooms.find(Number(client.data.room));
       if (node){
+        if (node.data.size === 2){
+          client.emit('roomAlreadyExist');
+          return;  
+        }
         node.data.size++;
         node.data.players.push(client.data.userId);
         client.join(node.data.id);
@@ -146,8 +163,8 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           this.userRepository.update(Number(client.data.roomNode.players[0]), {in_game: true});
           this.userRepository.update(Number(client.data.roomNode.players[1]), {in_game: true});
         }, timer * 1000);
-        ////console.log(`${client.id}: ${client.data.pos} join the room: ${client.data.room}.`)
-        ////console.log(client.data.roomNode);
+        //////console.log(`${client.id}: ${client.data.pos} join the room: ${client.data.room}.`)
+        //////console.log(client.data.roomNode);
         //this.gameRepository.getAllRooms();
       } else {
         client.data.pos = '';
@@ -181,13 +198,13 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   startTime(client: any){
     let start = Date.now();
-    ////console.log('start time', client.data.roomNode);
+    //////console.log('start time', client.data.roomNode);
     client.data.roomNode.gameTimer = setInterval(() => {
         let delta = Date.now() - start;
         let timer = Math.floor(delta / 1000);
         client.data.roomNode.time = timer;
         if (client.data.roomNode.time % 5 === 0){
-          ////console.log("1v1");
+          //////console.log("1v1");
           client.data.roomNode.ball.speed += 0.3;
           client.data.roomNode.playerLeft.h -= 3;
           client.data.roomNode.playerRight.h -= 3;
@@ -198,7 +215,7 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           clearInterval(client.data.roomNode.gameLoop);
           this.server.to(client.data.room).emit('leaveRoom');
         }
-        ////console.log(timer);
+        //////console.log(timer);
     }, 1000);
   }
 
@@ -213,11 +230,14 @@ export class oneVoneGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   @SubscribeMessage('decline')
   decline(client: Socket, room: string){
+    //console.log(`got decline`);
     client.data.pos = '';
     client.data.room = room;
     if (this.oneVoneLogic.rooms.find(Number(client.data.room))){
+      //console.log(`send to leaveroom`);
       this.server.to(client.data.room).emit('leaveRoom');
+      client.emit('disconect');
     }
-    ////console.log(room);
+    //////console.log(room);
   }
 }

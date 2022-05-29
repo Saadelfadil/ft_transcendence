@@ -136,7 +136,7 @@ export default defineComponent({
         },
         async addFriend()
         {
-            //console.log('adding');
+            ////console.log('adding');
             try{
                 const resp = await axios({
                     method: 'post',
@@ -149,7 +149,7 @@ export default defineComponent({
                 this.user_info.is_friend = true;
                 
             }catch(e){
-                //console.log(e);
+                ////console.log(e);
             }
         },
         validFriend(friend_id:number){

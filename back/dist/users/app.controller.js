@@ -57,7 +57,7 @@ let AppController = class AppController {
         return reqs;
     }
     async addFriend(body, request) {
-        //console.log('addfriend');
+        ////console.log('addfriend');
         const { login } = body;
         const userJwt = await this.appService.getUserDataFromJwt(request);
         if (userJwt.id == undefined)
@@ -94,7 +94,7 @@ let AppController = class AppController {
         }
     }
     async removeFriend(body, request) {
-        //console.log('remove friend');
+        ////console.log('remove friend');
         const { friend_id } = body;
         if (friend_id == undefined)
             return;
@@ -241,13 +241,13 @@ let AppController = class AppController {
         const UID = "a5ffc00459f1fef5558f6e7882102ec8873feba7712de5e2dd2c376354764512";
         const SECRET = "c96fc611de1556fe03825b1fe48054a14a09f7dbe43546c0aa861a313a29e1bb";
         const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
-        //console.log("------------------> ", code, process.env.UID, process.env.SECRET);
+        ////console.log("------------------> ", code, process.env.UID, process.env.SECRET);
         var appp = new _42_authentication_1.default(UID, SECRET, REDIRECT_URI);
         var token = await appp.get_Access_token(code);
         if (token == undefined)
             return;
         const userData = await appp.get_user_data(token.access_token);
-        //console.log(`${JSON.stringify(userData)}`);
+        ////console.log(`${JSON.stringify(userData)}`);
         if (userData == undefined)
             return;
         const { id, email, login, image_url } = userData;
@@ -347,7 +347,7 @@ let AppController = class AppController {
     async users() {
         const query = this.userRepository.createQueryBuilder('UserEntity');
         const matchs = await query.getMany();
-        //console.log(matchs);
+        ////console.log(matchs);
         return matchs;
     }
     async getExactUser(body, request) {

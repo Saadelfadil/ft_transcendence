@@ -88,7 +88,7 @@ export default defineComponent({
           let blockedUsers : Array<number> = resp.data;
           this.getListUsers(blockedUsers).then((resp:any) => {
               this.userList = resp.data.users;
-              //console.log(this.userList);
+              ////console.log(this.userList);
           });
       });
     }

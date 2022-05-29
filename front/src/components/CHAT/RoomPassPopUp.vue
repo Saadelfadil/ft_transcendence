@@ -32,7 +32,7 @@ export default defineComponent({
     methods: {
         joinPrivate()
         {
-            //console.log(`used with ${this.user_room_pass}`);
+            ////console.log(`used with ${this.user_room_pass}`);
             this.$emit('checkpass', this.user_room_pass);
         }
     },

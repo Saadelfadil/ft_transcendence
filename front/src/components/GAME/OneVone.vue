@@ -39,7 +39,7 @@
         </div>
 
     </div>
-    <alert-message-comp v-else />
+    <alert-message-comp :data_display="alert_display" v-else />
 
     </div>
 </template>
@@ -78,6 +78,9 @@ export default defineComponent({
     },
     data(){
         return{
+            unavailble_friend: 'your friend is unavailble',
+            invalid_play: 'you are already playing with this user',
+            alert_display: 'test' as string,
             in_game_socket : io(`http://${process.env.VUE_APP_HOST_IP}:3000/onlineUsers`),
             isNormalMsgs: true as boolean,
             socket : null as any,
@@ -164,12 +167,20 @@ export default defineComponent({
         }
     },
     methods: {
-        acceptedWhenFriendIsInvalid(){
-			   this.isNormalMsgs = false;
-			   setTimeout(() => {
-				   this.isNormalMsgs = true;
-                   router.go(-1);
-			   }, 2000);
+        acceptedWhenFriendIsInvalid(state:boolean){
+            //console.log(`called acceptedWhenFriendIsInvalid`);
+            if (state){
+                this.alert_display = this.unavailble_friend;
+            }else
+                this.alert_display = this.invalid_play;
+			this.isNormalMsgs = false;
+			setTimeout(() => {
+				this.isNormalMsgs = true;
+                if (state)
+                    router.go(-1);
+                else
+                    router.replace({name : 'profile'});
+			}, 2000);
 		},
         async leftLogin(){
             try{
@@ -184,7 +195,7 @@ export default defineComponent({
                 this.left_player_login = resp.data.login;
                 this.left_player_avatar = resp.data.image_url;
             }catch(e){
-                //console.log(e);
+                ////console.log(e);
             }
         },
         async rightLogin(){
@@ -200,7 +211,7 @@ export default defineComponent({
                 this.right_player_login = resp.data.login;
                 this.right_player_avatar = resp.data.image_url;
             }catch(e){
-                //console.log(e);
+                ////console.log(e);
             }
         },
         initGame(scw: number, sch: number){
@@ -271,7 +282,6 @@ export default defineComponent({
             this.context.fill();
         },
         startMouseEvent(){
-           
             this.canvas.addEventListener("mousemove", (e: any) => {
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
                 this.socket.emit("updatePos", cursPos / this.factor);
@@ -281,7 +291,7 @@ export default defineComponent({
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);
 
-            //console.log(`you reached 1v1 from ${this.$router.options.history.state.back}`);
+            ////console.log(`you reached 1v1 from ${this.$router.options.history.state.back}`);
 
             this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/onevone`);
             this.socket.on('connect', () => {
@@ -290,13 +300,12 @@ export default defineComponent({
                                                 pos: this.$route.query.pos,
                                                 id: this.user_id});
                 this.socket.on('noRoom', () => {
-                    //console.log('there is no room, player or game: khroj fhalek mn lakher');
-                    this.acceptedWhenFriendIsInvalid();
+                    ////console.log('there is no room, player or game: khroj fhalek mn lakher');
+                    this.acceptedWhenFriendIsInvalid(true);
                 });
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
-                    this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
@@ -312,10 +321,14 @@ export default defineComponent({
                         }
                         else{
                             this.timer--;
-                            //console.log(this.timer);
+                            ////console.log(this.timer);
                         }
                     }, 1000);
                     this.game_state = 1;
+                });
+
+                this.socket.on("roomAlreadyExist", () => {
+                    this.acceptedWhenFriendIsInvalid(false);
                 });
 
                 this.socket.on("startMouseEvent", () => {
@@ -342,7 +355,7 @@ export default defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    //console.log(clientData.pl);
+                    ////console.log(clientData.pl);
                     this.initGame(clientData.scw, clientData.sch);
                 });
 
@@ -379,7 +392,6 @@ export default defineComponent({
         },
         tabClosed(event:any){
             if (this.socket){
-                this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.in_game_socket.disconnect();
                 this.socket.disconnect();
             }
@@ -398,7 +410,6 @@ export default defineComponent({
         if (this.timerInterval)
             clearInterval(this.timerInterval);
         if (this.socket){
-            this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.in_game_socket.disconnect();
             this.socket.disconnect();
         }

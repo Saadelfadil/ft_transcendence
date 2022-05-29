@@ -72,7 +72,7 @@ export default defineComponent({
     },
       watch:{
           user_id(){
-              //console.log("used");
+              ////console.log("used");
               this.getUsers();
           }
       },
@@ -88,7 +88,7 @@ export default defineComponent({
             }
 			catch(e)
             {
-                //console.log(`while trying to get data for rooms ${e}`);
+                ////console.log(`while trying to get data for rooms ${e}`);
             }
         },
         async getUserData(user_id:number)

@@ -153,7 +153,7 @@ export default defineComponent({
                 this.left_player_login = resp.data.login;
                 this.left_player_avatar = resp.data.image_url;
             }catch(e){
-                //console.log(e);
+                ////console.log(e);
             }
         },
         async rightLogin(){
@@ -169,7 +169,7 @@ export default defineComponent({
                 this.right_player_login = resp.data.login;
                 this.right_player_avatar = resp.data.image_url;
             }catch(e){
-                //console.log(e);
+                ////console.log(e);
             }
         },
         initGame(scw: number, sch: number){
@@ -244,9 +244,9 @@ export default defineComponent({
             // this.socket.emit("startTime");
             //this.socket.emit("startGame");
             this.canvas.addEventListener("mousemove", (e: any) => {
-                ////console.log(`her${this.canvasHtml.getBoundingClientRect().top}`);
+                //////console.log(`her${this.canvasHtml.getBoundingClientRect().top}`);
                 let cursPos = e.clientY - this.canvas.getBoundingClientRect().top;
-                ////console.log(cursPos);
+                //////console.log(cursPos);
                 this.socket.emit("updatePos", cursPos / this.factor);
             });
         },
@@ -264,7 +264,7 @@ export default defineComponent({
 
                 this.socket.on('waitingForRoom', (pos: string) => {
                     this.playerPos = pos;
-                    ////console.log(pos);
+                    //////console.log(pos);
                     // msgHtml.innerHTML = `Waiting for Room, you are ${pos} player`;
                     this.game_state = 0;
                 });
@@ -279,7 +279,7 @@ export default defineComponent({
                         }
                         else{
                             this.timer--;
-                            //console.log(this.timer);
+                            ////console.log(this.timer);
                         }
                     }, 1000);
                     this.game_state = 1;
@@ -297,11 +297,11 @@ export default defineComponent({
                             this.playerLeft = clientData.pl;
                             this.playerRight = clientData.pr;
                             this.ball = clientData.b;
-                            // //console.log(clientData.pl);
-                            // //console.log(clientData.pr);
-                            ////console.log(clientData.b);
+                            // ////console.log(clientData.pl);
+                            // ////console.log(clientData.pr);
+                            //////console.log(clientData.b);
                             if (clientData.b && clientData.pr && clientData.pl){
-                                ////console.log('render')
+                                //////console.log('render')
                                 this.renderGame();
                             }
                         });
@@ -314,18 +314,18 @@ export default defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    ////console.log(clientData.pl);
+                    //////console.log(clientData.pl);
                     this.initGame(clientData.scw, clientData.sch);
                 });
 
                 this.socket.on("leaveRoom", () => {
                     this.displayResult();
-                    this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                    // this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                     setTimeout(() => {
                         this.$router.push('/matchhistory');
                     }, 3000);
                 });
-                //console.log(this.socket.id);
+                ////console.log(this.socket.id);
 
             });
         },
@@ -360,7 +360,7 @@ export default defineComponent({
         },
         tabClosed(event:any){
             if (this.socket){
-                this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+                // this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
                 this.in_game_socket.disconnect();
                 this.socket.disconnect();
             }
@@ -378,11 +378,12 @@ export default defineComponent({
         }
     },
     unmounted(){
-        //console.log('matchup unmounted------');
+        ////console.log('matchup unmounted------');
         if (this.timerInterval)
             clearInterval(this.timerInterval);
         if (this.socket){
-            this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
+            //console.log(`user emiting ${this.user_id}`);
+            // this.in_game_socket.emit('in-game-user', {user_id: this.user_id, playing:false});
             this.in_game_socket.disconnect();
             this.socket.disconnect();
         }

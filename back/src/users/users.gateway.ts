@@ -23,13 +23,13 @@ export class OnlineGateway implements OnGatewayInit , OnGatewayDisconnect{
 
   private  onlineUsers : Array<number> = [];
   private  onlineUsersSockets : Array<string> = [];
+  private   inGameUsersSockets : Array<string>  = [];
   private inGameUsers : Array<number> = [];
 	constructor(  
 	) {}
 
     @WebSocketServer() server: Server;
 	private logger: Logger = new Logger('MessageGateway');
-   
 
     @SubscribeMessage('online-state')
     handleOnlineUsers(client, payload: any ): any {
@@ -46,19 +46,10 @@ export class OnlineGateway implements OnGatewayInit , OnGatewayDisconnect{
     @SubscribeMessage('in-game-user')
     InGameUsers(client, payload:any){
   
-      if (payload.playing){
+      if (payload.playing) {
         this.inGameUsers.push(payload.user_id);
+        this.inGameUsersSockets.push(client.id);
         this.server.emit('all-users-in-game', this.inGameUsers);
-      }
-      else{
-        this.inGameUsers.map((id, index) => {
-          if (id === payload.user_id)
-          {
-            this.inGameUsers.splice(index, 1);
-            this.server.emit('all-users-in-game', this.inGameUsers);
-            return ;
-          }
-        });
       }
     }
 
@@ -66,7 +57,16 @@ export class OnlineGateway implements OnGatewayInit , OnGatewayDisconnect{
     }
 
     handleDisconnect(client: Socket) {
-      this.onlineUsersSockets.map((sock_id, index:number) => {
+      this.inGameUsersSockets.map((sock_id:string, index:number) => {
+        if (sock_id == client.id)
+        {
+          this.inGameUsers.splice(index, 1);
+          this.inGameUsersSockets.splice(index, 1);
+          return ;
+        }
+      });
+
+      this.onlineUsersSockets.map((sock_id:string, index:number) => {
         if (sock_id == client.id)
         {
           this.onlineUsersSockets.splice(index, 1);
@@ -74,6 +74,7 @@ export class OnlineGateway implements OnGatewayInit , OnGatewayDisconnect{
           return ;
         }
       });
+      this.server.emit('all-users-in-game', this.inGameUsers);
       this.server.emit('online-users', this.onlineUsers);
     }
 }

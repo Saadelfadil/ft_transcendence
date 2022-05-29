@@ -76,7 +76,7 @@ export class LevelUpLogic {
         
         clientData.node.ball.x += clientData.node.ball.velocityX * clientData.node.ball.speed;
         clientData.node.ball.y += clientData.node.ball.velocityY * clientData.node.ball.speed;
-        //////console.log(clientData.node.ball.x);
+        ////////console.log(clientData.node.ball.x);
 
         // if (clientData.ball.x > this.canvasW/2)
         //     clientData.node.playerRight.y = clientData.ball.y - clientData.node.playerRight.h/2; 
@@ -121,7 +121,7 @@ export class LevelUpLogic {
         if (this.wRooms.size > 0){
             let node = this.wRooms.minNode();
             while (node && node.data.players[0] === client.data.userId){
-                ////console.log(node.data);
+                //////console.log(node.data);
 
                 node = this.wRooms.next(node);
             }

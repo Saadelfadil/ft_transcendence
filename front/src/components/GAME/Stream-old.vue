@@ -120,7 +120,7 @@ export default defineComponent({
         async getRooms(){
             const resp = await axios.get(`http://${process.env.VUE_APP_HOST_IP}:3000/game/rooms`);
             this.gameRooms = resp.data;
-            //console.log(resp.data);
+            ////console.log(resp.data);
         },
 
         roomClicked(index:any)
@@ -131,13 +131,13 @@ export default defineComponent({
             this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/${this.gameRooms[index].namespace}`);
             this.socket.on('connect', () => {
                 this.socket.emit('clientType', {type: 'stream',room: this.gameRooms[index].name});
-                //console.log(this.socket.id);
+                ////console.log(this.socket.id);
             });
             this.socket.on("updateClient", (clientData: any) => {
                 this.playerLeft = clientData.pl;
                 this.playerRight = clientData.pr;
                 this.ball = clientData.b;
-                ////console.log(clientData.pl);
+                //////console.log(clientData.pl);
                 this.renderGame();
             });
             this.socket.on("leaveRoom", () => {
@@ -157,7 +157,7 @@ export default defineComponent({
 
     },
     mounted(){
-        //console.log('stream mounted');
+        ////console.log('stream mounted');
 
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
         this.context = (this.canvas as HTMLCanvasElement).getContext('2d');
@@ -176,7 +176,7 @@ export default defineComponent({
 
     },
     unmounted(){
-        //console.log('stream unmounted');
+        ////console.log('stream unmounted');
         // this.socket.emit("stopTime");
         if(this.socket)
             this.socket.disconnect();

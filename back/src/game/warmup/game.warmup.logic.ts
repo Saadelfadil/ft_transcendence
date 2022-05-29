@@ -112,9 +112,9 @@ export class WarmUpLogic {
         clientData.interval = setInterval(() => {
             let delta = Date.now() - start;
             clientData.timer = Math.floor(delta / 1000);
-            // ////console.log(clientData);
+            // //////console.log(clientData);
             this.update(clientData);
-            ////console.log(clientData.timer);
+            //////console.log(clientData.timer);
         //client.emit("updateTime", Math.floor(delta / 1000))
         }, 1000);
     }

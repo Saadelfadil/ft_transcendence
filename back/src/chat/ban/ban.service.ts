@@ -26,7 +26,7 @@ export class BanService {
 		if(createBanDto.user_id == roomData.owner_id)
 			throw new HttpException({ message: 'You can\'t ban the room crater!' }, HttpStatus.UNAUTHORIZED);
 
-		// //console.log(`room id is ${createBanDto.room_id} user id ${createBanDto.user_id}`);
+		// ////console.log(`room id is ${createBanDto.room_id} user id ${createBanDto.user_id}`);
 		const bannedUser = await this.findUserInRoom(createBanDto.room_id, createBanDto.user_id);
 		
 		if( bannedUser )

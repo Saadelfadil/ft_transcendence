@@ -21,7 +21,7 @@ export class GameService {
     }
 
     async getMatchByUserId(id: string): Promise<Match[]>{
-        //console.log(id);
+        ////console.log(id);
         return this.matchRepository.getMatchByUserId(id);
     }
 }

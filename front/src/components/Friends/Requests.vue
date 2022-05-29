@@ -69,11 +69,11 @@ export default defineComponent({
                   withCredentials: true,
               });
               this.user = resp.data;
-              //console.log(resp.data);
+              ////console.log(resp.data);
           }
           catch(e)
           {
-              //console.log(e);
+              ////console.log(e);
           }
       },
       async acceptOrDecline(val:boolean, id:number)
@@ -98,7 +98,7 @@ export default defineComponent({
         }
         catch(e)
         {
-            //console.log(e);
+            ////console.log(e);
         }
       },
     },

@@ -28,7 +28,7 @@ let GameService = class GameService {
         return this.matchRepository.getAllMatchs();
     }
     async getMatchByUserId(id) {
-        //console.log(id);
+        ////console.log(id);
         return this.matchRepository.getMatchByUserId(id);
     }
 };

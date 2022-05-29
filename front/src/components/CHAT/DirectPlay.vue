@@ -19,10 +19,10 @@ export default defineComponent({
     name: 'InviteBlock',
     methods: {
         acceptInvite(){
-            //console.log("accept playing");
+            ////console.log("accept playing");
         },
         declineInvite(){
-            //console.log("decline playing");
+            ////console.log("decline playing");
         },
     }
 })

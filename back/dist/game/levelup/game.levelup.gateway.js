@@ -34,18 +34,18 @@ let LevelUpGateway = class LevelUpGateway {
         this.logger.log(`server io initiatted ${server}`);
     }
     handleDisconnect(client) {
-        //console.log('-----disconnect socket (levelup)------');
-        //console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
+        ////console.log('-----disconnect socket (levelup)------');
+        ////console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
         if (client.data.node) {
             if (client.data.node.time < this.levelUpLogic.time && client.data.node.first_logout === '') {
                 client.data.node.first_logout = client.data.pos;
-                //console.log('first: ', client.data.pos);
+                ////console.log('first: ', client.data.pos);
             }
         }
         this.clear(client);
-        //console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
-        //console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
-        //console.log('-----end of disconnect socket ------\n');
+        ////console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
+        ////console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
+        ////console.log('-----end of disconnect socket ------\n');
     }
     checkRoomconnection(client) {
         let room = this.levelUpLogic.joinRoom(client);
@@ -61,16 +61,16 @@ let LevelUpGateway = class LevelUpGateway {
         }
     }
     handleConnection(client, ...args) {
-        //console.log('-----connect socket (levelup)------');
-        //console.log(`connect: ${client.id}`);
-        //console.log('-----end of connect socket ------\n');
+        ////console.log('-----connect socket (levelup)------');
+        ////console.log(`connect: ${client.id}`);
+        ////console.log('-----end of connect socket ------\n');
     }
     initGame(client) {
         this.levelUpLogic.initGmae();
         client.data.node.playerLeft = this.levelUpLogic.playerLeft;
         client.data.node.playerRight = this.levelUpLogic.playerRight;
         client.data.node.ball = this.levelUpLogic.ball;
-        //console.log(client.data.node);
+        ////console.log(client.data.node);
         client.emit("initData", {
             pl: client.data.node.playerLeft,
             pr: client.data.node.playerRight,
@@ -93,9 +93,9 @@ let LevelUpGateway = class LevelUpGateway {
         if (node) {
             client.data.roomStatus = 'play';
             client.data.node = node.data;
-            //console.log(client.data.node);
+            ////console.log(client.data.node);
             client.emit('startMouseEvent');
-            //console.log('mouse event sended');
+            ////console.log('mouse event sended');
             if (client.data.pos === 'left') {
                 let newDbRoom = {};
                 newDbRoom.name = client.data.node.id;
@@ -118,10 +118,10 @@ let LevelUpGateway = class LevelUpGateway {
             this.checkRoomconnection(client);
         }
         else if (data.type === 'stream') {
-            //console.log(data.room, 'stream');
+            ////console.log(data.room, 'stream');
             client.data.room = data.room;
             if (!this.levelUpLogic.rooms.find(Number(data.room))) {
-                //console.log("no room");
+                ////console.log("no room");
                 client.emit('noRoom');
                 return;
             }
@@ -141,7 +141,7 @@ let LevelUpGateway = class LevelUpGateway {
                 this.levelUpLogic.wRooms.remove(Number(client.data.room));
             }
             else if (client.data.roomStatus === 'play') {
-                //console.log('clear ***');
+                ////console.log('clear ***');
                 if (client.data.node.first_logout === "left") {
                     client.data.node.playerLeft.score = 0;
                     client.data.node.playerRight.score = 10;
@@ -160,9 +160,9 @@ let LevelUpGateway = class LevelUpGateway {
                 clearInterval(client.data.node.gameLoop);
                 clearInterval(client.data.node.gameTimer);
                 if (client.data.pos === 'left') {
-                    //console.log(client.data.node.playerLeft.score);
-                    //console.log(client.data.node.playerRight.score);
-                    //console.log(client.data.node.first_logout);
+                    ////console.log(client.data.node.playerLeft.score);
+                    ////console.log(client.data.node.playerRight.score);
+                    ////console.log(client.data.node.first_logout);
                     this.matchRepository.addMatchData(client.data.node, 'levelup');
                     if (client.data.node.playerLeft.score > client.data.node.playerRight.score) {
                         this.userRepository.createQueryBuilder()
@@ -218,7 +218,7 @@ let LevelUpGateway = class LevelUpGateway {
             let timer = Math.floor(delta / 1000);
             client.data.node.time = timer;
             if (client.data.node.time % 5 === 0) {
-                //console.log("levelup");
+                ////console.log("levelup");
                 client.data.node.ball.speed += 0.25;
                 client.data.node.playerLeft.h -= 2.5;
                 client.data.node.playerRight.h -= 2.5;
@@ -229,7 +229,7 @@ let LevelUpGateway = class LevelUpGateway {
                 clearInterval(client.data.node.gameLoop);
                 this.server.to(client.data.room).emit('leaveRoom');
             }
-            //console.log(timer);
+            ////console.log(timer);
         }, 1000);
     }
 };

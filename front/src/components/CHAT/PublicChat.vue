@@ -128,7 +128,7 @@ export default defineComponent({
             await Promise.all([this.newGetRooms(), this.getJoinedRooms()]).then((output:Array<any>) => {
                 store.commit('updateRooms', output[0].data);
                 this.joinedRooms = output[1].data.joinedRooms;
-                //console.log('joined rooms: ', this.joinedRooms);
+                ////console.log('joined rooms: ', this.joinedRooms);
             });
         }
     },
@@ -185,7 +185,7 @@ export default defineComponent({
                 // i will send password to backend to chek if password is correct
                 // just for testing i'm assuming that password is correct so i will fill the store
                 // and redirect him to chat messages block
-                //console.log("joining to private with pass: ", tmp_pass);
+                ////console.log("joining to private with pass: ", tmp_pass);
                 this.joinTheRoom(room.id, tmp_pass);
             }else{
                 this.passIsInvalid();
@@ -238,7 +238,7 @@ export default defineComponent({
             store.commit('removeRoomWithId', this.clickedRoom.id);
         },
         async updateRoomPassword(newpass:string){
-            //console.log(`new password ${newpass}`);
+            ////console.log(`new password ${newpass}`);
 
             const resp = await axios.patch(
 					`http://${process.env.VUE_APP_HOST_IP}:8080/room/${this.clickedRoom.id}`,

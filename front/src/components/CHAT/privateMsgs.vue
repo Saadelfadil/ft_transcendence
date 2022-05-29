@@ -178,7 +178,7 @@ export default  defineComponent({
 		},
 		async getUserMessages()
         {
-			// //console.log(`display blocked list ${this.blockedList}`)
+			// ////console.log(`display blocked list ${this.blockedList}`)
             const resp = await axios.get(
 				`http://${process.env.VUE_APP_HOST_IP}:8080/messages/${this.uId}`,
 			);
@@ -249,7 +249,7 @@ export default  defineComponent({
 	},
 	NewhandleSubmitNewInvite(){
 
-			//console.log(`called invite`);
+			////console.log(`called invite`);
 			const messageData = {
 				id: 0,
 				isInvite: true,
@@ -268,11 +268,11 @@ export default  defineComponent({
 				},
 				// send message callback
 				(response: any) => {
-					//console.log(response);
+					////console.log(response);
 					if(response.status)
 					{
 						// this.newMessage(messageData);
-						//console.log('onevone');
+						////console.log('onevone');
 						router.push({name : 'onevone', query: {room_name_1vs1: this.getRoomQuery(), pos: 'left'}});
 					}
 				}
@@ -310,12 +310,17 @@ export default  defineComponent({
 	},
 		declineInvite(msgObj:message, msg_index:number){
 
-			// //console.log(`decline at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
+			// ////console.log(`decline at room ${this.user_id.toString() + '_' + this.uId.toString()}`);
 			let socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/onevone`);
 			socket.on('connect', () => {
+				//console.log(`decline sent`);
 				socket.emit('decline', this.getRoomQuery());
-				socket.disconnect();
 			});
+
+			socket.on('disconect', () => {
+				//console.log(`socket disconnect`);
+				socket.disconnect();
+			})
 
 			const messageData = {
 				id: msgObj.id,
@@ -370,13 +375,13 @@ export default  defineComponent({
 					{
 						// TODO: redirect to play game room
 						// player who send request has recieved message that says let's play
-						// //console.log("Go to play game");
+						// ////console.log("Go to play game");
 					}
 				}
 			)
 
 			// TODO: redirect to play game room
-			// //console.log("Go to play game");
+			// ////console.log("Go to play game");
 		},
 
 	acceptingMsg(){
@@ -438,11 +443,11 @@ export default  defineComponent({
 	  {
 		  	this.isPopUp = true;
 			this.clickeduser_id = msg.from_id;
-		  	// //console.log(`message clicked ${msg.from_id} user id is ${this.user_id}`);
+		  	// ////console.log(`message clicked ${msg.from_id} user id is ${this.user_id}`);
 	  },
 	  disablePopUp()
 	  {
-		  // //console.log('blured');
+		  // ////console.log('blured');
 		  this.isPopUp = false;
 	  },
 	  profileClicked()
@@ -460,7 +465,7 @@ export default  defineComponent({
 		//   this.NewhandleSubmitNewMessage('', val);  // working here
 		// user id is this.user_id
 		// clicked user id is this.clickeduser_id
-		  // //console.log(`private invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
+		  // ////console.log(`private invite clicked bublic room logged id ${this.user_id} friend id ${this.clickeduser_id}`);
 
 		  this.NewhandleSubmitNewInvite();
 

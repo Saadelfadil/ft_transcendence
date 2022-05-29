@@ -38,10 +38,10 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleDisconnect(client: Socket) {
-    //console.log('-----disconnect socket (matchup)------');
-    //console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
+    ////console.log('-----disconnect socket (matchup)------');
+    ////console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
     this.clear(client);
-    //console.log('-----end of disconnect socket ------\n');
+    ////console.log('-----end of disconnect socket ------\n');
   }
 
   checkRoomconnection(client: Socket){
@@ -58,9 +58,9 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    //console.log('-----connect socket (matchup)------');
-    //console.log(`connect: ${client.id}`);
-    //console.log('-----end of connect socket ------\n');
+    ////console.log('-----connect socket (matchup)------');
+    ////console.log(`connect: ${client.id}`);
+    ////console.log('-----end of connect socket ------\n');
   }
 
   @SubscribeMessage('initGame')
@@ -94,9 +94,9 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (node){
       client.data.roomStatus = 'play';
       client.data.node = node.data;
-      //console.log(client.data.node);
+      ////console.log(client.data.node);
       client.emit('startMouseEvent');
-      //console.log('mouse event sended');
+      ////console.log('mouse event sended');
       if (client.data.pos === 'left'){
         let newDbRoom = {} as roomDb;
         newDbRoom.name = client.data.node.id;
@@ -111,7 +111,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   @SubscribeMessage('clientType')
   clientType(client: any, data: any): void {
     client.data.userId = data.userId;
-    ////console.log(client.data.userId);
+    //////console.log(client.data.userId);
     client.data.type = data.type;
     if (data.type === 'play'){
       this.userRepository.update(client.data.userId, {in_game: true});
@@ -121,17 +121,17 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       this.initGame(client);
       this.checkRoomconnection(client);
 
-      // //console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);
+      // ////console.log(`wRooms: ${this.matchUpLogic.wRooms.size}`);
       // this.matchUpLogic.wRooms.values().forEach(element => {
-      //   //console.log(element);
+      //   ////console.log(element);
       // });
-      // //console.log(`Rooms: ${this.matchUpLogic.rooms.size}`);
+      // ////console.log(`Rooms: ${this.matchUpLogic.rooms.size}`);
       // this.matchUpLogic.rooms.values().forEach(element => {
-      //   //console.log(element);
+      //   ////console.log(element);
       // });
 
     } else if (data.type === 'stream'){
-      //console.log(data.room, 'stream');
+      ////console.log(data.room, 'stream');
       client.data.room = data.room;
       client.join(data.room);
       client.emit('canvasWH', {scw: this.matchUpLogic.canvasW, sch: this.matchUpLogic.canvasH});
@@ -182,7 +182,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           this.userRepository.update(Number(client.data.node.players[0]), {in_game: false});
           this.userRepository.update(Number(client.data.node.players[1]), {in_game: false});
         }
-        ////console.log(client.data.node);
+        //////console.log(client.data.node);
         this.matchUpLogic.rooms.remove(Number(client.data.room));
         this.gameRepository.deleteRoom(client.data.room);
       }
@@ -208,7 +208,7 @@ export class MatchUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   startGame(client: any){
     // let users = ['1', '2', '3', '4', '5', '6', '7'];
     // let result = users.sort(() => .5 - Math.random()).slice(0,2);
-    // //console.log(result);
+    // ////console.log(result);
     // client.data.node.players[0] = result[0];
     // client.data.node.players[1] = result[1];
     client.data.node.gameLoop = setInterval(() => {

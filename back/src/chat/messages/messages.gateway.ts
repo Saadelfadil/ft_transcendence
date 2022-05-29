@@ -72,7 +72,7 @@ import {
 				const res = await this.messagesService.create(sessionId, messageDto);
 				payload.data.id = res.id;
 				payload.data.created = res.created;
-				//console.log("mp2 : ",payload)
+				////console.log("mp2 : ",payload)
 
 			}
 			else

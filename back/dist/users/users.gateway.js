@@ -25,7 +25,7 @@ let OnlineGateway = class OnlineGateway {
         return { onlineUsers: this.onlineUsers };
     }
     InGameUsers(client, payload) {
-        //console.log(`in game players ${this.inGameUsers}`);
+        ////console.log(`in game players ${this.inGameUsers}`);
         if (payload.playing) {
             this.inGameUsers.push(payload.user_id);
             this.server.emit('all-users-in-game', this.inGameUsers);

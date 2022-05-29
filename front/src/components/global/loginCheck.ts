@@ -18,7 +18,7 @@ export default {
     methods: {
         async checkLogin()
         {
-            //console.log("component name: ", (this as any).$options.name);
+            ////console.log("component name: ", (this as any).$options.name);
             if ((this as any).$options.name === "RouterLink" ||
             (this as any).$options.name === "RouterView"  || (this as any).$options.name === "ManagerBlock" || (this as any).$options.name === "LoginBlock") return 
 
@@ -32,7 +32,7 @@ export default {
                     (this as any).auth_switch = resp.data.is_login_db;
                     (this as any).user_id = resp.data.id;
 
-                    //console.log(`start working id now is ${(this as any).user_id}`);
+                    ////console.log(`start working id now is ${(this as any).user_id}`);
                     store.commit('set_global_user_id', (this as any).user_id);
 
                     (this as any).avatar = resp.data.image_url;
