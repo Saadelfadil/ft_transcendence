@@ -101,7 +101,7 @@ let WarmUpLogic = class WarmUpLogic {
             let delta = Date.now() - start;
             clientData.timer = Math.floor(delta / 1000);
             this.update(clientData);
-            console.log(clientData.timer);
+            //console.log(clientData.timer);
         }, 1000);
     }
 };

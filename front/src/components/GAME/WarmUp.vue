@@ -209,7 +209,7 @@ export default  defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    //console.log(clientData.pl);
+                    ////console.log(clientData.pl);
                     this.initGame(clientData.scw, clientData.sch);
                 });
 
@@ -219,17 +219,17 @@ export default  defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    //console.log(this.ball.x);
+                    ////console.log(this.ball.x);
                     this.renderGame();
                 });
 
                 this.socket.on("disconnect", () => {
-                    console.log(`${this.socket.id} disconnected`); // world
+                    //console.log(`${this.socket.id} disconnected`); // world
                 });
 
                 this.socket.on("updateTime", (time: number) => {
                     this.timer = time;
-                    //console.log(time);
+                    ////console.log(time);
                 });
 
                 this.socket.on("leaveRoom", () => {
@@ -271,20 +271,20 @@ export default  defineComponent({
                 this.right_player_avatar = resp.data.image_url;
                 this.right_player_login = resp.data.login;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         }
     },
     watch:{
         async user_id(){
-            console.log("at warm up: ", this.user_id);
+            //console.log("at warm up: ", this.user_id);
             await this.fillPlayersData();
             //await this.isUserPlaying();
             this.warmup();
         }
     },
     unmounted(){
-        console.log('warmup unmounted');
+        //console.log('warmup unmounted');
         //this.socket.emit("stopTime");
         this.socket.disconnect();
     },

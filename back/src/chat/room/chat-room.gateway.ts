@@ -67,7 +67,7 @@ import {
 	   
 	@SubscribeMessage('admins-changed')
 	async AdminsChanged(client: Socket, payload: any) {
-		console.log(`backend reahced with ${JSON.stringify(payload)}`);
+		//console.log(`backend reahced with ${JSON.stringify(payload)}`);
 		this.server.emit(payload.room_name, {data: {admin_id: payload.admin_id, add: payload.add}});
 	}
 

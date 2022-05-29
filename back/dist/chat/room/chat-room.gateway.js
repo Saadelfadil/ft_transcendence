@@ -42,7 +42,7 @@ let ChatRoomGateway = class ChatRoomGateway {
         }
     }
     async AdminsChanged(client, payload) {
-        console.log(`backend reahced with ${JSON.stringify(payload)}`);
+        //console.log(`backend reahced with ${JSON.stringify(payload)}`);
         this.server.emit(payload.room_name, { data: { admin_id: payload.admin_id, add: payload.add } });
     }
     async leaveRoom(client, payload) {

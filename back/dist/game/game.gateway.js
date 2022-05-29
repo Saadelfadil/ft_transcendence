@@ -21,19 +21,19 @@ let GameGateway = class GameGateway {
         this.logger.log(`server io initiatted ${server}`);
     }
     handleDisconnect(client) {
-        console.log('-----disconnect socket ------');
-        console.log(`disconnect: ${client.id}`);
-        console.log('-----end of disconnect socket ------\n');
+        //console.log('-----disconnect socket ------');
+        //console.log(`disconnect: ${client.id}`);
+        //console.log('-----end of disconnect socket ------\n');
     }
     handleConnection(client, ...args) {
-        console.log('-----connect socket (game)------');
-        console.log(`heereconnect: ${client.id}`);
+        //console.log('-----connect socket (game)------');
+        //console.log(`heereconnect: ${client.id}`);
         this.server.on('clientType', (type) => {
             if (type === 'stream') {
-                console.log(type);
+                //console.log(type);
             }
         });
-        console.log('-----end of connect socket ------\n');
+        //console.log('-----end of connect socket ------\n');
     }
 };
 __decorate([

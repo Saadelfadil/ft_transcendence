@@ -354,16 +354,16 @@ export default  defineComponent({
 		  	this.isPopUp = true;
 			this.clickeduser_id = msg.from_id;
 			this.clicked_user_name = msg.username;
-		  	console.log(`message clicked`);
+		  	//console.log(`message clicked`);
 	  },
 	  disablePopUp()
 	  {
-		  console.log('blured');
+		  //console.log('blured');
 		  this.isPopUp = false;
 	  },
 	  profileClicked()
 	  {
-		  console.log(this.clickeduser_id);
+		  //console.log(this.clickeduser_id);
 		  if (this.user_id !== this.clickeduser_id)
 		  {
 			  router.push({name: 'FriendProfile', query: {friend_id: this.clickeduser_id}});

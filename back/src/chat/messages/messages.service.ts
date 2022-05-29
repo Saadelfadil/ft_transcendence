@@ -31,7 +31,7 @@ export class MessagesService {
 
 	async updateMessage(id: number) {
 
-		console.log('id : ', id)
+		//console.log('id : ', id)
 		let msg = await this.findOneByCreatedDate(id);
 
 		msg.inviteStatus = 2;

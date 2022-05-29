@@ -181,7 +181,7 @@ export default defineComponent({
         },
         editUserName()
         {
-                console.log('catch double click');
+                ////console.log('catch double click');
                 this.user_name_editing = true;
         },
         async doneEditing(edit:boolean)
@@ -265,11 +265,11 @@ export default defineComponent({
         setAuth2(val:boolean){
             this.state = 0;
             this.auth2_enabled = val;
-            console.log(`change auth ${val}`);
+            ////console.log(`change auth ${val}`);
         },
         cancel_sig()
         {
-            console.log('called');
+            ////console.log('called');
             this.state = 0;
         },
         update_auth(authData:any){
@@ -297,7 +297,7 @@ export default defineComponent({
                     this.user_info.wins = response.data.wins;
                     this.user_info.loses = response.data.loses;
                 }, (error) => {
-                    console.log(error);
+                    ////console.log(error);
                 });
             }
             catch(e)

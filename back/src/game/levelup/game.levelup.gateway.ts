@@ -39,18 +39,18 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleDisconnect(client: Socket) {
-    console.log('-----disconnect socket (levelup)------');
-    console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
+    ////console.log('-----disconnect socket (levelup)------');
+    ////console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
     if (client.data.node){
       if (client.data.node.time < this.levelUpLogic.time && client.data.node.first_logout === ''){
         client.data.node.first_logout =  client.data.pos;
-        console.log('first: ', client.data.pos);
+        ////console.log('first: ', client.data.pos);
       }
     }
     this.clear(client);
-    console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
-    console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
-    console.log('-----end of disconnect socket ------\n');
+    ////console.log(`wRooms: ${this.levelUpLogic.wRooms.size}`);
+    ////console.log(`Rooms: ${this.levelUpLogic.rooms.size}`);
+    ////console.log('-----end of disconnect socket ------\n');
   }
 
   checkRoomconnection(client: Socket){
@@ -67,9 +67,9 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    console.log('-----connect socket (levelup)------');
-    console.log(`connect: ${client.id}`);
-    console.log('-----end of connect socket ------\n');
+    ////console.log('-----connect socket (levelup)------');
+    ////console.log(`connect: ${client.id}`);
+    ////console.log('-----end of connect socket ------\n');
   }
 
   @SubscribeMessage('initGame')
@@ -131,7 +131,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     } else if (data.type === 'stream'){
       client.data.room = data.room;
       if (!this.levelUpLogic.rooms.find(Number(data.room))){
-        console.log("no room");
+        ////console.log("no room");
         client.emit('noRoom');
         return;
       }
@@ -150,7 +150,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         this.userRepository.update(client.data.userId, {in_game: false});
         this.levelUpLogic.wRooms.remove(Number(client.data.room));
       } else if (client.data.roomStatus === 'play'){
-        console.log('clear ***');
+        ////console.log('clear ***');
         if (client.data.node.first_logout === "left"){
           client.data.node.playerLeft.score = 0;
           client.data.node.playerRight.score = 10;
@@ -234,7 +234,7 @@ export class LevelUpGateway implements OnGatewayInit, OnGatewayConnection, OnGat
           clearInterval(client.data.node.gameLoop);
           this.server.to(client.data.room).emit('leaveRoom');
         }
-        console.log(timer);
+        ////console.log(timer);
     }, 1000);
   }
 }

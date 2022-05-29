@@ -24,7 +24,7 @@ export class AppController  implements OnModuleInit {
 		@InjectRepository(UserHistoryEntity) private readonly userHistoryEntity: Repository<UserHistoryEntity>) {}
 
 	onModuleInit() {
-		console.log(`the IA user added.`);
+		//console.log(`the IA user added.`);
 		let user = new UserEntity();
 
 		user.id = 0;
@@ -316,17 +316,18 @@ export class AppController  implements OnModuleInit {
 		const SECRET = process.env.SECRET;
 		const REDIRECT_URI = `http://${process.env.HOST_IP}:8080/login`;
 		// 42 authenticator instance
-		//console.log("------------------> ", code, process.env.UID, process.env.SECRET);
+		////console.log("------------------> ", code, process.env.UID, process.env.SECRET);
 		var appp = new Authenticator(UID, SECRET, REDIRECT_URI);
 
 		var token = await appp.get_Access_token(code);
 		if (token == undefined)
 			return;
 		const userData = await appp.get_user_data(token.access_token);
-		if (userData == undefined)
-				return;
+
 		const { id, email, login, image_url } = userData;
 		
+		if (id === undefined)
+			return 'access denied by intranet';
 		const userDb = await this.appService.getUserById(id);
 
 		if (!userDb) {
@@ -513,11 +514,11 @@ export class AppController  implements OnModuleInit {
 	@UseGuards(AuthenticatedGuard)
 	@Post('getloginbyid')
 	async getloginbyid(@Body() body){
-		console.log(`getloginbyid `);
+		//console.log(`getloginbyid `);
 		const {id} = body;
 		if (id !== undefined) {
 			const {login, image_url} = await this.appService.getUserById(id);
-		console.log(`getloginbyid login ${login}`);
+		//console.log(`getloginbyid login ${login}`);
 			return {login: login, image_url: image_url};
 		}
 		return {login: 'invalid', image_url: 'invalid'};

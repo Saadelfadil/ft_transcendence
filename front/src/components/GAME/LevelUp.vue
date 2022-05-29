@@ -168,7 +168,7 @@ export default defineComponent({
                 this.left_player_login = resp.data.login;
                 this.left_player_avatar = resp.data.image_url;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         async rightLogin(){
@@ -184,7 +184,7 @@ export default defineComponent({
                 this.right_player_login = resp.data.login;
                 this.right_player_avatar = resp.data.image_url;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         initGame(scw: number, sch: number){

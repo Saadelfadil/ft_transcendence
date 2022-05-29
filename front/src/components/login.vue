@@ -44,10 +44,10 @@ export default defineComponent({
     async created()
     {
         this.red_uri = process.env.VUE_APP_RED_URI;
-        console.log(this.red_uri);
+        //console.log(this.red_uri);
         if (this.$route.query.code !== undefined && this.$route.query.code !== null && this.$route.query.code !== "")
         {
-            console.log(`value is ${this.$route.query.code}`);
+            //console.log(`value is ${this.$route.query.code}`);
             await axios({
                 method: 'post',
                 url: `http://${process.env.VUE_APP_HOST_IP}:8080/api/login`,
@@ -57,7 +57,7 @@ export default defineComponent({
             }).then((response) => {
                 router.replace({name : 'profile'});
             }, (error) => {
-                console.log(error);
+                //console.log(error);
             });
         }
         await this.redirectIfLogged();

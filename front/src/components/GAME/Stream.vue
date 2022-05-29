@@ -242,7 +242,7 @@ export default defineComponent({
             }
             catch(e)
             {
-                console.log(e);
+                ////console.log(e);
             }
         },
         async getUsers()
@@ -256,7 +256,7 @@ export default defineComponent({
                 
                 this.room_display = resp.data;
             }catch(e){
-                console.log(e);
+                ////console.log(e);
             }
         },
         redirect_left_player(target_id:number)
@@ -306,7 +306,7 @@ export default defineComponent({
             this.context.fillStyle = this.playerLeft.color;
             this.context.fillRect(this.playerRight.x * this.factor, this.playerRight.y * this.factor, this.playerRight.w * this.factor, this.playerRight.h * this.factor);
             this.context.fillRect(this.playerLeft.x * this.factor, this.playerLeft.y * this.factor, this.playerLeft.w * this.factor, this.playerLeft.h * this.factor);
-            //console.log(this.ball.x);
+            //////console.log(this.ball.x);
             this.context.fillStyle = this.ball.color;
             this.context.beginPath();
             this.context.arc(this.ball.x * this.factor, this.ball.y * this.factor, this.ball.r * this.factor, 0, Math.PI*2,false);
@@ -316,7 +316,7 @@ export default defineComponent({
         async getRooms(){
             const resp = await axios.get(`http://${process.env.VUE_APP_HOST_IP}:3000/game/rooms`);
             this.gameRooms = resp.data;
-            console.log(resp.data);
+            ////console.log(resp.data);
         },
 
         roomClicked(namespace:string, name:string, oneroom: OneRoom, room_index:number)
@@ -337,15 +337,15 @@ export default defineComponent({
             this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/${namespace}`);
 
             this.socket.on('connect', () => {
-                console.log(name,'heeeeere');
+                ////console.log(name,'heeeeere');
                 this.socket.emit('clientType', {type: 'stream',room: name});
                 this.socket.on('noRoom', ()=>{
-                    console.log( `room ${name}`);
+                    ////console.log( `room ${name}`);
                     this.room_display.splice(room_index, 1);
                     this.rooms_info.splice(room_index, 1);
                 });
                 this.socket.on('canvasWH', (canvas: any) => {
-                    console.log('roomwh', canvas.scw, canvas.sch);
+                    ////console.log('roomwh', canvas.scw, canvas.sch);
                     this.scw = canvas.scw;
                     this.sch = canvas.sch;
                     this.canvas.width = this.canvas.offsetWidth ;
@@ -353,7 +353,7 @@ export default defineComponent({
                     this.canvas.height = this.sch * this.factor;
                     this.initGame(canvas.scw, canvas.sch);
                 });
-                //console.log(this.socket.id);
+                //////console.log(this.socket.id);
             });
             this.socket.on("updateClient", (clientData: any) => {
                 this.playerLeft = clientData.pl;
@@ -361,11 +361,11 @@ export default defineComponent({
                 this.ball = clientData.b;
                 this.scw = clientData.scw;
                 this.sch = clientData.sch;
-                // console.log(this.scw);
+                // ////console.log(this.scw);
                 this.renderGame();
             });
             this.socket.on("leaveRoom", () => {
-                console.log('leve stream');
+                ////console.log('leve stream');
 
                 this.$router.push('/profile');
             });
@@ -376,7 +376,7 @@ export default defineComponent({
                this.page -= 1;
               this.limit -= this.pfactor;
               this.prev -= this.pfactor;
-               console.log('previous');
+               ////console.log('previous');
             }
         },  
         next() {
@@ -385,7 +385,7 @@ export default defineComponent({
                     this.page += 1;
                     this.limit += this.pfactor;
                     this.prev += this.pfactor;
-                    console.log('next');
+                    ////console.log('next');
             }
 
 
@@ -415,7 +415,7 @@ export default defineComponent({
         }
     },
     unmounted(){
-        console.log('stream unmounted');
+        ////console.log('stream unmounted');
         // this.socket.emit("stopTime");
         if(this.socket)
             this.socket.disconnect();

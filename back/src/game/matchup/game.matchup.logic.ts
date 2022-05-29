@@ -118,7 +118,7 @@ export class MatchUpLogic {
         if (this.wRooms.size > 0){
             let node = this.wRooms.minNode();
             while (node && node.data.players[0] === client.data.userId){
-                console.log(node.data);
+                ////console.log(node.data);
 
                 node = this.wRooms.next(node);
             }

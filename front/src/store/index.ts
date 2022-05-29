@@ -87,7 +87,7 @@ export default createStore({
     set_global_user_id(state:any, user_id:number){
       if (state.global_user_id === 0){
         state.global_user_id = user_id;
-        console.log(`id changed in store value is ${state.global_user_id }`);
+        //console.log(`id changed in store value is ${state.global_user_id }`);
       }
     },
     remove_at(state:any, index:number){
@@ -97,9 +97,9 @@ export default createStore({
       state.inGameUsers = ingameusers;
     },
     set_number(state:any, n:number){
-      console.log(`before ${state.num}`);
+      //console.log(`before ${state.num}`);
       state.num = n;
-      console.log(`after ${state.num}`);
+      //console.log(`after ${state.num}`);
     },
     set_online_users(state:any, us:Array<number>){
       state.onlineUsers = us;

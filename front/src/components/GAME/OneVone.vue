@@ -184,7 +184,7 @@ export default defineComponent({
                 this.left_player_login = resp.data.login;
                 this.left_player_avatar = resp.data.image_url;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         async rightLogin(){
@@ -200,7 +200,7 @@ export default defineComponent({
                 this.right_player_login = resp.data.login;
                 this.right_player_avatar = resp.data.image_url;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         initGame(scw: number, sch: number){
@@ -281,7 +281,7 @@ export default defineComponent({
             window.addEventListener('beforeunload', this.tabClosed);
             document.addEventListener('visibilitychange', this.tabChanged);
 
-            console.log(`you reached 1v1 from ${this.$router.options.history.state.back}`);
+            //console.log(`you reached 1v1 from ${this.$router.options.history.state.back}`);
 
             this.socket = io(`http://${process.env.VUE_APP_HOST_IP}:3000/onevone`);
             this.socket.on('connect', () => {
@@ -290,7 +290,7 @@ export default defineComponent({
                                                 pos: this.$route.query.pos,
                                                 id: this.user_id});
                 this.socket.on('noRoom', () => {
-                    console.log('there is no room, player or game: khroj fhalek mn lakher');
+                    //console.log('there is no room, player or game: khroj fhalek mn lakher');
                     this.acceptedWhenFriendIsInvalid();
                 });
 
@@ -312,7 +312,7 @@ export default defineComponent({
                         }
                         else{
                             this.timer--;
-                            console.log(this.timer);
+                            //console.log(this.timer);
                         }
                     }, 1000);
                     this.game_state = 1;
@@ -342,7 +342,7 @@ export default defineComponent({
                     this.playerLeft = clientData.pl;
                     this.playerRight = clientData.pr;
                     this.ball = clientData.b;
-                    console.log(clientData.pl);
+                    //console.log(clientData.pl);
                     this.initGame(clientData.scw, clientData.sch);
                 });
 

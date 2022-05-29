@@ -98,7 +98,7 @@ export default defineComponent({
                 });
                 this.all_leaders = resp.data;
             }catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         previous() {
@@ -107,7 +107,7 @@ export default defineComponent({
                this.page -= 1;
                this.limit -= this.factor;
                this.prev -= this.factor;
-               console.log('previous');
+               //console.log('previous');
             }
         },  
         next() {
@@ -116,7 +116,7 @@ export default defineComponent({
                     this.page += 1;
                     this.limit += this.factor;
                     this.prev += this.factor;
-                    console.log('next');
+                    //console.log('next');
             }
 
 

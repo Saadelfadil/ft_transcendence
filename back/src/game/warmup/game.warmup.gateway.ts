@@ -36,8 +36,8 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   handleDisconnect(client: Socket) {
-    console.log('-----disconnect socket ------');
-    console.log(`disconnect: ${client.id}`);
+    ////console.log('-----disconnect socket ------');
+    ////console.log(`disconnect: ${client.id}`);
     if (client.data.type === 'stream'){
       client.leave(client.data.room);
     } else {
@@ -52,13 +52,13 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.userRepository.update(client.data.userId, {in_game: false});
       this.matchRepository.addMatchData(matchData, 'warmup');
     }
-    console.log('-----end of disconnect socket ------\n');
+    ////console.log('-----end of disconnect socket ------\n');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    console.log('-----connect socket (warmap) ------');
-    console.log(`connect: ${client.id}`);
-    console.log('-----end of connect socket ------\n');
+    ////console.log('-----connect socket (warmap) ------');
+    ////console.log(`connect: ${client.id}`);
+    ////console.log('-----end of connect socket ------\n');
   }
 
 
@@ -66,7 +66,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   clientType(client: any, data: any): void {
     client.data.type = data.type;
     if (data.type === 'stream'){
-      console.log(data.room);
+      ////console.log(data.room);
       client.data.room = data.room;
       client.join(data.room);
       client.emit('canvasWH', {scw: this.warmUp.canvasW, sch: this.warmUp.canvasH});
@@ -88,7 +88,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       scw: this.warmUp.canvasW,
       sch: this.warmUp.canvasH,
     });
-    console.log('done init gme')
+    ////console.log('done init gme')
   }
 
   @SubscribeMessage('startTime')
@@ -98,7 +98,7 @@ export class WarmUpGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         let delta = Date.now() - start;
         client.data.timer = Math.floor(delta / 1000);
         client.emit("updateTime", client.data.timer);
-        console.log(client.data.timer);
+        ////console.log(client.data.timer);
     }, 1000);
   }
 

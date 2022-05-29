@@ -138,7 +138,7 @@ export default defineComponent({
             }
             catch(e)
             {
-                console.log(e);
+                //console.log(e);
             }
         },
         async getUsers()
@@ -151,7 +151,7 @@ export default defineComponent({
                 });
                 this.match_display = resp.data;
             } catch(e){
-                console.log(e);
+                //console.log(e);
             }
         },
         redirect_left_player(target_id:number)

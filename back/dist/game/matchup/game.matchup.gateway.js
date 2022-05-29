@@ -34,10 +34,10 @@ let MatchUpGateway = class MatchUpGateway {
         this.logger.log(`server io initiatted ${server}`);
     }
     handleDisconnect(client) {
-        console.log('-----disconnect socket (matchup)------');
-        console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
+        //console.log('-----disconnect socket (matchup)------');
+        //console.log(`disconnect: ${client.id} --> ${client.data.room} : ${client.data.roomStatus}`);
         this.clear(client);
-        console.log('-----end of disconnect socket ------\n');
+        //console.log('-----end of disconnect socket ------\n');
     }
     checkRoomconnection(client) {
         let room = this.matchUpLogic.joinRoom(client);
@@ -53,9 +53,9 @@ let MatchUpGateway = class MatchUpGateway {
         }
     }
     handleConnection(client, ...args) {
-        console.log('-----connect socket (matchup)------');
-        console.log(`connect: ${client.id}`);
-        console.log('-----end of connect socket ------\n');
+        //console.log('-----connect socket (matchup)------');
+        //console.log(`connect: ${client.id}`);
+        //console.log('-----end of connect socket ------\n');
     }
     initGame(client) {
         this.matchUpLogic.initGmae();
@@ -84,9 +84,9 @@ let MatchUpGateway = class MatchUpGateway {
         if (node) {
             client.data.roomStatus = 'play';
             client.data.node = node.data;
-            console.log(client.data.node);
+            //console.log(client.data.node);
             client.emit('startMouseEvent');
-            console.log('mouse event sended');
+            //console.log('mouse event sended');
             if (client.data.pos === 'left') {
                 let newDbRoom = {};
                 newDbRoom.name = client.data.node.id;
@@ -109,7 +109,7 @@ let MatchUpGateway = class MatchUpGateway {
             this.checkRoomconnection(client);
         }
         else if (data.type === 'stream') {
-            console.log(data.room, 'stream');
+            //console.log(data.room, 'stream');
             client.data.room = data.room;
             client.join(data.room);
             client.emit('canvasWH', { scw: this.matchUpLogic.canvasW, sch: this.matchUpLogic.canvasH });

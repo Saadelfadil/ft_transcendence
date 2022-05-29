@@ -28,8 +28,8 @@ let GameLogic = class GameLogic {
         let ball;
         this.canvasH = CanvasH;
         this.canvasW = CanvasW;
-        console.log(`canvash: ${CanvasH}`);
-        console.log(`canvasw: ${CanvasW}`);
+        //console.log(`canvash: ${CanvasH}`);
+        //console.log(`canvasw: ${CanvasW}`);
         playerLeft = {
             x: 0,
             y: CanvasH / 2 - 100 / 2,
@@ -120,7 +120,7 @@ let GameLogic = class GameLogic {
             let delta = Date.now() - start;
             clientData.timer = Math.floor(delta / 1000);
             this.update(clientData);
-            console.log(clientData.timer);
+            //console.log(clientData.timer);
         }, 1000);
     }
     stopTime(clientData) {
