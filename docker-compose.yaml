@@ -12,8 +12,8 @@ services:
 
   nestjs:
     build: 
-      context: ./back
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile_back
     image: back_nest
     environment: 
       DB_TYPE: ${DB_TYPE}
@@ -32,8 +32,8 @@ services:
 
   vuejs:
     build: 
-      context: ./front
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile_front
     image: front_vue
     environment: 
       HOST_IP: ${HOST_IP}

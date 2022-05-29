@@ -4,11 +4,11 @@ RUN apk add curl
 
 WORKDIR /app
 
-COPY ./package.json /app/
+COPY ./srcs/front/package.json /app/
 
 RUN npm install
 
-COPY . /app/
+COPY ./srcs/front /app/
 
 EXPOSE 8080
 CMD ["npm", "run", "serve"]
